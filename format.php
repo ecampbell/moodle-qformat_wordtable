@@ -76,20 +76,15 @@ class qformat_wordtable extends qformat_xml {
         $import_preprocess_debug = 0;
         $wordtable_dir = "/question/format/wordtable/";
 
-
         // Use the default Moodle temporary folder to store temporary files
         $tmpdir = $CFG->dataroot . "/temp/";
         //$debughandle = debug_init($tmpdir . "wordtable.log", $import_preprocess_debug);
-
         //debug_write("importpreprocess:this->filename = $this->filename, this->realfilename = $this->realfilename\n");
 
         // Check that the module is registered, and redirect to registration page if not
         if(!record_exists('config', 'name', 'qformat_wordtable_version')) {
             notify(get_string('registrationpage', 'qformat_wordtable'));
-            // Wish this worked, but it doesn't
-            //$redirect_url = $CFG->wwwroot . $wordtable_dir . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $COURSE->id;
             $redirect_url = $CFG->wwwroot. $wordtable_dir . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $this->course->id;
-            //$redirect_url = $CFG->wwwroot. $wordtable_dir . 'register.php?sesskey=' . $USER->sesskey;
             redirect($redirect_url);
         }
 
@@ -170,30 +165,36 @@ class qformat_wordtable extends qformat_xml {
         // Open the Zip file and extract the Moodle Question XML file data
         $zfh = zip_open($zipfile);
         if ($zfh) {
-            while ($zip_entry = zip_read($zfh)) {
+            $xmlfile_found = false;
+            while (!$xmlfile_found) {
+                $zip_entry = zip_read($zfh);
                 if (zip_entry_open($zfh, $zip_entry, "r")) {
                     $ze_filename = zip_entry_name($zip_entry);
                     $ze_file_suffix = substr($ze_filename, -3, 3);
                     $ze_filesize = zip_entry_filesize($zip_entry);
                     //debug_write("importpreprocess:zip_entry_name = $ze_filename, $ze_file_suffix, $ze_filesize\n");
-                    if($ze_file_suffix === "xml" && $ze_filesize != 0) {
+                    if($ze_file_suffix == "xml") {
+                        $xmlfile_found = true;
+                        // Found the XML file, so grab the data
                         $xmldata = zip_entry_read($zip_entry, $ze_filesize);
                         //debug_write("importpreprocess:xmldata length = (" . strlen($xmldata) . ")\n");
+                        zip_entry_close($zip_entry);
+                        zip_close($zfh);
+                        if (!$import_preprocess_debug) unlink($zipfile);
                     }
-                    zip_entry_close($zip_entry);
                 } else {
                     notify(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
+                    zip_close($zfh);
                     if (!$import_preprocess_debug) unlink($zipfile);
                     return false;
                 }
-                zip_close($zfh);
-                if (!$import_preprocess_debug) unlink($zipfile);
             }
         } else {
             notify(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
             if (!$import_preprocess_debug) unlink($zipfile);
             return false;
         }
+
 
         // Now over-write the original Word file with the XML file, so that default XML file handling will work
         if(($fp = fopen($this->filename, "wb"))) {
