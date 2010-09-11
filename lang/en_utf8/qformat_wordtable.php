@@ -14,6 +14,7 @@ $string['xmlnotsupported'] = 'Files in XML format not supported: <b>$a</b>';
 $string['docxnotsupported'] = 'Files in Word 2007 format not supported: <b>$a</b>';
 $string['htmlnotsupported'] = 'Files in HTML format not supported: <b>$a</b>';
 $string['htmldocnotsupported'] = 'Incorrect Word format: please use <i>File>Save As...</i> to save <b>$a</b> in native Word format and import again';
+$string['preview_question_not_found'] = 'Preview question not found, name / course ID: $a';
 $string['registration_administration'] = 'Moodle2Word Administration';
 $string['registration'] = 'Registration';
 $string['registrationinfo'] = '<p>You must register Moodle2Word in order to enable the import of Word documents. You do not need to register if you only wish to export questions into Word format. Registration is free, and allows Word files containing up to 5 questions to be imported. However, to import larger numbers of questions, you must pay an annual subscription.</p>
