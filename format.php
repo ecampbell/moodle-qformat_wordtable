@@ -236,6 +236,8 @@ class qformat_wordtable extends qformat_xml {
         global $CFG, $USER;
 
         $wordtable_installation_folder = "$CFG->dirroot/question/format/wordtable/";
+        $wordtable_installation_url = "$CFG->wwwroot/question/format/wordtable/";
+
         $presave_process_debug = 0;
 
         // Use the default Moodle temporary folder to store temporary files
@@ -283,8 +285,9 @@ class qformat_wordtable extends qformat_xml {
         //debug_write("presave_process: xml data saved to $temp_xml_filename\n");
 
         // Set parameters for XSLT transformation. Note that we cannot use arguments though
+        // Use a web URL for the template name, to avoid problems with a Windows-style path
         $parameters = array (
-            'htmltemplatefile' => $htmltemplatefile,
+            'htmltemplatefile' => $wordtable_installation_url . 'wordfile_template.html',
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
@@ -293,10 +296,9 @@ class qformat_wordtable extends qformat_xml {
 
 
         $xsltproc = xslt_create();
-        // TODO Get XSLT export to work on Windows - at present only Linux works
         if(!($xslt_output = xslt_process($xsltproc,
                 $temp_xml_filename, $stylesheet, null, null, $parameters))) {
-            notify(get_string('transformationfailed', 'qformat_wordtable', $stylesheet . "/" . $xmlfile));
+            notify(get_string('transformationfailed', 'qformat_wordtable', $stylesheet));
             if (!$presave_process_debug) unlink($temp_xml_filename);
             return false;
         }
