@@ -1,4 +1,4 @@
-<?
+<?php
 /** mqutility.php
  *
  * wrapper function to convert a Word file to XML via YAWC Online
@@ -22,18 +22,18 @@ $mqdebug_file = "";
 
 function debug_init($debug_file, $debug) {
 	global $mqdebug_file, $mqdebug_flag, $mqdebug_handle;
-	
+
 	$mqdebug_file = $debug_file;
 
 	//print "<p>debug_init(" . $debug_file . ", " . $debug . ")</p>";
 
 	if ($debug) {
 		$mqdebug_handle = fopen($debug_file, "w");
-		if (!$mqdebug_handle) { 
+		if (!$mqdebug_handle) {
 			//print "<p>fopen failed</p>";
 			header("HTTP/1.0 403 Forbidden");
 			die("Debugging file open failed: " . $debug_file . "\n");
-			return false; 
+			return false;
 		} else {
 			$mqdebug_flag = $debug;
 			return $mqdebug_handle;
@@ -96,7 +96,7 @@ function xslt_transform($xml, $stylesheet, $preview_question) {
 		// XSLT stylesheet to transform Moodle Question XML into Word doesn't exist
 		debug_write("xslt_transform failed: no stylesheet '" . $stylesheet . "'\n");		//notify(get_string('stylesheetunavailable', 'qformat_wordq', $stylesheet));
 		return false;
-	} 
+	}
 	//else if(!file_exists($working_folder . $htmltemplatefile)) {
 		// Word-compatible XHTML template doesn't exist
 	//	notify(get_string('templateunavailable', 'qformat_wordq', $htmltemplatefile));
@@ -143,7 +143,7 @@ function xslt_transform($xml, $stylesheet, $preview_question) {
 
 	$xsltproc = xslt_create();
 	// if(!($xslt_output = xslt_process($xsltproc, 'arg:/_xml', 'arg:/_xsl', null, $arguments, $parameters))) {
-	if(!($xslt_output = xslt_process($xsltproc, 
+	if(!($xslt_output = xslt_process($xsltproc,
 			$temp_xml_filename, $stylesheet, null, null, $parameters))) {
 		//notify(get_string('transformationfailed', 'qformat_wordq', $stylesheet . "/" . $xml));
 		debug_write("xslt_transform failed: xslt_process '" . $stylesheet . "'\n");
@@ -180,7 +180,7 @@ function convert_to_xml() {
 		header("HTTP/1.0 500 Internal Server Error");
 		die("Could not convert Word file.\n");
 	}
-	
+
 	// Save the Zip file to a regular temporary file, not publicly available
 	$zipfile = tempnam($working_folder, "zip-") . ".zip";
 	debug_write("MQPreview: zipfile = " . $zipfile . "\n");
@@ -226,7 +226,7 @@ function convert_to_xml() {
 		die("Could not open preview XML file.\n");
 	}
 
-		
+
 		// Now over-write the original Word file with the XML file, so that default XML file handling will work
 		if(($fp = fopen($yolfriendly_name, "wb"))) {
 			if(($nbytes = fwrite($fp, $xmldata)) == 0) {
@@ -240,24 +240,24 @@ function convert_to_xml() {
 
 
 function file_upload_error_message($error_code) {
-    switch ($error_code) { 
-        case UPLOAD_ERR_INI_SIZE: 
-            return 'The uploaded file exceeds the upload_max_filesize directive in php.ini'; 
-        case UPLOAD_ERR_FORM_SIZE: 
-            return 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form'; 
-        case UPLOAD_ERR_PARTIAL: 
-            return 'The uploaded file was only partially uploaded'; 
-        case UPLOAD_ERR_NO_FILE: 
-            return 'No file was uploaded'; 
-        case UPLOAD_ERR_NO_TMP_DIR: 
-            return 'Missing a temporary folder'; 
-        case UPLOAD_ERR_CANT_WRITE: 
-            return 'Failed to write file to disk'; 
-        case UPLOAD_ERR_EXTENSION: 
-            return 'File upload stopped by extension'; 
-        default: 
-            return 'Unknown upload error'; 
-    } 
+    switch ($error_code) {
+        case UPLOAD_ERR_INI_SIZE:
+            return 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+        case UPLOAD_ERR_PARTIAL:
+            return 'The uploaded file was only partially uploaded';
+        case UPLOAD_ERR_NO_FILE:
+            return 'No file was uploaded';
+        case UPLOAD_ERR_NO_TMP_DIR:
+            return 'Missing a temporary folder';
+        case UPLOAD_ERR_CANT_WRITE:
+            return 'Failed to write file to disk';
+        case UPLOAD_ERR_EXTENSION:
+            return 'File upload stopped by extension';
+        default:
+            return 'Unknown upload error';
+    }
 }
 
 ?>

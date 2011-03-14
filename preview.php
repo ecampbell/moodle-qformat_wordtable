@@ -1,4 +1,4 @@
-<?
+<?php
 /** preview.php
  *
  * Provides a simple mechanism to preview a question based on the course ID and a unique question name.
