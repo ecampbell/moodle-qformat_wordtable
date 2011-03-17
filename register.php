@@ -27,7 +27,7 @@ if (!$admin->country and $CFG->country) {
 
 // Get the course ID so that we can return to the import page after registration
 $courseid = optional_param('courseid', 0, PARAM_INT);
-$returnurl = $CFG->wwwroot . ($courseid)? '/question/import.php?courseid=' . $courseid : "";
+$returnurl = $CFG->wwwroot . (($courseid)? '/question/import.php?courseid=' . $courseid : "");
 
 $stradministration = get_string("registration_administration", 'qformat_wordtable');
 $strregistration = get_string("registration", 'qformat_wordtable');
