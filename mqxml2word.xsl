@@ -263,6 +263,45 @@
 			</tr>
 		<xsl:text>&#x0a;</xsl:text>
 		</xsl:if>
+
+		<!-- Simple instructions feedback for some question types: MA, MAT, MC, TF, SA -->
+		<xsl:variable name="instruction_text">
+			<xsl:choose>
+			<xsl:when test="$qtype = 'CL'">
+				<xsl:text>Use bold for dropdown menu items and italic for text field items.</xsl:text>
+			</xsl:when>
+			<xsl:when test="$qtype = 'DE'">
+				<xsl:text>This description will be displayed before the following questions.</xsl:text>
+			</xsl:when>
+			<xsl:when test="$qtype = 'ES'">
+				<xsl:text>Don't forget to include the deadline!</xsl:text>
+			</xsl:when>
+			<xsl:when test="$qtype = 'MA'">
+				<xsl:text>Enter two right and two wrong answers.</xsl:text>
+			</xsl:when>
+			<xsl:when test="$qtype = 'MAT'">
+				<xsl:text>Replace each Item/Match pair with a matching word(s) pair.</xsl:text>
+			</xsl:when>
+			<xsl:when test="$qtype = 'MC'">
+				<xsl:text>Replace 'Right answer' with the correct answer, and each 'Wrong answer' with a plausible alternative. Add hints or feedback for each wrong answer too.</xsl:text>
+			</xsl:when>
+			<xsl:when test="$qtype = 'SA'">
+				<xsl:text>All answers should be right answers.  Allow for grammatical variations such as 'boat', 'a boat', the boat'.</xsl:text>
+			</xsl:when>
+			<xsl:when test="$qtype = 'TF'">
+				<xsl:text>Swap 'True' and 'False' to put the right answer first. Do not include hints/feedback.</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+			</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		
+		<tr>
+			<td colspan="3" style="width: 12.0cm"><p class="Cell"><i><xsl:value-of select="$instruction_text"/></i></p></td>
+			<td style="width: 1.0cm"><p class="MsoNormal">&#160;</p></td>
+		</tr>
+		<xsl:text>&#x0a;</xsl:text>
+
 	</tbody>
 	</table>
 	</div>
