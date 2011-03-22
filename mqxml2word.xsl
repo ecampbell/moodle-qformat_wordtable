@@ -305,6 +305,8 @@
 	</tbody>
 	</table>
 	</div>
+	<!-- CONTRIB-2847: Insert an empty paragraph after the table so that the "Insert new question" facility works -->
+	<p class="MsoNormal">&#160;</p>
 </xsl:template>
 
 <!-- Handle standard question rows -->
