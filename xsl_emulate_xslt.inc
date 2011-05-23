@@ -1,4 +1,23 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// $Id: xsl_emulate_xslt.inc,v 1.1.2.1 2011/05/23 10:07:40 eoincampbell Exp $
+
+// This file is copied from moodle/backup/bb/xsl_emulate_xslt.inc
+
 // This file adds xslt_xxx emulation functions.
 // It is intended for systems, e.g. those running PHP 5, where:
 // 1) The XSLT library is not installed.
