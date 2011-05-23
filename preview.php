@@ -1,4 +1,21 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// $Id: preview.php,v 1.3.2.1 2011/05/23 10:09:14 eoincampbell Exp $
+
 /** preview.php
  *
  * Provides a simple mechanism to preview a question based on the course ID and a unique question name.
@@ -16,7 +33,7 @@ $qname = required_param('qname', PARAM_TEXT);
 $courseid = required_param('courseid', PARAM_INT);
 
 // Get the question ID by searching for the unique name, and redirect to the preview page
-if(($question = get_record('question', 'name', $qname))) {
+if(($question = $DB->get_record('question', 'name', $qname))) {
     // Figure out the proper URL, allowing for an installation in a subfolder
     $moodle_root_folder_path = parse_url($CFG->wwwroot, PHP_URL_PATH);
     $redirect_url = $moodle_root_folder_path . "/question/preview.php?id=" . $question->id . "&courseid=" . $courseid;

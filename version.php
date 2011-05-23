@@ -1,15 +1,30 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+// $Id: version.php,v 1.3.2.1 2011/05/23 10:09:14 eoincampbell Exp $
 /**
- * Code fragment to define the version of wordtable
+ * Code fragment to define the version of wordtable for Moodle 2.0
  * This fragment is called by moodle_needs_upgrading() and /admin/index.php
  *
  * @author Eoin Campbell
  * @package wordtable
  **/
 
-$module->version  = 2011032200;  // The current module version (Date: YYYYMMDDXX)
-$module->requires = 2007101545.01;  // Requires Moodle 1.9 or later
-$module->cron     = 0;           // Period for cron to check this module (secs)
+$plugin->version  = 2011052300;  // The current module version (Date: YYYYMMDDXX)
+$plugin->requires = 2010122500;  // Requires Moodle 2.0 or later
+$plugin->cron     = 0;           // Period for cron to check this module (secs)
 
 ?>

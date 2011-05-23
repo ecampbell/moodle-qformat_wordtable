@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+// $Id: format.php,v 1.3.2.1 2011/05/23 10:09:14 eoincampbell Exp $
 
 /**
  * Convert Word tables into Moodle Question XML format
@@ -39,13 +39,14 @@
  */
 
 
-require_once( "$CFG->libdir/xmlize.php" );
-
-//require_once( $CFG->dirroot . "/question/format/wordtable/mqutility.php" );
+require_once("$CFG->libdir/xmlize.php");
+require_once($CFG->dirroot.'/lib/uploadlib.php');
 
 // wordtable just extends XML import/export
-require_once( "$CFG->dirroot/question/format/xml/format.php" );
+require_once("$CFG->dirroot/question/format/xml/format.php");
 
+// Include custom debug functions
+require_once("$CFG->dirroot/question/format/wordtable/debug.php");
 // Include XSLT processor functions
 require_once("$CFG->dirroot/question/format/wordtable/xsl_emulate_xslt.inc");
 
@@ -69,66 +70,64 @@ class qformat_wordtable extends qformat_xml {
      * @return boolean success
      */
     function importpreprocess() {
-        global $CFG;
-        global $USER;
-        global $COURSE;
-
-        $import_preprocess_debug = 0;
-        $wordtable_dir = "/question/format/wordtable/";
+        global $CFG, $USER, $COURSE, $OUTPUT, $DB;
+        $wt_install_path = "/question/format/wordtable/";
 
         // Use the default Moodle temporary folder to store temporary files
-        $tmpdir = $CFG->dataroot . "/temp/";
-        //$debughandle = debug_init($tmpdir . "wordtable.log", $import_preprocess_debug);
-        //debug_write("importpreprocess:this->filename = $this->filename, this->realfilename = $this->realfilename\n");
+        $tmpdir = $CFG->dataroot . '/temp/';
+        $debughandle = debug_init($tmpdir . "wordtable_debug.txt");
+        debug_write("importpreprocess:this->filename = $this->filename, this->realfilename = $this->realfilename\n");
 
         // Check that the module is registered, and redirect to registration page if not
-        if(!record_exists('config', 'name', 'qformat_wordtable_version')) {
-            notify(get_string('registrationpage', 'qformat_wordtable'));
-            $redirect_url = $CFG->wwwroot. $wordtable_dir . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $this->course->id;
+        //if(!$DB->record_exists('config', array('name' => 'qformat_wordtable_version'))) {
+        if(!get_config('qformat_wordtable', 'username')) {
+            debug_write("importpreprocess: not registered = ", get_config('qformat_wordtable', 'username'));
+            echo $OUTPUT->notification(get_string('registrationpage', 'qformat_wordtable'));
+            $redirect_url = $CFG->wwwroot. $wt_install_path . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $this->course->id;
             redirect($redirect_url);
         }
 
         // Check that the file is in Word 2000/2003 format, not HTML, XML, or Word 2007
         if((substr($this->realfilename, -4, 4) == 'docx')) {
-            notify(get_string('docxnotsupported', 'qformat_wordtable', $this->realfilename));
+            echo $OUTPUT->notification(get_string('docxnotsupported', 'qformat_wordtable', $this->realfilename));
             return false;
         }else if ((substr($this->realfilename, -3, 3) == 'xml')) {
-            notify(get_string('xmlnotsupported', 'qformat_wordtable', $this->realfilename));
+            echo $OUTPUT->notification(get_string('xmlnotsupported', 'qformat_wordtable', $this->realfilename));
             return false;
         } else if ((stripos($this->realfilename, 'htm'))) {
-            notify(get_string('htmlnotsupported', 'qformat_wordtable', $this->realfilename));
+            echo $OUTPUT->notification(get_string('htmlnotsupported', 'qformat_wordtable', $this->realfilename));
             return false;
         } else if ((stripos(file_get_contents($this->filename, 0, null, 0, 100), 'html'))) {
-            notify(get_string('htmldocnotsupported', 'qformat_wordtable', $this->realfilename));
+            echo $OUTPUT->notification(get_string('htmldocnotsupported', 'qformat_wordtable', $this->realfilename));
             return false;
         }
 
         // Temporarily copy the Word file so it has a .doc suffix, which is required by YAWC
         // The uploaded file name has no suffix by default
         $temp_doc_filename = $tmpdir . clean_filename(basename($this->filename)) . "-" . $this->realfilename;
-        //debug_write("importpreprocess:temp_doc_filename = $temp_doc_filename\n");
+        debug_write("importpreprocess:temp_doc_filename = $temp_doc_filename\n");
         if (copy($this->filename, $temp_doc_filename)) {
             chmod($temp_doc_filename, 0666);
             clam_log_upload($temp_doc_filename, $COURSE);
-            //debug_write("importpreprocess: $this->filename copied to $temp_doc_filename\n");
+            debug_write("importpreprocess: $this->filename copied to $temp_doc_filename\n");
         } else {
-            notify(get_string("uploadproblem", "", $temp_doc_filename));
+            echo $OUTPUT->notification(get_string("uploadproblem", "", $temp_doc_filename));
         }
 
         // Get the username and password required for YAWC Online
-        $yol_username = get_record('config', 'name', 'qformat_wordtable_username');
-        $yol_password = get_record('config', 'name', 'qformat_wordtable_password');
+        $yol_username = get_config('qformat_wordtable', 'username');
+        $yol_password = base64_decode(get_config('qformat_wordtable', 'password'));
 
         // Now send the file to YAWC  to convert it into Moodle Question XML inside a Zip file
         $yawcurl = 'http://www.yawconline.com/ye_convert1.php';
         $yawc_post_data = array(
-            "username" => $yol_username->value,
-            "password" => base64_decode($yol_password->value),
+            "username" => $yol_username,
+            "password" => $yol_password,
             "downloadZip" => "0",
             "okUpload" => "Convert",
             "docFile" => "@" . $temp_doc_filename
         );
-        //debug_write("importpreprocess: " . print_r($yawc_post_data, true) . "\n");
+        debug_write("importpreprocess: " . print_r($yawc_post_data, true) . "\n");
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $yawcurl );
@@ -136,27 +135,33 @@ class qformat_wordtable extends qformat_xml {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $yawc_post_data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
+        debug_write("importpreprocess: sending Word file for conversion using cURL\n");
+        $yawczipdata = curl_exec($ch);
+        // Check if any error occured
+        if(!curl_errno($ch)) {
+            $info = curl_getinfo($ch);
+            debug_write("importpreprocess: " . print_r($info, true) . "\n");
+        }
         $yawczipdata = curl_exec($ch);
         curl_close ($ch);
 
         // Delete the temporary Word file once conversion complete
-        if (!$import_preprocess_debug) unlink($temp_doc_filename);
+        debug_unlink($temp_doc_filename);
 
         // Check that a non-zero length file is returned, and the file is a Zip file
-        //debug_write("importpreprocess:yawczipdata type/length = " . substr($yawczipdata, 0, 2) . "/" . strlen($yawczipdata) . "\n");
+        debug_write("importpreprocess:yawczipdata type/length = " . substr($yawczipdata, 0, 2) . "/" . strlen($yawczipdata) . "\n");
         if((strlen($yawczipdata) == 0) || (substr($yawczipdata, 0, 2) !== "PK")) {
-            notify(get_string('conversionfailed', 'qformat_wordtable'));
+            echo $OUTPUT->notification(get_string('conversionfailed', 'qformat_wordtable'));
             return false;
         }
 
         // Save the Zip file to a regular temporary file, so that we can extract its
         // contents using the PHP zip library
         $zipfile = tempnam($tmpdir, "wt-");
-        //debug_write("importpreprocess:zipfile = " . $zipfile . "\n");
+        debug_write("importpreprocess:zipfile = " . $zipfile . "\n");
         if(($fp = fopen($zipfile, "wb"))) {
             if(($nbytes = fwrite($fp, $yawczipdata)) == 0) {
-                notify(get_string('cannotwritetotempfile', 'qformat_wordtable', $zipfile));
+                echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $zipfile));
                 return false;
             }
             fclose($fp);
@@ -172,26 +177,26 @@ class qformat_wordtable extends qformat_xml {
                     $ze_filename = zip_entry_name($zip_entry);
                     $ze_file_suffix = substr($ze_filename, -3, 3);
                     $ze_filesize = zip_entry_filesize($zip_entry);
-                    //debug_write("importpreprocess:zip_entry_name = $ze_filename, $ze_file_suffix, $ze_filesize\n");
+                    debug_write("importpreprocess:zip_entry_name = $ze_filename, $ze_file_suffix, $ze_filesize\n");
                     if($ze_file_suffix == "xml") {
                         $xmlfile_found = true;
                         // Found the XML file, so grab the data
                         $xmldata = zip_entry_read($zip_entry, $ze_filesize);
-                        //debug_write("importpreprocess:xmldata length = (" . strlen($xmldata) . ")\n");
+                        debug_write("importpreprocess:xmldata length = (" . strlen($xmldata) . ")\n");
                         zip_entry_close($zip_entry);
                         zip_close($zfh);
-                        if (!$import_preprocess_debug) unlink($zipfile);
+                        debug_unlink($zipfile);
                     }
                 } else {
-                    notify(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
+                    echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
                     zip_close($zfh);
-                    if (!$import_preprocess_debug) unlink($zipfile);
+                    debug_unlink($zipfile);
                     return false;
                 }
             }
         } else {
-            notify(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
-            if (!$import_preprocess_debug) unlink($zipfile);
+            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
+            debug_unlink($zipfile);
             return false;
         }
 
@@ -199,13 +204,13 @@ class qformat_wordtable extends qformat_xml {
         // Now over-write the original Word file with the XML file, so that default XML file handling will work
         if(($fp = fopen($this->filename, "wb"))) {
             if(($nbytes = fwrite($fp, $xmldata)) == 0) {
-                notify(get_string('cannotwritetotempfile', 'qformat_wordtable', $this->filename));
+                echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $this->filename));
                 return false;
             }
             fclose($fp);
         }
 
-        //notify(get_string('conversionsucceeded', 'qformat_wordtable'));
+        //echo $OUTPUT->notification(get_string('conversionsucceeded', 'qformat_wordtable'));
         return true;
     }   // end importpreprocess
 
@@ -234,60 +239,56 @@ class qformat_wordtable extends qformat_xml {
     function presave_process( $content ) {
         // override method to allow us convert to Word-compatible XHTML format
         global $CFG, $USER;
-
-        $wordtable_installation_folder = "$CFG->dirroot/question/format/wordtable/";
-        $wordtable_installation_url = "$CFG->wwwroot/question/format/wordtable/";
-
-        $presave_process_debug = 0;
+        global $OUTPUT;
+        $wt_install_path = "/question/format/wordtable/";
 
         // Use the default Moodle temporary folder to store temporary files
-        $tmpdir = $CFG->dataroot . "/temp/";
-        //$debughandle = debug_init($tmpdir . "format_debug.txt", $presave_process_debug);
+        $tmpdir = $CFG->dataroot . '/temp/';
+        $debughandle = debug_init($tmpdir . "wordtable_debug.txt");
 
         // XSLT stylesheet to convert Moodle Question XML into Word-compatible XHTML format
-        $stylesheet = $wordtable_installation_folder . 'mqxml2word.xsl';
+        $stylesheet = $CFG->dirroot . $wt_install_path . 'mqxml2word.xsl';
         // XHTML template for Word file CSS styles formatting
-        $htmltemplatefile = $wordtable_installation_folder . 'wordfile_template.html';
+        $htmltemplatefile = $CFG->dirroot . $wt_install_path . 'wordfile_template.html';
 
         // Check that XSLT is installed, and the XSLT stylesheet and XHTML template are present
         if (!class_exists('XSLTProcessor') || !function_exists('xslt_create')) {
-            notify(get_string('xsltunavailable', 'qformat_wordtable'));
+            echo $OUTPUT->notification(get_string('xsltunavailable', 'qformat_wordtable'));
             return false;
         } else if(!file_exists($stylesheet)) {
             // XSLT stylesheet to transform Moodle Question XML into Word doesn't exist
-            notify(get_string('stylesheetunavailable', 'qformat_wordtable', $stylesheet));
+            echo $OUTPUT->notification(get_string('stylesheetunavailable', 'qformat_wordtable', $stylesheet));
             return false;
         } else if(!file_exists($htmltemplatefile)) {
             // Word-compatible XHTML template doesn't exist
-            notify(get_string('templateunavailable', 'qformat_wordtable', $htmltemplatefile));
+            echo $OUTPUT->notification(get_string('templateunavailable', 'qformat_wordtable', $htmltemplatefile));
             return false;
         }
 
         // Check that there is some content to convert into Word
         if (!strlen($content)) {
-            notify(get_string('noquestions', 'qformat_wordtable'));
+            echo $OUTPUT->notification(get_string('noquestions', 'qformat_wordtable'));
             return false;
         }
 
-        //debug_write("presave_process: preflight checks complete, xmldata length = " . strlen($content) . "\n");
+        debug_write("presave_process: preflight checks complete, xmldata length = " . strlen($content) . "\n");
 
         // Create a temporary file to store the XML content to transform
         if (!($temp_xml_filename = tempnam($tmpdir, "m2w-"))) {
-            notify(get_string('cannotopentempfile', 'qformat_wordtable', $temp_xml_filename));
+            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $temp_xml_filename));
             return false;
         }
 
         // Write the XML contents to be transformed
         if (($nbytes = file_put_contents($temp_xml_filename, "<quiz>" . $content . "</quiz>")) == 0) {
-            notify(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
         }
 
-        //debug_write("presave_process: xml data saved to $temp_xml_filename\n");
+        debug_write("presave_process: xml data saved to $temp_xml_filename\n");
 
         // Set parameters for XSLT transformation. Note that we cannot use arguments though
-        // Use a web URL for the template name, to avoid problems with a Windows-style path
         $parameters = array (
-            'htmltemplatefile' => $wordtable_installation_url . 'wordfile_template.html',
+            'htmltemplatefile' => $htmltemplatefile,
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
@@ -296,13 +297,14 @@ class qformat_wordtable extends qformat_xml {
 
 
         $xsltproc = xslt_create();
+        // TODO Get XSLT export to work on Windows - at present only Linux works
         if(!($xslt_output = xslt_process($xsltproc,
                 $temp_xml_filename, $stylesheet, null, null, $parameters))) {
-            notify(get_string('transformationfailed', 'qformat_wordtable', $stylesheet));
-            if (!$presave_process_debug) unlink($temp_xml_filename);
+            echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', $stylesheet . "/" . $temp_xml_filename));
+            debug_unlink($temp_xml_filename);
             return false;
         }
-        if (!$presave_process_debug) unlink($temp_xml_filename);
+        debug_unlink($temp_xml_filename);
 
         // Strip off the XML declaration, if present, since Word doesn't like it
         //$content = substr($xslt_output, strpos($xslt_output, ">"));
