@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: mqxml2word.xsl,v 1.3.2.1 2011/05/23 10:07:40 eoincampbell Exp $ 
+<!-- $Id: mqxml2word.xsl,v 1.3.2.2 2011/06/06 22:42:29 eoincampbell Exp $ 
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -195,7 +195,12 @@
 					<xsl:apply-templates select="questiontext/text"/>
 				</xsl:otherwise>
 				</xsl:choose>
-			</p></td>
+			</p>
+			<xsl:if test="image">
+				<p class="Cell"><img src="{image}"/></p>
+			</xsl:if>
+			</td>
+
 			<td style="width: 1.0cm"><p class="QFType"><xsl:value-of select="$qtype" /></p></td>
 		</tr>
 		<xsl:text>&#x0a;</xsl:text>
