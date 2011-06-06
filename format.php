@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: format.php,v 1.3.2.1 2011/05/23 10:09:14 eoincampbell Exp $
+// $Id: format.php,v 1.3.2.2 2011/06/06 19:17:32 eoincampbell Exp $
 
 /**
  * Convert Word tables into Moodle Question XML format
@@ -71,7 +72,7 @@ class qformat_wordtable extends qformat_xml {
      */
     function importpreprocess() {
         global $CFG, $USER, $COURSE, $OUTPUT, $DB;
-        $wt_install_path = "/question/format/wordtable/";
+        $wordtable_dir = "/question/format/wordtable/";
 
         // Use the default Moodle temporary folder to store temporary files
         $tmpdir = $CFG->dataroot . '/temp/';
@@ -83,7 +84,7 @@ class qformat_wordtable extends qformat_xml {
         if(!get_config('qformat_wordtable', 'username')) {
             debug_write("importpreprocess: not registered = ", get_config('qformat_wordtable', 'username'));
             echo $OUTPUT->notification(get_string('registrationpage', 'qformat_wordtable'));
-            $redirect_url = $CFG->wwwroot. $wt_install_path . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $this->course->id;
+            $redirect_url = $CFG->wwwroot. $wordtable_dir . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $this->course->id;
             redirect($redirect_url);
         }
 
@@ -142,7 +143,6 @@ class qformat_wordtable extends qformat_xml {
             $info = curl_getinfo($ch);
             debug_write("importpreprocess: " . print_r($info, true) . "\n");
         }
-        $yawczipdata = curl_exec($ch);
         curl_close ($ch);
 
         // Delete the temporary Word file once conversion complete
@@ -240,16 +240,18 @@ class qformat_wordtable extends qformat_xml {
         // override method to allow us convert to Word-compatible XHTML format
         global $CFG, $USER;
         global $OUTPUT;
-        $wt_install_path = "/question/format/wordtable/";
+
+        $wordtable_installation_folder = "$CFG->dirroot/question/format/wordtable/";
+        $wordtable_installation_url = "$CFG->wwwroot/question/format/wordtable/";
 
         // Use the default Moodle temporary folder to store temporary files
-        $tmpdir = $CFG->dataroot . '/temp/';
+        $tmpdir = $CFG->dataroot . "/temp/";
         $debughandle = debug_init($tmpdir . "wordtable_debug.txt");
 
         // XSLT stylesheet to convert Moodle Question XML into Word-compatible XHTML format
-        $stylesheet = $CFG->dirroot . $wt_install_path . 'mqxml2word.xsl';
+        $stylesheet = $wordtable_installation_folder . 'mqxml2word.xsl';
         // XHTML template for Word file CSS styles formatting
-        $htmltemplatefile = $CFG->dirroot . $wt_install_path . 'wordfile_template.html';
+        $htmltemplatefile = $wordtable_installation_folder . 'wordfile_template.html';
 
         // Check that XSLT is installed, and the XSLT stylesheet and XHTML template are present
         if (!class_exists('XSLTProcessor') || !function_exists('xslt_create')) {
@@ -287,8 +289,9 @@ class qformat_wordtable extends qformat_xml {
         debug_write("presave_process: xml data saved to $temp_xml_filename\n");
 
         // Set parameters for XSLT transformation. Note that we cannot use arguments though
+        // Use a web URL for the template name, to avoid problems with a Windows-style path
         $parameters = array (
-            'htmltemplatefile' => $htmltemplatefile,
+            'htmltemplatefile' => $wordtable_installation_url . 'wordfile_template.html',
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
@@ -296,8 +299,8 @@ class qformat_wordtable extends qformat_xml {
         );
 
 
+
         $xsltproc = xslt_create();
-        // TODO Get XSLT export to work on Windows - at present only Linux works
         if(!($xslt_output = xslt_process($xsltproc,
                 $temp_xml_filename, $stylesheet, null, null, $parameters))) {
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', $stylesheet . "/" . $temp_xml_filename));
