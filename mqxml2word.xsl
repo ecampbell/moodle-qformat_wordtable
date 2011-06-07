@@ -171,7 +171,11 @@
 					<xsl:apply-templates select="questiontext/text"/>
 				</xsl:otherwise>
 				</xsl:choose>
-			</p></td>
+			</p>
+			<xsl:if test="image">
+				<p class="Cell"><img src="{image}"/></p>
+			</xsl:if>
+			</td>
 			<td style="width: 1.0cm"><p class="QFType"><xsl:value-of select="$qtype" /></p></td>
 		</tr>
 		<xsl:text>&#x0a;</xsl:text>
