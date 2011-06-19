@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: debug_flag.php,v 1.1.2.1 2011/05/23 10:09:57 eoincampbell Exp $
+// $Id: $
 
 // Flag to turn on/off debugging of Word Table plugin
 // 0 = Off

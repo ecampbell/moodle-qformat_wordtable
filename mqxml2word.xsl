@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: mqxml2word.xsl,v 1.3.2.2 2011/06/06 22:42:29 eoincampbell Exp $ 
+<!-- $Id: $ 
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -195,12 +195,7 @@
 					<xsl:apply-templates select="questiontext/text"/>
 				</xsl:otherwise>
 				</xsl:choose>
-			</p>
-			<xsl:if test="image">
-				<p class="Cell"><img src="{image}"/></p>
-			</xsl:if>
-			</td>
-
+			</p></td>
 			<td style="width: 1.0cm"><p class="QFType"><xsl:value-of select="$qtype" /></p></td>
 		</tr>
 		<xsl:text>&#x0a;</xsl:text>
@@ -526,6 +521,20 @@
 </xsl:template>
 
 
+<!--
+<xsl:template name="img/@src" priority="2">
+		<xsl:choose>
+		<xsl:when test="1">
+			<xsl:value-of select="."/>
+		</xsl:when>
+		<xsl:when test="contains(., 'PLUGINFILE')">
+			<xsl:value-of select="substring-after('@@PLUGINFILE@@/', .)"/>
+		</xsl:when>
+		<xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+		</xsl:choose>
+		<xsl:value-of select="."/>
+</xsl:template>
+-->
 
 <!-- got to preserve comments for style definitions -->
 <xsl:template match="comment()">

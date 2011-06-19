@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: register_form.php,v 1.1.2.1 2011/05/23 10:09:14 eoincampbell Exp $
+// $Id: register_form.php,v 1.1 2010/07/08 05:03:16 arborrow Exp $
 
 require_once($CFG->libdir.'/formslib.php');
 

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: preview.php,v 1.3.2.1 2011/05/23 10:09:14 eoincampbell Exp $
+// $Id: $
 
 /** preview.php
  *

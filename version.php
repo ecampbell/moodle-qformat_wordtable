@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: version.php,v 1.3.2.1 2011/05/23 10:09:14 eoincampbell Exp $
+// $Id: $
 /**
  * Code fragment to define the version of wordtable for Moodle 2.0
  * This fragment is called by moodle_needs_upgrading() and /admin/index.php
