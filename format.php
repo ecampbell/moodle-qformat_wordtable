@@ -54,6 +54,9 @@ require_once("$CFG->dirroot/question/format/wordtable/xsl_emulate_xslt.inc");
 class qformat_wordtable extends qformat_xml {
 
 
+    public function mime_type() {
+        return 'application/msword';
+    }
 
     // IMPORT FUNCTIONS START HERE
 
