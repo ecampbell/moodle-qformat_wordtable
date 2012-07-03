@@ -1,5 +1,9 @@
 <?php
+$string['pluginname'] = 'Microsoft Word table format (wordtable)';
+$string['pluginname_help'] = 'This is a front-end for converting Microsoft Word 2003 binary format into Moodle Question XML format for import, and converting Moodle Question XML format into an enhanced XHTML format for exporting into a format suitable for editing in Microsoft Word.';
+$string['pluginname_link'] = 'qformat/wordtable';
 $string['wordtable'] = 'Microsoft Word table format (wordtable)';
+$string['wordtable_help'] = 'This is a front-end for converting Microsoft Word 2003 binary format into Moodle Question XML format for import, and converting Moodle Question XML format into an enhanced XHTML format for exporting into a format suitable for editing in Microsoft Word.';
 $string['noquestions'] = 'No questions to export';
 $string['tempfile'] = 'Temporary XML file: <b>{$a}</b>';
 $string['templateunavailable'] = 'Word-compatible XHTML template <b>{$a}</b> is not available';
