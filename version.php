@@ -23,7 +23,7 @@
  * @package wordtable
  **/
 
-$plugin->version  = 2011072600;  // The current module version (Date: YYYYMMDDXX)
+$plugin->version  = 2013013100;  // The current module version (Date: YYYYMMDDXX)
 $plugin->requires = 2011070100.03;  // Requires Moodle 2.1 or later
 $plugin->cron     = 0;           // Period for cron to check this module (secs)
 
