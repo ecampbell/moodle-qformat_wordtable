@@ -49,6 +49,8 @@ if (!$admin->country and $CFG->country) {
 
 global $DB;
 global $OUTPUT;
+// declare empty array to prevent each debug message from including a complete backtrace
+$backtrace = array();
 
 // Get the course ID so that we can return to the import page after registration
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -115,6 +117,8 @@ if ($from_form = $reg_form->get_data()) {
     //echo $OUTPUT->notification($m2w_registration_string);
     $reg_result = file_get_contents($m2w_registration_string);
     //echo $OUTPUT->notification($reg_result);
+    debugging("Registration: String = " . $m2w_registration_string, DEBUG_DEVELOPER, $backtrace);
+    debugging("Registration: Result = " . $reg_result, DEBUG_DEVELOPER, $backtrace);
     if (!$reg_result || preg_match("/HTTP\/1.0 403 Forbidden/", $reg_result)) {
         echo $OUTPUT->notification(get_string('registrationincomplete', 'qformat_wordtable'));
     } else {
