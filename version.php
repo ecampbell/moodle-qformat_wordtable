@@ -23,7 +23,7 @@
  * @package wordtable
  **/
 
-$plugin->version  = 2013020500;  // The current module version (Date: YYYYMMDDXX)
+$plugin->version  = 2013020501;  // The current module version (Date: YYYYMMDDXX)
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level
 $plugin->component  = 'qformat_wordtable';  // Plugin name
 $plugin->release  = '2.4 (Build: 20130205)';  // The current module release in human-readable form (x.y)
