@@ -163,7 +163,7 @@
 		<xsl:choose>
 		<xsl:when test="$qtype = 'DE'">	<xsl:text></xsl:text></xsl:when>
 		<xsl:when test="$qtype = 'ES'"><xsl:text></xsl:text></xsl:when>
-		<xsl:when test="$qtype = 'CL'"><xsl:text></xsl:text></xsl:when>
+		<xsl:when test="$qtype = 'CL'"><xsl:text>Wrong Answers</xsl:text></xsl:when>
 		<xsl:when test="$qtype = 'MAT'">	<xsl:text>Item</xsl:text></xsl:when>
 		<xsl:otherwise><xsl:text>Answers</xsl:text></xsl:otherwise>
 		</xsl:choose>
@@ -213,7 +213,11 @@
 			<td style="width: 1.0cm"><p class="TableHead">#</p></td>
 			<td style="width: 5.0cm"><p class="QFOptionReset"><xsl:value-of select="$col2_body_label"/></p></td>
 			<xsl:choose>
-			<xsl:when test="$qtype = 'CL' or $qtype = 'DE' or $qtype = 'ES'">
+			<xsl:when test="$qtype = 'CL'">
+				<td style="width: 6.0cm"><p class="TableHead">Hints/Feedback</p></td>
+				<td style="width: 1.0cm"><p class="TableHead">&#160;</p></td>
+			</xsl:when>
+			<xsl:when test="$qtype = 'DE' or $qtype = 'ES'">
 				<td style="width: 6.0cm"><p class="TableHead">&#160;</p></td>
 				<td style="width: 1.0cm"><p class="TableHead">&#160;</p></td>
 			</xsl:when>
@@ -400,6 +404,10 @@
 			<!-- 7 = string-length('<p>') + string-length('</p>') </p> -->
 			<xsl:value-of select="substring($raw_text, 4, string-length($raw_text) - 7)"/>
 		</xsl:when>
+		<xsl:when test="starts-with($raw_text, '&lt;table')">
+			<!-- Add a blank paragraph before the table,  -->
+			<xsl:value-of select="concat('&lt;p&gt;&#160;&lt;/p&gt;', $raw_text)"/>
+		</xsl:when>
 		<xsl:when test="$raw_text = ''"><xsl:text>&#160;</xsl:text></xsl:when>
 		<xsl:otherwise><xsl:value-of select="$raw_text"/></xsl:otherwise>
 		</xsl:choose>
@@ -440,14 +448,14 @@
 		<!-- Copy the text prior to the embedded question -->
 		<xsl:value-of select="substring-before($cloze_string, '{')" disable-output-escaping="yes"/>
 		
-		<!-- PRocess the embedded cloze -->
+		<!-- Process the embedded cloze -->
 		<xsl:call-template name="convert_cloze_item">
 			<xsl:with-param name="cloze_item" 
 				select="substring-before(substring-after($cloze_string, '{'), '}')"/>
 		</xsl:call-template>
 		<!-- Recurse through the string again -->
 		<xsl:call-template name="convert_cloze_string">
-			<xsl:with-param name="cloze_item" select="substring-after($cloze_string, '}')"/>
+			<xsl:with-param name="cloze_string" select="substring-after($cloze_string, '}')"/>
 		</xsl:call-template>
 	</xsl:when>
 	<xsl:otherwise>
@@ -485,10 +493,11 @@
 	</xsl:choose>
 </xsl:template>
 
-<!-- Separate items with newlines -->
+<!-- Cloze items simply get converted into formatted text, retaining the horrible Moodle ~ markup formatting -->
 <xsl:template name="format_cloze_item">
 	<xsl:param name="cloze_item"/>
 	
+  <!--
 	<xsl:choose>
 	<xsl:when test="contains($cloze_item, '~')">
 		<xsl:value-of select="substring-before($cloze_item, '~')"/>
@@ -501,6 +510,9 @@
 		<xsl:value-of select="$cloze_item"/>
 	</xsl:otherwise>
 	</xsl:choose>
+  -->
+  		<xsl:value-of select="$cloze_item"/>
+
 </xsl:template>
 
 <!-- Read in the template and copy it to the output -->
