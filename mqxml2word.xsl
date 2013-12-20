@@ -195,7 +195,11 @@
 					<xsl:apply-templates select="questiontext/text"/>
 				</xsl:otherwise>
 				</xsl:choose>
-			</p></td>
+			</p>
+			<xsl:if test="image and image/@src">
+				<p class="Cell"><img src="{image}"/></p>
+			</xsl:if>
+			</td>
 			<td style="width: 1.0cm"><p class="QFType"><xsl:value-of select="$qtype" /></p></td>
 		</tr>
 		<xsl:text>&#x0a;</xsl:text>
@@ -356,9 +360,6 @@
 	</tr>
 </xsl:template>
 
-<xsl:template match="answer/text">
-	<xsl:apply-templates/>
-</xsl:template>
 
 <xsl:template match="p[not(@class)]">
 	<p class="Cell">
@@ -366,34 +367,8 @@
 	</p>
 </xsl:template>
 
-<xsl:template match="text" mode="fbtext">
-	<xsl:variable name="text_string">
-		<xsl:variable name="raw_text" select="normalize-space(.)"/>
-		
-		<xsl:choose>
-		<!-- If the string is wrapped in <p>...</p>, get rid of it -->
-		<xsl:when test="starts-with($raw_text, '&lt;p&gt;') and substring($raw_text, -4) = '&lt;/p&gt;'">
-			<!-- 7 = string-length('<p>') + string-length('</p>') </p> -->
-			<xsl:value-of select="substring($raw_text, 4, string-length($raw_text) - 7)"/>
-		</xsl:when>
-		<xsl:when test="$raw_text = ''"><xsl:text>&#160;</xsl:text></xsl:when>
-		<xsl:otherwise><xsl:value-of select="$raw_text"/></xsl:otherwise>
-		</xsl:choose>
-	</xsl:variable>
-	
-</xsl:template>
 
-<xsl:template match="feedback/text">
-	<xsl:variable name="feedback" select="normalize-space(.)" />
-	
-	<xsl:choose>
-	<xsl:when test="$feedback = ''"><xsl:value-of select="'&#160;'"/></xsl:when>
-	<xsl:otherwise><xsl:apply-templates/></xsl:otherwise>
-	</xsl:choose>
-	
-</xsl:template>
-
-<!-- Handle CDATA-encoded text -->
+<!-- Handle MQXML text elements, which may consist only of a CDATA section -->
 <xsl:template match="text">
 	<xsl:variable name="text_string">
 		<xsl:variable name="raw_text" select="normalize-space(.)"/>
