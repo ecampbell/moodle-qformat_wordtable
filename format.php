@@ -125,6 +125,7 @@ class qformat_wordtable extends qformat_xml {
             "username" => $yol_username->value,
             "password" => base64_decode($yol_password->value),
             "downloadZip" => "0",
+            "moodle_release" => $CFG->release,
             "okUpload" => "Convert",
             "docFile" => "@" . $temp_doc_filename
         );
@@ -244,8 +245,8 @@ class qformat_wordtable extends qformat_xml {
         $tmpdir = $CFG->dataroot . "/temp/";
         //$debughandle = debug_init($tmpdir . "format_debug.txt", $presave_process_debug);
 
-        // XSLT stylesheet to convert Moodle Question XML into Word-compatible XHTML format
-        $stylesheet = $wordtable_installation_folder . 'mqxml2word.xsl';
+         // XSLT stylesheet to convert Moodle Question XML into intermediate XHTML format
+         $stylesheet = $wordtable_installation_folder . 'mqxml2word_pass1.xsl';
         // XHTML template for Word file CSS styles formatting
         $htmltemplatefile = $wordtable_installation_folder . 'wordfile_template.html';
 
@@ -291,7 +292,8 @@ class qformat_wordtable extends qformat_xml {
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
-            'moodle_url' => $CFG->wwwroot . "/"
+            'moodle_url' => $CFG->wwwroot . "/",
+            'moodle_release' => $CFG->release . "/"
         );
 
 
@@ -302,6 +304,20 @@ class qformat_wordtable extends qformat_xml {
             if (!$presave_process_debug) unlink($temp_xml_filename);
             return false;
         }
+
+        // Write the XHTML contents to be transformed in Pass 2
+        if (($nbytes = file_put_contents($temp_xml_filename, $xslt_output)) == 0) {
+            notify(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
+        }
+        // XSLT stylesheet to convert intermediate XHTML into Word-compatible XHTML format
+        $stylesheet = $wordtable_installation_folder . 'mqxml2word_pass2.xsl';
+        if(!($xslt_output = xslt_process($xsltproc,
+                $temp_xml_filename, $stylesheet, null, null, $parameters))) {
+            notify(get_string('transformationfailed', 'qformat_wordtable', $stylesheet));
+            if (!$presave_process_debug) unlink($temp_xml_filename);
+            return false;
+        }
+
         if (!$presave_process_debug) unlink($temp_xml_filename);
 
         // Strip off the XML declaration, if present, since Word doesn't like it
