@@ -1,4 +1,22 @@
-<?php  // register.php - allows admin to register account on YAWC Online to enable Word to XML conversion
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// $Id: $
+
+// register.php - allows admin to register account on YAWC Online to enable Word to XML conversion
 
 require_once('../../../config.php');
 require_once('register_form.php');
@@ -9,6 +27,10 @@ require_login();
 
 require_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
 
+
+$PAGE->set_url('/question/format/wordtable/register.php');
+$PAGE->set_pagelayout('admin'); // Set a default pagelayout
+
 if (!$site = get_site()) {
     redirect("index.php");
 }
@@ -18,16 +40,21 @@ if (!confirm_sesskey()) {
 }
 
 if (!$admin = get_admin()) {
-    error("No admins");
+    print_error("No admins");
 }
 
 if (!$admin->country and $CFG->country) {
     $admin->country = $CFG->country;
 }
 
+global $DB;
+global $OUTPUT;
+// declare empty array to prevent each debug message from including a complete backtrace
+$backtrace = array();
+
 // Get the course ID so that we can return to the import page after registration
 $courseid = optional_param('courseid', 0, PARAM_INT);
-$returnurl = $CFG->wwwroot . (($courseid)? '/question/import.php?courseid=' . $courseid : "");
+$returnurl = $CFG->wwwroot . ($courseid)? '/question/import.php?courseid=' . $courseid : "";
 
 $stradministration = get_string("registration_administration", 'qformat_wordtable');
 $strregistration = get_string("registration", 'qformat_wordtable');
@@ -36,14 +63,15 @@ $navlinks = array();
 $navlinks[] = array('name' => $stradministration, 'link' => "../$CFG->admin/index.php", 'type' => 'misc');
 $navlinks[] = array('name' => $strregistration, 'link' => null, 'type' => 'misc');
 $navigation = build_navigation($navlinks);
+//$PAGE->set_context($PAGE->context);
 
-$thispageurl = new moodle_url();
+$thispageurl = new moodle_url('/question/format/wordtable/register.php');
 $reg_form = new wordtable_register_form($thispageurl);
 
 // Get the number of users on this site to classify site by size
 // Just send the general classification, not the actual number of users
 // Administrators can override the value if they want, too
-$count = count_records('user', 'deleted', 0);
+$count = $DB->count_records('user', array('deleted' => 0));
 $sizeclass = 0;
 if ($count > 500) $sizeclass = 1;
 if ($count > 5000) $sizeclass = 2;
@@ -62,8 +90,13 @@ $site_defaults = array(
     'public' => 2
 );
 /// Print the form
-print_header("$site->shortname: $strregistration", $site->fullname, $navigation);
-print_heading($strregistration);
+$PAGE->navbar->add($strregistration);
+$PAGE->set_title("$site->shortname: $strregistration");
+$PAGE->set_heading($strregistration);
+$PAGE->set_cacheable(false);
+echo $OUTPUT->header();
+//print_header("$site->shortname: $strregistration", $site->fullname, $navigation);
+echo $OUTPUT->heading($strregistration);
 
 if ($from_form = $reg_form->get_data()) {
     // Send the data to Moodle2Word website for registration
@@ -81,35 +114,27 @@ if ($from_form = $reg_form->get_data()) {
     $m2w_registration_string .= "&lang=" . $from_form->lang;
     $m2w_registration_string .= "&release=" . urlencode($from_form->release);
 
-    //notify($m2w_registration_string);
+    //echo $OUTPUT->notification($m2w_registration_string);
     $reg_result = file_get_contents($m2w_registration_string);
-    //notify($reg_result);
+    //echo $OUTPUT->notification($reg_result);
+    debugging("Registration: String = " . $m2w_registration_string, DEBUG_DEVELOPER, $backtrace);
+    debugging("Registration: Result = " . $reg_result, DEBUG_DEVELOPER, $backtrace);
     if (!$reg_result || preg_match("/HTTP\/1.0 403 Forbidden/", $reg_result)) {
-        notify(get_string('registrationincomplete', 'qformat_wordtable'));
+        echo $OUTPUT->notification(get_string('registrationincomplete', 'qformat_wordtable'));
     } else {
-        notify(get_string('registrationcomplete', 'qformat_wordtable'));
+        echo $OUTPUT->notification(get_string('registrationcomplete', 'qformat_wordtable'));
         // Account is added, so safe to store the version, username and password
-        $new = new stdClass();
-        $new->name = 'qformat_wordtable_version';
-        $new->value = $module->version;
-        insert_record('config', $new);
-
-        $new->name = 'qformat_wordtable_username';
-        $new->value = $from_form->yolusername;
-        insert_record('config', $new);
-
-        $new->name = 'qformat_wordtable_password';
-        $new->value = base64_encode($from_form->password);
-        insert_record('config', $new);
+        set_config('username', $from_form->yolusername, 'qformat_wordtable');
+        set_config('password', base64_encode($from_form->password), 'qformat_wordtable');
 
         // Return to the calling page so that Administrator can continue uploading a Word file
         redirect($returnurl);
     }
 
 
-    print_footer();
+    echo $OUTPUT->footer();
 } else {
-    print_simple_box($strregistrationinfo, "center", "70%");
+    echo $OUTPUT->box($strregistrationinfo, "center", "70%");
     $reg_form->set_data($site_defaults);
     $reg_form->display();
 }

@@ -1,4 +1,20 @@
-<?php  // $Id: register_form.php,v 1.1 2010/07/08 05:03:16 arborrow Exp $
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+// $Id: register_form.php,v 1.1 2010/07/08 05:03:16 arborrow Exp $
 
 require_once($CFG->libdir.'/formslib.php');
 
@@ -6,6 +22,7 @@ class wordtable_register_form extends moodleform {
 
     function definition() {
         global $COURSE;
+        global $CFG;
         $mform    =& $this->_form;
 
         $defaultcategory   = $this->_customdata['defaultcategory'];
@@ -46,10 +63,10 @@ class wordtable_register_form extends moodleform {
         $mform->addRule('adminemail', get_string('invalidemail'), 'email', '', 'client');
         $mform->applyFilter('adminemail', 'trim');
 
-        $options[0] = get_string("publicdirectory0");
-        $options[1] = get_string("publicdirectory1");
-        $options[2] = get_string("publicdirectory2");
-        $mform->addElement('select', 'public', get_string("publicdirectory"), $options );
+        $options[0] = get_string('siteprivacynotpublished', 'hub');
+        $options[1] = get_string('siteprivacypublished', 'hub');
+        $options[2] = get_string('siteprivacylinked', 'hub');
+        $mform->addElement('select', 'public', get_string('siteprivacy', 'hub'), $options );
         unset($options);
 
 /*
@@ -65,7 +82,7 @@ class wordtable_register_form extends moodleform {
         $mform->addElement('select', 'sitesize', get_string("users"), $options );
         unset($options);
 
-        $mform->addElement('select', 'country', get_string("selectacountry"), get_list_of_countries() );
+        $mform->addElement('select', 'country', get_string("selectacountry"), get_string_manager()->get_list_of_countries() );
 
         $options[0] = get_string("registrationno");
         $options[1] = get_string("registrationyes");
