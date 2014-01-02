@@ -53,7 +53,8 @@ class qformat_wordtable extends qformat_xml {
 
     private $wordtable_dir = "/question/format/wordtable/"; // Folder where WordTable is installed
     private $wordfile_template = 'wordfile_template.html';  // XHTML template file containing Word-compatible CSS style definitions
-    private $mqxml2word_stylesheet = 'mqxml2word.xsl';      // XSLT stylesheet containing code to convert Moodle Question XML into Word-compatible XHTML for question export
+    private $mqxml2word_stylesheet1 = 'mqxml2word_pass1.xsl';      // XSLT stylesheet containing code to convert Moodle Question XML into XHTML
+    private $mqxml2word_stylesheet2 = 'mqxml2word_pass2.xsl';      // XSLT stylesheet containing code to convert XHTML into Word-compatible XHTML for question export
     private $word2mqxml_server_url = 'http://www.yawconline.com/ye_convert1.php'; // URL of external server that does Word to Moodle Question XML conversion for question import
 
     public function mime_type() {
@@ -127,6 +128,7 @@ class qformat_wordtable extends qformat_xml {
         $yawc_post_data = array(
             "username" => $yol_username,
             "password" => $yol_password,
+            "moodle_release" => $CFG->release,
             "downloadZip" => "0",
             "okUpload" => "Convert",
             "docFile" => "@" . $temp_doc_filename
@@ -256,7 +258,7 @@ class qformat_wordtable extends qformat_xml {
         debugging("presave_process(content = " . str_replace("\n", " ", substr($content, 80, 50)) . "):", DEBUG_DEVELOPER, $backtrace);
 
         // XSLT stylesheet to convert Moodle Question XML into Word-compatible XHTML format
-        $stylesheet =  $CFG->dirroot . $this->wordtable_dir . $this->mqxml2word_stylesheet;
+        $stylesheet =  $CFG->dirroot . $this->wordtable_dir . $this->mqxml2word_stylesheet1;
         // XHTML template for Word file CSS styles formatting
         $htmltemplatefile_url = $CFG->wwwroot . $this->wordtable_dir . $this->wordfile_template;
 
@@ -308,10 +310,11 @@ class qformat_wordtable extends qformat_xml {
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
-            'moodle_url' => $CFG->wwwroot . "/"
+            'moodle_url' => $CFG->wwwroot . "/",
+            'moodle_release' => $CFG->release
         );
 
-        debugging("presave_process(): Calling XSLT with stylesheet \"" . $stylesheet . "\" and template \"" . $parameters['htmltemplatefile'] . "\"", DEBUG_DEVELOPER, $backtrace);
+        debugging("presave_process(): Calling XSLT Pass 1 with stylesheet \"" . $stylesheet . "\" and template \"" . $parameters['htmltemplatefile'] . "\"", DEBUG_DEVELOPER, $backtrace);
         $xsltproc = xslt_create();
         if(!($xslt_output = xslt_process($xsltproc, $temp_xml_filename, $stylesheet, null, null, $parameters))) {
             debugging("presave_process(): Transformation failed", DEBUG_DEVELOPER, $backtrace);
@@ -319,7 +322,27 @@ class qformat_wordtable extends qformat_xml {
             debug_unlink($temp_xml_filename);
             return false;
         }
-        debugging("presave_process(): Transformation succeeded, HTML output fragment = " . str_replace("\n", "", substr($xslt_output, 400, 100)), DEBUG_DEVELOPER, $backtrace);
+        debugging("presave_process(): Transformation Pass 1 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 400, 100)), DEBUG_DEVELOPER, $backtrace);
+
+        // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, re-using the temporary XML file
+        if (($nbytes = file_put_contents($temp_xml_filename, $xslt_output)) == 0) {
+            debugging("presave_process(): Failed to save XHTML data to temporary file ('$temp_xml_filename')", DEBUG_DEVELOPER, $backtrace);
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
+            return false;
+        }
+        debugging("presave_process(): Intermediate XHTML data saved to $temp_xml_filename", DEBUG_DEVELOPER, $backtrace);
+
+        // Prepare for Pass 2 XSLT transformation
+        $stylesheet =  $CFG->dirroot . $this->wordtable_dir . $this->mqxml2word_stylesheet2;
+        debugging("presave_process(): Calling XSLT Pass 1 with stylesheet \"" . $stylesheet . "\" and template \"" . $parameters['htmltemplatefile'] . "\"", DEBUG_DEVELOPER, $backtrace);
+        if(!($xslt_output = xslt_process($xsltproc, $temp_xml_filename, $stylesheet, null, null, $parameters))) {
+            debugging("presave_process(): Pass 2 Transformation failed", DEBUG_DEVELOPER, $backtrace);
+            echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XHTML: " . $temp_xml_filename . ")"));
+            debug_unlink($temp_xml_filename);
+            return false;
+        }
+        debugging("presave_process(): Transformation Pass 2 succeeded, HTML output fragment = " . str_replace("\n", "", substr($xslt_output, 400, 100)), DEBUG_DEVELOPER, $backtrace);
+
         debug_unlink($temp_xml_filename);
 
         // Strip off the XML declaration, if present, since Word doesn't like it
@@ -346,3 +369,4 @@ function debug_unlink($filename) {
     }
 }
 ?>
+
