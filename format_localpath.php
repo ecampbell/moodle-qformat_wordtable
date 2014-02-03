@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+// $Id: format.php,v 1.3.2.2 2011/06/06 19:17:32 eoincampbell Exp $
+
 /**
  * Convert Word tables into Moodle Question XML format
  *
@@ -45,12 +47,13 @@ require_once($CFG->dirroot.'/lib/uploadlib.php');
 require_once("$CFG->dirroot/question/format/xml/format.php");
 
 // Include XSLT processor functions
-require_once(dirname(__FILE__) . "/xsl_emulate_xslt.inc");
+require_once("$CFG->dirroot/question/format/wordtable/xsl_emulate_xslt.inc");
 
 class qformat_wordtable extends qformat_xml {
 
-    private $wordtable_dir = "/question/format/wordtable/"; // Folder where WordTable is installed, relative to Moodle $CFG->dirroot
+    private $wordtable_dir = "question/format/wordtable"; // Folder where WordTable is installed, relative to Moodle $CFG->dirroot
     private $wordfile_template = 'wordfile_template.html';  // XHTML template file containing Word-compatible CSS style definitions
+    private $wordtable_strings_file = "moodletext_en.xml"; // File containing translated text strings for localised display
     private $mqxml2word_stylesheet1 = 'mqxml2word_pass1.xsl';      // XSLT stylesheet containing code to convert Moodle Question XML into XHTML
     private $mqxml2word_stylesheet2 = 'mqxml2word_pass2.xsl';      // XSLT stylesheet containing code to convert XHTML into Word-compatible XHTML for question export
     private $word2mqxml_server_url = 'http://www.yawconline.com/ye_convert1.php'; // URL of external server that does Word to Moodle Question XML conversion for question import
@@ -76,14 +79,18 @@ class qformat_wordtable extends qformat_xml {
      */
     function importpreprocess() {
         global $CFG, $USER, $COURSE, $OUTPUT;
+        // declare empty array to prevent each debug message from including a complete backtrace
+        $backtrace = array();
 
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Word file = $this->realfilename; path = $this->filename", DEBUG_DEVELOPER);
+        // Use the default Moodle temporary folder to store temporary files
+        $tmpdir = $CFG->dataroot . '/temp/';
+        debugging("importpreprocess(): Word file = $this->realfilename; path = $this->filename", DEBUG_DEVELOPER, $backtrace);
 
         // Check that the module is registered, and redirect to registration page if not
         if(!get_config('qformat_wordtable', 'username')) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Account not registered, redirecting to registration page", DEBUG_DEVELOPER);
+            debugging("importpreprocess(): Account not registered, redirecting to registration page", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('registrationpage', 'qformat_wordtable'));
-            $redirect_url = $CFG->wwwroot. $this->wordtable_dir . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $this->course->id;
+            $redirect_url = $CFG->wwwroot. "/" . $this->wordtable_dir . "/" . 'register.php?sesskey=' . $USER->sesskey . "&courseid=" . $this->course->id;
             redirect($redirect_url);
         }
 
@@ -102,36 +109,36 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
 
-        // Temporarily copy the Word file to ensure it has a .doc suffix, which is required by YAWC
-        // The uploaded file name may not have a .doc suffix, depending on platform and version
-        $temp_doc_filename = $CFG->dataroot . '/temp/' . strval(rand(10, 90)) . "-" . $this->realfilename;
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": File OK, copying to $temp_doc_filename", DEBUG_DEVELOPER);
+        // Temporarily copy the Word file so it has a .doc suffix, which is required by YAWC
+        // The uploaded file name has no suffix by default
+        $temp_doc_filename = $tmpdir . clean_filename(basename($this->filename)) . "-" . $this->realfilename;
+        debugging("importpreprocess(): File OK, copying to $temp_doc_filename", DEBUG_DEVELOPER, $backtrace);
         if (copy($this->filename, $temp_doc_filename)) {
             chmod($temp_doc_filename, 0666);
             clam_log_upload($temp_doc_filename, $COURSE);
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Copy succeeded, $this->filename copied to $temp_doc_filename", DEBUG_DEVELOPER);
+            debugging("importpreprocess(): Copy succeeded, $this->filename copied to $temp_doc_filename", DEBUG_DEVELOPER, $backtrace);
         } else {
             echo $OUTPUT->notification(get_string("uploadproblem", "", $temp_doc_filename));
         }
 
         // Get the username and password required for YAWC Online
         $yol_username = get_config('qformat_wordtable', 'username');
-        $yol_password = get_config('qformat_wordtable', 'password');
+        $yol_password = base64_decode(get_config('qformat_wordtable', 'password'));
 
         // Now send the file to YAWC  to convert it into Moodle Question XML inside a Zip file
         $yawc_post_data = array(
             "username" => $yol_username,
-            "password" => base64_decode($yol_password),
+            "password" => $yol_password,
             "moodle_release" => $CFG->release,
             "downloadZip" => "0",
             "okUpload" => "Convert",
             "docFile" => "@" . $temp_doc_filename
         );
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": YAWC POST data: " . print_r($yawc_post_data, true), DEBUG_DEVELOPER);
+        debugging("importpreprocess(): YAWC POST data: " . print_r($yawc_post_data, true), DEBUG_DEVELOPER, $backtrace);
 
         // Check that cURL is available
         if (!function_exists('curl_version')) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": cURL not available", DEBUG_DEVELOPER);
+            debugging("importpreprocess(): cURL not available", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('curlunavailable', 'qformat_wordtable', $zipfile));
             return false;
         }
@@ -142,20 +149,20 @@ class qformat_wordtable extends qformat_xml {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $yawc_post_data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1);
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Sending Word file for conversion using cURL", DEBUG_DEVELOPER);
+        debugging("importpreprocess(): Sending Word file for conversion using cURL", DEBUG_DEVELOPER, $backtrace);
         $yawczipdata = curl_exec($ch);
         // Check if any error occured
         if(curl_errno($ch)) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": cURL failed with error: " . curl_error($ch), DEBUG_DEVELOPER);
+            debugging("importpreprocess(): cURL failed with error: " . curl_error($ch), DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('curlerror', 'qformat_wordtable'));
         }
         curl_close ($ch);
 
         // Delete the temporary Word file once conversion complete
-        $this->debug_unlink($temp_doc_filename);
+        debug_unlink($temp_doc_filename);
 
         // Check that a non-zero length file is returned, and the file is a Zip file
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": ZIP file data type = " . substr($yawczipdata, 0, 2) . ", length = " . strlen($yawczipdata), DEBUG_DEVELOPER);
+        debugging("importpreprocess(): ZIP file data type = " . substr($yawczipdata, 0, 2) . ", length = " . strlen($yawczipdata), DEBUG_DEVELOPER, $backtrace);
         if((strlen($yawczipdata) == 0) || (substr($yawczipdata, 0, 2) !== "PK")) {
             echo $OUTPUT->notification(get_string('conversionfailed', 'qformat_wordtable'));
             return false;
@@ -163,8 +170,8 @@ class qformat_wordtable extends qformat_xml {
 
         // Save the Zip file to a regular temporary file, so that we can extract its
         // contents using the PHP zip library
-        $zipfile = tempnam($CFG->dataroot . '/temp/', "wtz-");
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": zip file location = " . $zipfile, DEBUG_DEVELOPER);
+        $zipfile = tempnam($tmpdir, "wt-");
+        debugging("importpreprocess(): zip file location = " . $zipfile, DEBUG_DEVELOPER, $backtrace);
         if(($fp = fopen($zipfile, "wb"))) {
             if(($nbytes = fwrite($fp, $yawczipdata)) == 0) {
                 echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $zipfile));
@@ -183,26 +190,26 @@ class qformat_wordtable extends qformat_xml {
                     $ze_filename = zip_entry_name($zip_entry);
                     $ze_file_suffix = substr($ze_filename, -3, 3);
                     $ze_filesize = zip_entry_filesize($zip_entry);
-                    debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = $ze_filename, $ze_file_suffix, $ze_filesize", DEBUG_DEVELOPER);
+                    debugging("importpreprocess(): zip_entry_name = $ze_filename, $ze_file_suffix, $ze_filesize", DEBUG_DEVELOPER, $backtrace);
                     if($ze_file_suffix == "xml") {
                         $xmlfile_found = true;
                         // Found the XML file, so grab the data
                         $xmldata = zip_entry_read($zip_entry, $ze_filesize);
-                        debugging(__FUNCTION__ . ":" . __LINE__ . ": xmldata length = (" . strlen($xmldata) . ")", DEBUG_DEVELOPER);
+                        debugging("importpreprocess(): xmldata length = (" . strlen($xmldata) . ")", DEBUG_DEVELOPER, $backtrace);
                         zip_entry_close($zip_entry);
                         zip_close($zfh);
-                        $this->debug_unlink($zipfile);
+                        debug_unlink($zipfile);
                     }
                 } else {
                     echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
                     zip_close($zfh);
-                    $this->debug_unlink($zipfile);
+                    debug_unlink($zipfile);
                     return false;
                 }
             }
         } else {
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $zipfile));
-            $this->debug_unlink($zipfile);
+            debug_unlink($zipfile);
             return false;
         }
 
@@ -246,105 +253,109 @@ class qformat_wordtable extends qformat_xml {
         // override method to allow us convert to Word-compatible XHTML format
         global $CFG, $USER;
         global $OUTPUT;
+        // declare empty array to prevent each debug message from including a complete backtrace
+        $backtrace = array();
 
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": content = " . str_replace("\n", " ", substr($content, 80, 50)) . "):", DEBUG_DEVELOPER);
+        debugging("presave_process(content = " . str_replace("\n", " ", substr($content, 80, 50)) . "):", DEBUG_DEVELOPER, $backtrace);
 
         // XSLT stylesheet to convert Moodle Question XML into Word-compatible XHTML format
-        $stylesheet =  dirname(__FILE__) . "/" . $this->mqxml2word_stylesheet1;
+        $stylesheet =  $CFG->dirroot . "/" . $this->wordtable_dir . "/" . $this->mqxml2word_stylesheet1;
         // XHTML template for Word file CSS styles formatting
-        $htmltemplatefile_path = dirname(__FILE__) . "/" . $this->wordfile_template;
+        $htmltemplatefile_path = str_replace("\\", "/", $CFG->dirroot) . "/" . $this->wordtable_dir . "/" . $this->wordfile_template;
 
         // Check that XSLT is installed, and the XSLT stylesheet and XHTML template are present
         if (!class_exists('XSLTProcessor') || !function_exists('xslt_create')) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": XSLT not installed", DEBUG_DEVELOPER);
+            debugging("presave_process(): XSLT not installed", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('xsltunavailable', 'qformat_wordtable'));
             return false;
         } else if(!file_exists($stylesheet)) {
             // XSLT stylesheet to transform Moodle Question XML into Word doesn't exist
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": XSLT stylesheet missing: $stylesheet", DEBUG_DEVELOPER);
+            debugging("presave_process(): XSLT stylesheet missing: $stylesheet", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('stylesheetunavailable', 'qformat_wordtable', $stylesheet));
             return false;
         }
 
         // Check that there is some content to convert into Word
         if (!strlen($content)) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": No XML questions in category", DEBUG_DEVELOPER);
+            debugging("presave_process(): No XML questions in category", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('noquestions', 'qformat_wordtable'));
             return false;
         }
 
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": preflight checks complete, xmldata length = " . strlen($content), DEBUG_DEVELOPER);
+        debugging("presave_process(): preflight checks complete, xmldata length = " . strlen($content), DEBUG_DEVELOPER, $backtrace);
 
         // Create a temporary file to store the XML content to transform
-        if (!($temp_xml_filename = tempnam($CFG->dataroot . '/temp/', "wt1-"))) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot open temporary file ('$temp_xml_filename') to store XML", DEBUG_DEVELOPER);
+        if (!($temp_xml_filename = tempnam($CFG->dataroot . "/temp/", "m2w-"))) {
+            debugging("presave_process(): Cannot open temporary file ('$temp_xml_filename') to store XML", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $temp_xml_filename));
             return false;
         }
 
-        // Write the XML contents to be transformed, and also include labels data, to avoid having to use document() inside XSLT
-        if (($nbytes = file_put_contents($temp_xml_filename, "<container>\n<quiz>" . $content . "</quiz>\n" . $this->get_text_labels() . "\n</container>")) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XML data to temporary file ('$temp_xml_filename')", DEBUG_DEVELOPER);
+        // Write the XML contents to be transformed
+        if (($nbytes = file_put_contents($temp_xml_filename, "<quiz>" . $content . "</quiz>")) == 0) {
+            debugging("presave_process(): Failed to save XML data to temporary file ('$temp_xml_filename')", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
             return false;
         }
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": XML data saved to $temp_xml_filename", DEBUG_DEVELOPER);
+        debugging("presave_process(): XML data saved to $temp_xml_filename", DEBUG_DEVELOPER, $backtrace);
 
-        // Get the locale, so we can set the language and locale in Word for better spell-checking
-        $locale_country = $CFG->country;
-        if (empty($CFG->country) or $CFG->country == 0 or $CFG->country == '0') {
-            $admin_user_config = get_admin();
-            $locale_country = $admin_user_config->country;
-        }
+        // Create a temporary XML file containing text labels in the current interface language, for use in the Word file
+        $moodletextfile = tempnam($CFG->dataroot . "/temp/", "wt-");
+        file_put_contents($moodletextfile, get_text_labels());
+        $stringsfile_path = "file:///" . str_replace("\\", "/", $moodletextfile);
+        debugging("presave_process(): Moodle labels saved to $moodletextfile", DEBUG_DEVELOPER, $backtrace);
+
         // Set parameters for XSLT transformation. Note that we cannot use arguments though
+        // Use a web URL for the template name, to avoid problems with a Windows-style path
         $parameters = array (
+            'htmltemplatefile' => $htmltemplatefile_path,
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
-            'moodle_country' => $locale_country,
+            'moodle_category' => get_string('category', 'question'),
+            'moodle_labels_file' => $stringsfile_path,
             'moodle_language' => current_language(),
+            'moodle_question' => get_string('question', 'moodle'),
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username
         );
 
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Calling XSLT Pass 1 with stylesheet \"" . $stylesheet . "\"", DEBUG_DEVELOPER);
+        debugging("presave_process(): Calling XSLT Pass 1 with stylesheet \"" . $stylesheet . "\" and template \"" . $parameters['htmltemplatefile'] . "\"", DEBUG_DEVELOPER, $backtrace);
         $xsltproc = xslt_create();
         if(!($xslt_output = xslt_process($xsltproc, $temp_xml_filename, $stylesheet, null, null, $parameters))) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Transformation failed", DEBUG_DEVELOPER);
+            debugging("presave_process(): Transformation failed", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XML: " . $temp_xml_filename . ")"));
-            $this->debug_unlink($temp_xml_filename);
+            debug_unlink($temp_xml_filename);
             return false;
         }
-        $this->debug_unlink($temp_xml_filename);
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Transformation Pass 1 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 1, 200)), DEBUG_DEVELOPER);
+        debugging("presave_process(): Transformation Pass 1 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 400, 100)), DEBUG_DEVELOPER, $backtrace);
 
-        $temp_xml_filename = tempnam($CFG->dataroot . '/temp/', "wt2-");
-        // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, using a temporary XML file, this time including the HTML template too
-        if (($nbytes = file_put_contents($temp_xml_filename, "<container>\n" . $xslt_output . "\n<htmltemplate>\n" . file_get_contents($htmltemplatefile_path) . "\n</htmltemplate>\n" . $this->get_text_labels() . "\n</container>")) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_xml_filename')", DEBUG_DEVELOPER);
+        // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, re-using the temporary XML file
+        if (($nbytes = file_put_contents($temp_xml_filename, $xslt_output)) == 0) {
+            debugging("presave_process(): Failed to save XHTML data to temporary file ('$temp_xml_filename')", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
             return false;
         }
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Intermediate XHTML data saved to $temp_xml_filename", DEBUG_DEVELOPER);
+        debugging("presave_process(): Intermediate XHTML data saved to $temp_xml_filename", DEBUG_DEVELOPER, $backtrace);
 
         // Prepare for Pass 2 XSLT transformation
-        $stylesheet =  dirname(__FILE__) . "/" . $this->mqxml2word_stylesheet2;
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Calling XSLT Pass 2 with stylesheet \"" . $stylesheet . "\"", DEBUG_DEVELOPER);
+        $stylesheet =  $CFG->dirroot . "/" . $this->wordtable_dir . "/" . $this->mqxml2word_stylesheet2;
+        debugging("presave_process(): Calling XSLT Pass 1 with stylesheet \"" . $stylesheet . "\" and template \"" . $parameters['htmltemplatefile'] . "\"", DEBUG_DEVELOPER, $backtrace);
         if(!($xslt_output = xslt_process($xsltproc, $temp_xml_filename, $stylesheet, null, null, $parameters))) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Pass 2 Transformation failed", DEBUG_DEVELOPER);
+            debugging("presave_process(): Pass 2 Transformation failed", DEBUG_DEVELOPER, $backtrace);
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XHTML: " . $temp_xml_filename . ")"));
-            $this->debug_unlink($temp_xml_filename);
+            debug_unlink($temp_xml_filename);
             return false;
         }
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Transformation Pass 2 succeeded, HTML output fragment = " . str_replace("\n", "", substr($xslt_output, 400, 100)), DEBUG_DEVELOPER);
+        debugging("presave_process(): Transformation Pass 2 succeeded, HTML output fragment = " . str_replace("\n", "", substr($xslt_output, 400, 100)), DEBUG_DEVELOPER, $backtrace);
 
-        $this->debug_unlink($temp_xml_filename);
+        debug_unlink($temp_xml_filename);
 
         // Strip off the XML declaration, if present, since Word doesn't like it
         //$content = substr($xslt_output, strpos($xslt_output, ">"));
         if (strncasecmp($xslt_output, "<?xml ", 5) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Stripping out XML declaration (line 1)", DEBUG_DEVELOPER);
+            debugging("presave_process(): Stripping out XML declaration (line 1)", DEBUG_DEVELOPER, $backtrace);
             $content = substr($xslt_output, strpos($xslt_output, "\n"));
         } else {
             $content = $xslt_output;
@@ -353,14 +364,17 @@ class qformat_wordtable extends qformat_xml {
         return $content;
     }   // end presave_process
 
-    /*
-     * Delete temporary files if debugging disabled
-     */
-    private function debug_unlink($filename) {
-        if (!debugging(null, DEBUG_DEVELOPER)) {
-            unlink($filename);
-        }
+}
+
+function debug_unlink($filename) {
+    // declare empty array to prevent each debug message from including a complete backtrace
+    $backtrace = array();
+
+    debugging("debug_unlink(\"" . $filename . "\")", DEBUG_DEVELOPER, $backtrace);
+    if (!debugging()) {
+        unlink($filename);
     }
+}
 
     /**
      * Get all the text strings needed to fill in the Word file labels in a language-dependent way
@@ -369,35 +383,30 @@ class qformat_wordtable extends qformat_xml {
      *
      * @return string
      */
-    private function get_text_labels() {
+    function get_text_labels() {
         $textstrings = array(
-            'assignment' => array('uploaderror', 'uploadafile', 'uploadfiletoobig'),
+            'qtype_description' => array('pluginname', 'pluginnamesummary'),
+            'qtype_essay' => array('pluginname', 'pluginnamesummary', 'graderinfo', 'allowattachments', 'responsefieldlines', 'responseformat', 'responsetemplate', 'responsetemplate_help'),
             'grades' => array('item'),
-            'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown', 'formatplain', 'formattext', 'grade', 'question', 'tags', 'uploadserverlimit', 'uploadedfile'),
-            'qformat_wordtable' => array('cloze_instructions', 'description_instructions', 'essay_instructions', 'multichoice_instructions', 'truefalse_instructions'),
-            'qtype_calculated' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'addmoreanswerblanks'),
-            'qtype_description' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary'),
-            'qtype_essay' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatplain', 'responsefieldlines', 'responseformat', 'responsetemplate', 'responsetemplate_help'),
-            'qtype_match' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'blanksforxmorequestions', 'filloutthreeqsandtwoas'),
-            'qtype_multianswer' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary'), // 'Embedded answers (Cloze)'
-            'qtype_multichoice' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'answerhowmany', 'answernumbering', 'answersingleno', 'answersingleyes', 'choiceno', 'correctfeedback', 'fillouttwochoices', 'incorrectfeedback', 'partiallycorrectfeedback', 'shuffleanswers'),
-            'qtype_shortanswer' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'addmoreanswerblanks', 'casesensitive', 'filloutoneanswer'),
-            'qtype_truefalse' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'false', 'true'),
-            'question' => array('addmorechoiceblanks', 'category', 'combinedfeedback', 'correctfeedbackdefault', 'defaultmark', 'fillincorrect', 'flagged', 'flagthisquestion', 'generalfeedback', 'addanotherhint', 'hintn', 'hintnoptions', 'hinttext', 'clearwrongparts', 'penaltyforeachincorrecttry', 'incorrect', 'incorrectfeedbackdefault', 'partiallycorrect', 'partiallycorrectfeedbackdefault', 'questions', 'questionx', 'questioncategory', 'questiontext', 'specificfeedback', 'shownumpartscorrect', 'shownumpartscorrectwhenfinished'),
-            'quiz' => array('answer', 'answers', 'correct', 'correctanswers', 'defaultgrade', 'generalfeedback', 'feedback', 'incorrect', 'penaltyfactor', 'shuffle'),
-            'repository_upload' => array('pluginname', 'pluginname_help', 'upload_error_no_file')
+            'qtype_match' => array('pluginname', 'pluginnamesummary', 'blanksforxmorequestions', 'filloutthreeqsandtwoas', 'shuffle'),
+            'moodle' => array('categoryname', 'no', 'yes', 'grade', 'question', 'tags'),
+            'qtype_multianswer' => array('pluginname', 'pluginnamesummary'), // 'Embedded answers (Cloze)'
+            'qtype_multichoice' => array('pluginname', 'pluginnamesummary', 'answerhowmany', 'answernumbering', 'choiceno', 'correctfeedback', 'shuffleanswers'),
+            'qtype_shortanswer' => array('pluginname', 'pluginnamesummary', 'casesensitive', 'correctanswers', 'filloutoneanswer'),
+            'question' => array('answer', 'answers', 'addmorechoiceblanks', 'category', 'combinedfeedback', 'correctfeedback', 'correctfeedbackdefault', 'defaultmark', 'feedback', 'fillincorrect', 'flagged', 'flagthisquestion', 'generalfeedback', 'addanotherhint', 'hintn', 'hintnoptions', 'hinttext', 'clearwrongparts', 'penaltyforeachincorrecttry', 'shownumpartscorrect', 'shownumpartscorrectwhenfinished', 'incorrect', 'incorrectfeedback', 'incorrectfeedbackdefault', 'partiallycorrect', 'partiallycorrectfeedback', 'partiallycorrectfeedbackdefault', 'questions', 'questionx', 'questiontext', 'specificfeedback', 'shownumpartscorrect', 'shownumpartscorrectwhenfinished'),
+            'qtype_truefalse' => array('pluginname', 'pluginnamesummary', 'false', 'true'),
+            'qformat_wordtable' => array('cloze_instructions', 'truefalse_instructions')
             );
 
-        $expout = "<moodlelabels>\n";
+        $expout = "<root>\n";
         foreach ($textstrings as $type_group => $group_array) {
             foreach ($group_array as $string_id) {
                 $name_string = $type_group . '_' . $string_id;
                 $expout .= '<data name="' . $name_string . '"><value>' . get_string($string_id, $type_group) . "</value></data>\n";
             }
         }
-        $expout .= "</moodlelabels>";
+        $expout .= "\n</root>";
 
         return $expout;
     }
-}
 ?>
