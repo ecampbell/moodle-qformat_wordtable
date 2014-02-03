@@ -1,30 +1,3 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<!-- 
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-// $Id: $ 
-
- * Word-compatible XHTML template into which questions can be poured as HTML tables
- *
- * @package questionbank
- * @subpackage importexport
- * @copyright 2010 Eoin Campbell
- * @author Eoin Campbell
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
--->
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:o="urn:schemas-microsoft-com:office:office"
 	xmlns:w="urn:schemas-microsoft-com:office:word"
@@ -119,7 +92,7 @@ h1
 	font-size:14.0pt;
 	font-family:Arial;
 	mso-font-kerning:0pt;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-weight:normal;}
 h2
 	{mso-style-next:"Body Text Indent";
@@ -134,7 +107,7 @@ h2
 	tab-stops:0cm list 54.0pt 72.0pt;
 	font-size:13.0pt;
 	font-family:Arial;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-weight:normal;}
 h3
 {
@@ -147,10 +120,9 @@ line-height:12.0pt;
 mso-pagination:widow-orphan lines-together;
 page-break-after:avoid;
 font-family:"Arial";
-color:#0A4E83;
 mso-style-name:"Heading 3";
 font-size:11.0pt;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l1 level3 lfo1;}
 h4
 {
@@ -163,11 +135,10 @@ line-height:12.0pt;
 mso-pagination:widow-orphan lines-together;
 page-break-after:avoid;
 font-family:"Arial";
-color:#0A4E83;
 mso-style-name:"Heading 4";
 font-size:11.0pt;
 font-weight:normal;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l1 level4 lfo1;}
 h5
 {
@@ -180,11 +151,10 @@ line-height:12.0pt;
 mso-pagination:widow-orphan lines-together;
 page-break-after:avoid;
 font-family:"Arial";
-color:#0A4E83;
 mso-style-name:"Heading 5";
 font-size:10.0pt;
 font-weight:normal;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l1 level5 lfo1;}
 p.MsoListBullet, li.MsoListBullet, div.MsoListBullet
 {
@@ -200,7 +170,7 @@ tab-stops:list .25in;
 font-size:10.0pt;
 font-family:"Times New Roman";
 mso-style-name:"List Bullet";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l2 level1 lfo2;}
 p.MsoListBullet2, li.MsoListBullet2, div.MsoListBullet2
 {
@@ -216,7 +186,7 @@ tab-stops:list .5in;
 font-size:10.0pt;
 font-family:"Times New Roman";
 mso-style-name:"List Bullet 2";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l2 level2 lfo2;}
 p.MsoListBullet3, li.MsoListBullet3, div.MsoListBullet3
 {
@@ -232,7 +202,7 @@ tab-stops:list .75in;
 font-size:10.0pt;
 font-family:"Times New Roman";
 mso-style-name:"List Bullet 3";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l2 level3 lfo2;}
 p.MsoListBullet4, li.MsoListBullet4, div.MsoListBullet4
 {
@@ -252,8 +222,11 @@ mso-list:l2 level4 lfo2;}
 p.ListNumberReset, li.ListNumberReset, div.ListNumberReset
 {mso-style-name:"List Number Reset";
 margin:0cm;
-font-size:1pt;
-mso-ansi-language:EN-IE;
+font-size:9pt;
+text-align:center;
+font-weight:bold;
+font-family:"Arial";
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l4 level1 lfo4;}
 p.MsoListNumber, li.MsoListNumber, div.MsoListNumber
 {
@@ -262,14 +235,14 @@ margin-right:0in;
 margin-bottom:0in;
 margin-left:0.25in;
 text-align:justify;
-text-indent:-.25in;
-line-height:12.0pt;
+text-indent:0.0in;
+line-height:11.0pt;
 mso-pagination:widow-orphan;
 font-size:10.0pt;
-font-family:"Times New Roman";
+font-family:"Arial";
 mso-style-name:"List Number";
-tab-stops:list .25in;
-mso-ansi-language:EN-IE;
+tab-stops:list .20in;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l4 level2 lfo4;}
 p.MsoListContinue, li.MsoListContinue, div.MsoListContinue
 {
@@ -283,7 +256,7 @@ line-height:12.0pt;
 mso-pagination:widow-orphan;
 font-size:10.0pt;
 font-family:"Times New Roman";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-style-name:"List Continue";}
 p.MsoListNumber2, li.MsoListNumber2, div.MsoListNumber2
 {
@@ -297,7 +270,7 @@ line-height:12.0pt;
 mso-pagination:widow-orphan;
 font-size:10.0pt;
 font-family:"Times New Roman";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-style-name:"List Number 2";
 tab-stops:list .5in;
 mso-list:l4 level3 lfo4;}
@@ -313,7 +286,7 @@ line-height:12.0pt;
 mso-pagination:widow-orphan;
 font-size:10.0pt;
 font-family:"Times New Roman";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-style-name:"List Continue 2";}
 p.MsoListNumber3, li.MsoListNumber3, div.MsoListNumber3
 {
@@ -329,7 +302,7 @@ font-size:10.0pt;
 font-family:"Times New Roman";
 mso-style-name:"List Number 3";
 tab-stops:list .75in;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l4 level4 lfo4;}
 p.MsoListContinue3, li.MsoListContinue3, div.MsoListContinue3
 {
@@ -343,7 +316,7 @@ line-height:12.0pt;
 mso-pagination:widow-orphan;
 font-size:10.0pt;
 font-family:"Times New Roman";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-style-name:"List Continue 3";}
 p.MsoListNumber4, li.MsoListNumber4, div.MsoListNumber4
 {
@@ -359,7 +332,7 @@ font-size:10.0pt;
 font-family:"Times New Roman";
 mso-style-name:"List Number 4";
 tab-stops:list 1.0in;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l4 level5 lfo4;}
 p.MsoListContinue4, li.MsoListContinue4, div.MsoListContinue4
 {
@@ -373,7 +346,7 @@ line-height:12.0pt;
 mso-pagination:widow-orphan;
 font-size:10.0pt;
 font-family:"Times New Roman";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-style-name:"List Continue 4";}
 p.MsoCaption, li.MsoCaption, div.MsoCaption
 {
@@ -389,7 +362,7 @@ mso-pagination:widow-orphan;
 font-size:9.0pt;
 font-weight:bold;
 font-family:"Arial";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l6 level2 lfo6;}
 p.TableTitle, li.TableTitle, div.TableTitle
 {
@@ -406,7 +379,7 @@ mso-pagination:widow-orphan;
 font-size:9.0pt;
 font-family:"Arial";
 font-weight:bold;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l7 level2 lfo7;}
 p.QFQuestion, li.QFQuestion, div.QFQuestion
 {
@@ -422,17 +395,17 @@ mso-pagination:widow-orphan;
 page-break-after:avoid;
 font-size:9.0pt;
 font-family:"Arial";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l10 level2 lfo10;}
 p.QFOptionReset, li.QFOptionReset, div.QFOptionReset
 {mso-style-name:"QF Option Reset";
 margin:0cm;
 margin-left:0in;
-font-size:9pt;
+font-size:10pt;
 text-align:center;
 font-weight:bold;
 font-family:"Arial";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l12 level1 lfo12;}
 p.QFOption, li.QFOption, div.QFOption
 {
@@ -441,7 +414,7 @@ margin-left:3pt;
 margin-right:3pt;
 margin-bottom:3pt;
 text-indent:0in;
-line-height:12.0pt;
+line-height:11.0pt;
 mso-pagination:widow-orphan;
 font-size:10.0pt;
 font-family:"Arial";
@@ -449,13 +422,13 @@ mso-style-name:"QF Option";
 mso-style-next:"QF Option";
 page-break-after:avoid;
 tab-stops:list 0.20in;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l12 level2 lfo12;}
 p.ListNumberalphaReset, li.ListNumberalphaReset, div.ListNumberalphaReset
 {mso-style-name:"List Number alpha Reset";
 margin:0cm;
 font-size:1pt;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l13 level1 lfo13;}
 p.ListNumberalpha, li.ListNumberalpha, div.ListNumberalpha
 {
@@ -471,7 +444,7 @@ mso-pagination:widow-orphan;
 font-size:10.0pt;
 font-family:"Times New Roman";
 tab-stops:list .25in;
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l13 level2 lfo13;}
 </style>
     <style>
@@ -487,7 +460,7 @@ p.MsoTitle, li.MsoTitle, div.MsoTitle
 	font-size:16.0pt;
 	font-family:Arial;
 	mso-fareast-font-family:"Times New Roman";
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-weight:bold;
 	mso-bidi-font-weight:normal;}
 p.MsoSubtitle, li.MsoSubtitle, div.MsoSubtitle
@@ -498,7 +471,7 @@ p.MsoSubtitle, li.MsoSubtitle, div.MsoSubtitle
 	line-height:14.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:14.0pt;
 	font-family:"Arial", Palatino;}
 p.MsoToc1, li.MsoToc1, div.MsoToc1
@@ -509,7 +482,7 @@ p.MsoToc1, li.MsoToc1, div.MsoToc1
 	line-height:12.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:12.0pt;
 	font-family:"Times New Roman", Palatino;}
 p.MsoToc2, li.MsoToc2, div.MsoToc2
@@ -529,7 +502,7 @@ p.MsoToc2, li.MsoToc2, div.MsoToc2
 	mso-border-bottom-alt:solid windowtext .5pt;
 	padding:0in;
 	mso-padding-alt:1.0pt 0in 1.0pt 0in;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:8.5pt;
 	font-family:Arial, "Frutiger 55 Roman";
 	font-weight:bold;}
@@ -541,7 +514,7 @@ p.MsoFootnoteText, li.MsoFootnoteText, div.MsoFootnoteText
 	text-align:justify;
 	line-height:12.0pt;
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:10.0pt;
 	font-family:"Times New Roman", Palatino;}
 span.MsoFootnoteReference
@@ -554,7 +527,7 @@ p.MsoCommentText, li.MsoCommentText, div.MsoCommentText
 	line-height:12.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:12.0pt;
 	font-family:"Times New Roman", Palatino;}
 p.MsoNormal, li.MsoNormal, div.MsoNormal
@@ -568,7 +541,7 @@ p.MsoNormal, li.MsoNormal, div.MsoNormal
 	line-height:12.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:10.0pt;
 	font-family:"Times New Roman", Palatino;}
 p.MsoBlockText, li.MsoBlockText, div.MsoBlockText
@@ -577,7 +550,7 @@ p.MsoBlockText, li.MsoBlockText, div.MsoBlockText
 	margin-bottom:3.0pt;
 	margin-left:0.25in;
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	line-height:11.0pt;
 	font-family:"Arial";}
@@ -594,7 +567,7 @@ p.MsoBodyText, li.MsoBodyText, div.MsoBodyText
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	layout-grid-mode:char;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:10.0pt;
 	font-family:"Times New Roman", Palatino;
 	mso-hansi-font-family:"Times New Roman";}
@@ -611,7 +584,7 @@ p.MsoBodyTextFirst, li.MsoBodyTextFirst, div.MsoBodyTextFirst
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	layout-grid-mode:char;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:10.0pt;
 	font-family:"Times New Roman", Palatino;
 	mso-hansi-font-family:"Times New Roman";}
@@ -625,7 +598,7 @@ p.BlockQuote, li.BlockQuote, div.BlockQuote
 	text-align:justify;
 	line-height:12.0pt;
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-family:Arial;}
 p.Figure, li.Figure, div.Figure
@@ -641,7 +614,7 @@ p.Figure, li.Figure, div.Figure
   /* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	layout-grid-mode:char;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:10.0pt;
 	font-family:"Times New Roman", Palatino;
 	mso-hansi-font-family:"Times New Roman";}
@@ -655,7 +628,7 @@ p.QFNormal, li.QFNormal, div.QFNormal
 	line-height:11.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-family:Arial, "Frutiger 55 Roman";}
 p.QFHeading, li.QFHeading, div.QFHeading
@@ -668,7 +641,7 @@ p.QFHeading, li.QFHeading, div.QFHeading
 	line-height:12.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:12.0pt;
 	font-family:Arial;
 	font-weight:bold;
@@ -682,7 +655,7 @@ p.QFFeedback, li.QFFeedback, div.QFFeedback
 	line-height:12.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:10.0pt;
 	/*font-style:italic;*/
 	font-family:Arial;}
@@ -692,15 +665,14 @@ p.QFGrade, li.QFGrade, div.QFGrade
 	margin-right:0in;
 	mso-margin-bottom-alt:auto;
 	margin-left:0in;
-	line-height:12.0pt;
+	line-height:11.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
-	font-size:9.0pt;
+	mso-ansi-language:<?replace insert-language?>;
+	font-size:10.0pt;
 	font-style:italic;
-	font-family:Arial;
-	color:#0A4E83;}
+	font-family:Arial;}
 p.QFType, li.QFType, div.QFType
 	{mso-style-name:"QF Type";
 	mso-margin-top-alt:auto;
@@ -711,11 +683,10 @@ p.QFType, li.QFType, div.QFType
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-style:italic;
 	font-family:Arial;
-	color:#0A4E83;
 	mso-fareast-language:KO;}
 p.QFName, li.QFName, div.QFName
 	{mso-style-name:"QF Name";
@@ -727,11 +698,10 @@ p.QFName, li.QFName, div.QFName
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-style:italic;
 	font-family:Arial;
-	color:#0A4E83;
 }
 p.QFWeight, li.QFWeight, div.QFWeight
 	{mso-style-name:"QF Weight";
@@ -744,11 +714,10 @@ p.QFWeight, li.QFWeight, div.QFWeight
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-style:italic;
-	font-family:Arial;
-	color:#0A4E83;}
+	font-family:Arial;}
 p.QFCaseStudy, li.QFCaseStudy, div.QFCaseStudy
 	{mso-style-name:"QF CaseStudy";
 	mso-margin-top-alt:auto;
@@ -759,7 +728,7 @@ p.QFCaseStudy, li.QFCaseStudy, div.QFCaseStudy
 	line-height:11.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-family:Arial, "Frutiger 55 Roman";}
 p.QFAnswer, li.QFAnswer, div.QFAnswer
@@ -772,7 +741,7 @@ p.QFAnswer, li.QFAnswer, div.QFAnswer
 	line-height:12.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-family:Arial, "Frutiger 55 Roman";}
 p.QFItemNumber, li.QFItemNumber, div.QFItemNumber
@@ -788,7 +757,7 @@ mso-pagination:widow-orphan;
 font-size:9.0pt;
 font-weight:bold;
 font-family:"Arial";
-mso-ansi-language:EN-IE;
+mso-ansi-language:<?replace insert-language?>;
 mso-list:l17 level2 lfo17;}
 
 
@@ -815,10 +784,9 @@ p.MsoFooter, li.MsoFooter, div.MsoFooter
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	tab-stops:center 207.65pt;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:7.0pt;
-	font-family:Arial, "Eras Medium ITC";
-	color:#0A4E83;}
+	font-family:Arial, "Eras Medium ITC";}
 
 
 strong
@@ -835,7 +803,7 @@ p.spacer, li.spacer, div.spacer
 	font-size:1.0pt;
 	font-family:Arial;
 	color:white;
-	mso-ansi-language:EN-IE;}
+	mso-ansi-language:<?replace insert-language?>;}
 
 
 
@@ -858,13 +826,13 @@ p.TableHead, li.TableHead, div.TableHead
 	margin-right:0in;
 	mso-margin-bottom-alt:auto;
 	margin-left:0in;
-	line-height:10.0pt;
+	line-height:11.0pt;
 	text-align:center;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
-	font-size:9.0pt;
+	mso-ansi-language:<?replace insert-language?>;
+	font-size:10.0pt;
 	font-weight:bold;
 	font-family:"Arial";}
 p.TableRowHead, li.TableRowHead, div.TableRowHead
@@ -874,12 +842,12 @@ p.TableRowHead, li.TableRowHead, div.TableRowHead
 	mso-margin-bottom-alt:auto;
 	margin-left:0in;
 	text-align:left;
-	line-height:10.0pt;
+	line-height:11.0pt;
 	/* mso-line-height-rule:exactly; */
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
-	font-size:9.0pt;
+	mso-ansi-language:<?replace insert-language?>;
+	font-size:10.0pt;
 	font-weight:bold;
 	font-family:"Arial";}
 p.Cell, li.Cell, div.Cell
@@ -891,8 +859,8 @@ p.Cell, li.Cell, div.Cell
 	margin-left:2.0pt;
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
-	font-size:9.0pt;
+	mso-ansi-language:<?replace insert-language?>;
+	font-size:11.0pt;
 	font-family:Arial, "Frutiger 55 Roman";
 	}
 p.Cell2, li.Cell2, div.Cell2
@@ -904,7 +872,7 @@ p.Cell2, li.Cell2, div.Cell2
 	margin-left:2.0pt;
 	mso-pagination:widow-orphan;
 	page-break-after:avoid;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:10.0pt;
 	font-family:"Times New Roman", Palatino;}
 p.TableNote
@@ -915,7 +883,7 @@ p.TableNote
 	margin-left:0in;
 	mso-pagination:widow-orphan;
 	page-break-before:avoid;
-	mso-ansi-language:EN-IE;
+	mso-ansi-language:<?replace insert-language?>;
 	font-size:9.0pt;
 	font-family:Arial, "Frutiger 55 Roman";
 }
@@ -1050,8 +1018,7 @@ mso-level-number-position:left;}
 @list l6:level2
 {
 mso-level-text:"Figure %1\.%2";
-mso-level-number-position:left;
-color:#0A4E83;}
+mso-level-number-position:left;}
 @list l7
 {mso-list-id:100000007}
 @list l7:level1
@@ -1061,8 +1028,7 @@ mso-level-number-position:left;}
 @list l7:level2
 {
 mso-level-text:"Table %1\.%2";
-mso-level-number-position:left;
-color:#0A4E83;}
+mso-level-number-position:left;}
 @list l8
 {mso-list-id:100000008}
 @list l8:level1
@@ -1077,8 +1043,7 @@ mso-level-number-position:left;}
 @list l10:level2
 {
 mso-level-text:"%1\.%2";
-mso-level-number-position:left;
-color:#0A4E83;}
+mso-level-number-position:left;}
 @list l12
 {mso-list-id:100000012}
 @list l12:level1
@@ -1132,8 +1097,7 @@ mso-level-number-position:left;}
 {
 mso-level-number-format:arabic-leading-zero;
 mso-level-suffix:none;
-mso-level-number-position:left;
-color:#0A4E83;}
+mso-level-number-position:left;}
 </style>
     <style>
  /* Page Definitions */

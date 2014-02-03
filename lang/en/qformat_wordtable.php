@@ -20,7 +20,7 @@ $string['conversionsucceeded'] = 'Question import <b>succeeded</b>, <br>click th
 $string['xmlnotsupported'] = 'Files in XML format not supported: <b>{$a}</b>';
 $string['docxnotsupported'] = 'Files in Word 2007 format not supported: <b>{$a}</b>';
 $string['htmlnotsupported'] = 'Files in HTML format not supported: <b>{$a}</b>';
-$string['htmldocnotsupported'] = 'Incorrect Word format: please use <i>File>Save As...</i> to save <b>{$a}</b> in native Word format and import again';
+$string['htmldocnotsupported'] = 'Incorrect Word format: please use <i>File>Save As...</i> to save <b>{$a}</b> in native Word (.doc) format and import again';
 $string['preview_question_not_found'] = 'Preview question not found, name / course ID: {$a}';
 $string['registration_administration'] = 'Moodle2Word Administration';
 $string['registration'] = 'Registration';
@@ -37,10 +37,16 @@ $string['registrationyes'] = 'Yes, please notify me about important issues';
 $string['registrationcomplete'] = 'Registration successful, Word import available';
 $string['registrationincomplete'] = 'Registration unsuccessful, Word import not available';
 $string['registrationpasswordsdonotmatch'] = 'The passwords do not match';
+$string['export_type_set'] = 'The question export type has been set to ';
 
 $string['subscription'] = 'Subscription type';
 $string['subtype_free'] = 'Free';
 $string['subtype_unlimited'] = 'Paid';
-$string['subtype_help'] = ' (No limits, but no support)';
-?>
+$string['subtype_help'] = ' (Maximum of 5 questions per file can be imported)';
 
+$string['cloze_instructions'] = 'Use <strong>bold</strong> for dropdown menu items and <em>italic</em> for text field items.';
+$string['description_instructions'] = 'This is not actually a question. Instead it is a way to add some instructions, rubric or other content to the activity. This is similar to the way that labels can be used to add content to the course page.';
+$string['essay_instructions'] = 'Allows a response of a few sentences or paragraphs. This must then be graded manually.';
+$string['multichoice_instructions'] = 'Allows the selection of a single or multiple responses from a pre-defined list.';
+$string['truefalse_instructions'] = 'Set grade \'100\' to the correct answer.';
+?>

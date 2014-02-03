@@ -38,7 +38,7 @@ $courseid = required_param('courseid', PARAM_INT);
 
 
 // Get the question ID by searching for the unique name, and redirect to the preview page
-if(($question = $DB->get_record('question', 'name', $qname))) {
+if(($question = $DB->get_record('question', array('name' => $qname)))) {
     // Figure out the proper URL, allowing for an installation in a subfolder
     $moodle_root_folder_path = parse_url($CFG->wwwroot, PHP_URL_PATH);
     $redirect_url = $moodle_root_folder_path . "/question/preview.php?id=" . $question->id . "&courseid=" . $courseid;
