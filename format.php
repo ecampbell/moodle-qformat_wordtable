@@ -303,6 +303,7 @@ class qformat_wordtable extends qformat_xml {
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
             'moodle_country' => $locale_country,
             'moodle_language' => current_language(),
+            'moodle_textdirection' => (right_to_left())? 'rtl': 'ltr',
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username
@@ -370,23 +371,37 @@ class qformat_wordtable extends qformat_xml {
      * @return string
      */
     private function get_text_labels() {
+
+        global $CFG;
+        // Release-independent list of all strings required in the XSLT stylesheets for labels etc.
         $textstrings = array(
-            'assignment' => array('uploaderror', 'uploadafile', 'uploadfiletoobig'),
             'grades' => array('item'),
-            'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown', 'formatplain', 'formattext', 'grade', 'question', 'tags', 'uploadserverlimit', 'uploadedfile'),
+            'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown', 'formatplain', 'formattext', 'grade', 'question', 'tags'),
             'qformat_wordtable' => array('cloze_instructions', 'description_instructions', 'essay_instructions', 'multichoice_instructions', 'truefalse_instructions'),
-            'qtype_calculated' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'addmoreanswerblanks'),
-            'qtype_description' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary'),
-            'qtype_essay' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatplain', 'responsefieldlines', 'responseformat', 'responsetemplate', 'responsetemplate_help'),
-            'qtype_match' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'blanksforxmorequestions', 'filloutthreeqsandtwoas'),
-            'qtype_multianswer' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary'), // 'Embedded answers (Cloze)'
-            'qtype_multichoice' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'answerhowmany', 'answernumbering', 'answersingleno', 'answersingleyes', 'choiceno', 'correctfeedback', 'fillouttwochoices', 'incorrectfeedback', 'partiallycorrectfeedback', 'shuffleanswers'),
-            'qtype_shortanswer' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'addmoreanswerblanks', 'casesensitive', 'filloutoneanswer'),
-            'qtype_truefalse' => array('pluginname', 'pluginnameadding', 'pluginnameediting', 'pluginnamesummary', 'false', 'true'),
-            'question' => array('addmorechoiceblanks', 'category', 'combinedfeedback', 'correctfeedbackdefault', 'defaultmark', 'fillincorrect', 'flagged', 'flagthisquestion', 'generalfeedback', 'addanotherhint', 'hintn', 'hintnoptions', 'hinttext', 'clearwrongparts', 'penaltyforeachincorrecttry', 'incorrect', 'incorrectfeedbackdefault', 'partiallycorrect', 'partiallycorrectfeedbackdefault', 'questions', 'questionx', 'questioncategory', 'questiontext', 'specificfeedback', 'shownumpartscorrect', 'shownumpartscorrectwhenfinished'),
-            'quiz' => array('answer', 'answers', 'correct', 'correctanswers', 'defaultgrade', 'generalfeedback', 'feedback', 'incorrect', 'penaltyfactor', 'shuffle'),
-            'repository_upload' => array('pluginname', 'pluginname_help', 'upload_error_no_file')
+            'qtype_description' => array('pluginnamesummary'),
+            'qtype_essay' => array('allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat'),
+            'qtype_match' => array('filloutthreeqsandtwoas'),
+            'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback', 'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
+            'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
+            'qtype_truefalse' => array('false', 'true'),
+            'question' => array('category', 'clearwrongparts', 'defaultmark', 'generalfeedback', 'hintn','penaltyforeachincorrecttry', 'questioncategory','shownumpartscorrect', 'shownumpartscorrectwhenfinished'),
+            'quiz' => array('answer', 'answers', 'casesensitive', 'correct', 'correctanswers', 'defaultgrade', 'incorrect', 'shuffle')
             );
+
+        // Append Moodle release-specific text strings, thus avoiding any errors being generated when absent strings are requested
+        if ($CFG->release < '2.0') {
+            $textstrings['quiz'][] = 'choice';
+            $textstrings['quiz'][] = 'penaltyfactor';
+        } else if ($CFG->release >= '2.5') {
+            $textstrings['qtype_essay'][] = 'responsetemplate';
+            $textstrings['qtype_essay'][] = 'responsetemplate_help';
+            $textstrings['qtype_match'][] = 'blanksforxmorequestions';
+            $textstrings['question'][] = 'addmorechoiceblanks';
+            $textstrings['question'][] = 'correctfeedbackdefault';
+            $textstrings['question'][] = 'hintnoptions';
+            $textstrings['question'][] = 'incorrectfeedbackdefault';
+            $textstrings['question'][] = 'partiallycorrectfeedbackdefault';
+        }
 
         $expout = "<moodlelabels>\n";
         foreach ($textstrings as $type_group => $group_array) {

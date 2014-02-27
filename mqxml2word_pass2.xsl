@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
- * XSLT stylesheet to transform Moodle Question XML-formatted questions into Word-compatible HTML tables 
+ * XSLT stylesheet to wrap questions formatted as HTML tables with a Word-compatible wrapper that defines the styles, metadata, etc.
  *
  * @package questionbank
  * @subpackage importexport
@@ -38,6 +38,7 @@
 <xsl:param name="institution_name"/>
 <xsl:param name="moodle_country" select="'US'"/> <!-- Country of Moodle installation -->
 <xsl:param name="moodle_language" select="'en'"/> <!-- Interface language for user -->
+<xsl:param name="moodle_textdirection" select="'ltr'"/>  <!-- ltr/rtl, ltr except for Arabic, Hebrew, Urdu, Farsi, Maldivian (who knew?) -->
 <xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
@@ -74,7 +75,10 @@
 </xsl:variable>
 <!-- Match document root node, and read in and process Word-compatible XHTML template -->
 <xsl:template match="/">
-  <xsl:apply-templates select="$htmltemplate/*" />
+<!-- Set the language and text direction -->
+	<html lang="{$moodle_language}" dir="{$moodle_textdirection}">
+		<xsl:apply-templates select="$htmltemplate/htm:html/*" />
+	</html>
 </xsl:template>
 
 <!-- Place questions in XHTML template body -->
@@ -134,7 +138,8 @@
 	<o:moodleCourseID><xsl:value-of select="$course_id"/></o:moodleCourseID>
 	<o:moodleImages><xsl:value-of select="$contains_embedded_images"/></o:moodleImages>
 	<o:moodleLanguage><xsl:value-of select="$moodle_language"/></o:moodleLanguage>
-	<o:moodleNo><xsl:value-of select="$moodle_labels/data[@name = 'moodle_yes']"/></o:moodleNo>
+	<o:moodleTextDirection><xsl:value-of select="$moodle_textdirection"/></o:moodleTextDirection>
+	<o:moodleNo><xsl:value-of select="$moodle_labels/data[@name = 'moodle_no']"/></o:moodleNo>
 	<o:moodleQuestion><xsl:value-of select="$moodle_labels/data[@name = 'moodle_question']"/></o:moodleQuestion>
 	<o:moodleYes><xsl:value-of select="$moodle_labels/data[@name = 'moodle_yes']"/></o:moodleYes>
 	<o:moodleQuestionSeqNum><xsl:value-of select="count($data//htm:table) + 1"/></o:moodleQuestionSeqNum>
