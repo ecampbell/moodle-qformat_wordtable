@@ -21,3 +21,4 @@ into images on import.
 
 Exported questions contain metadata labelled in the language of the user, and the text is in paragraphs
 with the spell-check language also set to the same language has the user has chosen for their Moodle interface.
+Both left-to-right and right-to-left languages (such as Arabic and Hebrew) are supported.

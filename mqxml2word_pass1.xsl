@@ -35,7 +35,8 @@
 <xsl:param name="author_id"/>
 <xsl:param name="institution_name"/>
 <xsl:param name="moodle_language" select="'en'"/> <!-- Interface language for user -->
-<xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
+<xsl:param name="moodle_release"/> <!-- 1.9 or 2.x -->
+<xsl:param name="moodle_textdirection" select="'ltr'"/> <!-- ltr/rtl, ltr except for Arabic, Hebrew, Urdu, Farsi, Maldivian (who knew?) -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 
@@ -120,10 +121,52 @@
 <!-- Per-question feedback labels -->
 <xsl:variable name="correctfeedback_label" select="concat($moodle_labels/data[@name = 'qtype_multichoice_correctfeedback'], $colon_string)"/>
 <xsl:variable name="feedback_label" select="$moodle_labels/data[@name = 'moodle_feedback']"/>
-<xsl:variable name="generalfeedback_label" select="concat($moodle_labels/data[@name = 'quiz_generalfeedback'], $colon_string)"/>
+<xsl:variable name="generalfeedback_label">
+	<xsl:choose>
+	<xsl:when test="$moodle_release_number = '1'">
+		<xsl:value-of  select="concat($moodle_labels/data[@name = 'quiz_generalfeedback'], $colon_string)"/>
+	</xsl:when>
+	<xsl:otherwise>
+		<xsl:value-of  select="concat($moodle_labels/data[@name = 'question_generalfeedback'], $colon_string)"/>
+	</xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
+
 <xsl:variable name="incorrectfeedback_label" select="concat($moodle_labels/data[@name = 'qtype_multichoice_incorrectfeedback'], $colon_string)"/>
 <xsl:variable name="pcorrectfeedback_label" select="concat($moodle_labels/data[@name = 'qtype_multichoice_partiallycorrectfeedback'], $colon_string)"/>
 <xsl:variable name="shownumcorrectfeedback_label" select="concat($moodle_labels/data[@name = 'question_shownumpartscorrectwhenfinished'], $colon_string)"/>
+
+<!-- Default feedback text (2.5+ only) -->
+<xsl:variable name="correctfeedback_default">
+	<xsl:choose>
+	<xsl:when test="$moodle_release_number &gt; '24'">
+		<xsl:value-of select="$moodle_labels/data[@name = 'question_correctfeedbackdefault']"/>
+	</xsl:when>
+	<xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is correct'"/></xsl:when>
+	<xsl:when test="starts-with($moodle_language, 'es')"><xsl:value-of select="'Respuesta correcta'"/></xsl:when>
+	<xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
+<xsl:variable name="incorrectfeedback_default">
+	<xsl:choose>
+	<xsl:when test="$moodle_release_number &gt; '24'">
+		<xsl:value-of select="$moodle_labels/data[@name = 'question_incorrectfeedbackdefault']"/>
+	</xsl:when>
+	<xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is incorrect'"/></xsl:when>
+	<xsl:when test="starts-with($moodle_language, 'es')"><xsl:value-of select="'Respuesta incorrecta.'"/></xsl:when>
+	<xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
+<xsl:variable name="pcorrectfeedback_default">
+	<xsl:choose>
+	<xsl:when test="$moodle_release_number &gt; '24'">
+		<xsl:value-of select="$moodle_labels/data[@name = 'question_partiallycorrectfeedbackdefault']"/>
+	</xsl:when>
+	<xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is partially correct'"/></xsl:when>
+	<xsl:when test="starts-with($moodle_language, 'es')"><xsl:value-of select="'Respuesta parcialmente correcta.'"/></xsl:when>
+	<xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
 
 <!-- Hint labels; don't add a colon yet, because we'll suffix a specific hint number when printing -->
 <xsl:variable name="hintn_label" select="$moodle_labels/data[@name = 'question_hintn']"/>
@@ -329,7 +372,7 @@
 	<!-- Column heading 1 is blank if question is not numbered, otherwise it includes a #, and importantly, a list number reset style -->
 	<xsl:variable name="colheading1_label">
 		<xsl:choose>
-		<xsl:when test="$qtype = 'MA' or $qtype = 'MC'  or $qtype = 'MAT'"><xsl:text>#</xsl:text></xsl:when>
+		<xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MAT'"><xsl:text>#</xsl:text></xsl:when>
 		<xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
@@ -382,7 +425,7 @@
 	
 	<!-- Generate the table containing the question stem and the answers -->
 	<div class="TableDiv">
-	<table border="1">
+	<table border="1" dir="{$moodle_textdirection}">
 	<thead>
 		<xsl:text>&#x0a;</xsl:text>
 		<tr>
@@ -612,6 +655,9 @@
 				</td>
 				<td style="{$col3_width}">
 					<xsl:choose>
+					<xsl:when test="$moodle_release_number &gt; '1' and graderinfo and graderinfo = ''">
+						<p class="Cell"><xsl:value-of select="$blank_cell"/></p>
+					</xsl:when>
 					<xsl:when test="$moodle_release_number &gt; '1' and graderinfo and graderinfo/@format and graderinfo/@format = 'html'">
 						<xsl:apply-templates select="graderinfo"/>
 					</xsl:when>
@@ -666,8 +712,8 @@
 				<th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$correctfeedback_label"/></p></th>
 				<td style="{$col3_width}">
 					<xsl:choose>
-					<xsl:when test="correctfeedback/text = ''">
-						<p class="Cell"><xsl:value-of select="$blank_cell"/></p>
+					<xsl:when test="normalize-space(correctfeedback/text) = ''">
+						<p class="Cell"><xsl:value-of select="$correctfeedback_default"/></p>
 					</xsl:when>
 					<xsl:otherwise><xsl:apply-templates select="correctfeedback/text"/></xsl:otherwise>
 					</xsl:choose>
@@ -680,8 +726,8 @@
 				<th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$incorrectfeedback_label"/></p></th>
 				<td style="{$col3_width}">
 					<xsl:choose>
-					<xsl:when test="incorrectfeedback/text = ''">
-						<p class="Cell"><xsl:value-of select="$blank_cell"/></p>
+					<xsl:when test="normalize-space(incorrectfeedback/text) = ''">
+						<p class="Cell"><xsl:value-of select="$incorrectfeedback_default"/></p>
 					</xsl:when>
 					<xsl:otherwise><xsl:apply-templates select="incorrectfeedback/text"/></xsl:otherwise>
 					</xsl:choose>
@@ -697,8 +743,8 @@
 				<th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$pcorrectfeedback_label"/></p></th>
 				<td style="{$col3_width}">
 					<xsl:choose>
-					<xsl:when test="partiallycorrectfeedback/text = ''">
-						<p class="Cell"><xsl:value-of select="$blank_cell"/></p>
+					<xsl:when test="normalize-space(partiallycorrectfeedback/text) = ''">
+						<p class="Cell"><xsl:value-of select="$pcorrectfeedback_default"/></p>
 					</xsl:when>
 					<xsl:otherwise><xsl:apply-templates select="partiallycorrectfeedback/text"/></xsl:otherwise>
 					</xsl:choose>
@@ -766,7 +812,7 @@
 					<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 				</tr>
 				<xsl:text>&#x0a;</xsl:text>
-				<!-- Most question types allow for some fields on the behaviour of hints, but SA doesn't, and CL only in 2.4+  -->
+				<!-- Most question types allow for some fields on the behaviour of hints, but SA doesn't, and CL only in 2.4+ -->
 				<xsl:if test="($qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC') or ($qtype = 'CL' and $moodle_release_number &gt;= '24')">
 					<tr>
 						<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
@@ -938,7 +984,7 @@
 			<xsl:value-of select="substring($raw_text, 4, string-length($raw_text) - 7)"/>
 		</xsl:when>
 		<xsl:when test="starts-with($raw_text, '&lt;table')">
-			<!-- Add a blank paragraph before the table,  -->
+			<!-- Add a blank paragraph before the table, -->
 			<xsl:value-of select="concat('&lt;p&gt;', $blank_cell, '&lt;/p&gt;', $raw_text)"/>
 		</xsl:when>
 		<xsl:when test="$raw_text = ''"><xsl:value-of select="$blank_cell"/></xsl:when>
@@ -1032,8 +1078,7 @@
 	<xsl:value-of select="$cloze_item"/>
 </xsl:template>
 
-<!-- Handle images associated with '@@PLUGINFILE@@' keyword by including them in temporary supplementary paragraphs in whatever
-     component they occur in -->
+<!-- Handle images associated with '@@PLUGINFILE@@' keyword by including them in temporary supplementary paragraphs in whatever component they occur in -->
 <xsl:template match="file">
 	<xsl:variable name="image_file_suffix">
 		<xsl:value-of select="translate(substring-after(@name, '.'), $ucase, $lcase)"/>
@@ -1046,7 +1091,7 @@
 
 <!-- got to preserve comments for style definitions -->
 <xsl:template match="comment()">
-	<xsl:comment><xsl:value-of select="."  /></xsl:comment>
+	<xsl:comment><xsl:value-of select="."/></xsl:comment>
 </xsl:template>
 
 <!-- Identity transformations -->
