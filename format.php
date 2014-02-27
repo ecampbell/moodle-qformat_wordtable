@@ -298,6 +298,7 @@ class qformat_wordtable extends qformat_xml {
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
             'moodle_country' => $locale_country,
             'moodle_language' => current_language(),
+            'moodle_textdirection' => (right_to_left())? 'rtl': 'ltr',
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username
@@ -366,17 +367,15 @@ class qformat_wordtable extends qformat_xml {
      */
     private function get_text_labels() {
         $textstrings = array(
-            'assignment' => array('uploaderror', 'uploadafile', 'uploadfiletoobig'),
             'grades' => array('item'),
             'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown', 'formatplain', 'formattext', 'grade', 'question', 'tags', 'uploadserverlimit', 'uploadedfile'),
             'qformat_wordtable' => array('cloze_instructions', 'description_instructions', 'essay_instructions', 'multichoice_instructions', 'truefalse_instructions'),
-            'qtype_calculated' => array('addmoreanswerblanks'),
             'qtype_match' => array('blanksforxmorequestions', 'filloutthreeqsandtwoas'),
             'qtype_multichoice' => array('answerhowmany', 'answernumbering', 'answersingleno', 'answersingleyes', 'choiceno', 'correctfeedback', 'fillouttwochoices', 'incorrectfeedback', 'partiallycorrectfeedback', 'shuffleanswers'),
             'qtype_shortanswer' => array('addmoreanswerblanks', 'filloutoneanswer'),
             'qtype_truefalse' => array('false', 'true'),
-            'question' => array('addmorechoiceblanks', 'category', 'combinedfeedback', 'defaultmark', 'fillincorrect', 'flagged', 'flagthisquestion', 'generalfeedback', 'incorrect', 'partiallycorrect', 'questions', 'questionx', 'questioncategory', 'questiontext', 'specificfeedback', 'shownumpartscorrect', 'shownumpartscorrectwhenfinished'),
-            'quiz' => array('answer', 'answers', 'casesensitive', 'choice', 'correct', 'correctanswers', 'defaultgrade', 'generalfeedback', 'feedback', 'incorrect', 'penaltyfactor', 'shuffle')
+            'question' => array('addmorechoiceblanks', 'category', 'combinedfeedback', 'defaultmark', 'fillincorrect', 'flagged', 'flagthisquestion', 'incorrect', 'partiallycorrect', 'questions', 'questionx', 'questioncategory', 'questiontext', 'specificfeedback', 'shownumpartscorrect', 'shownumpartscorrectwhenfinished'),
+            'quiz' => array('answer', 'answers', 'casesensitive', 'choice', 'correct', 'correctanswers', 'defaultgrade', 'feedback', 'generalfeedback', 'incorrect', 'penaltyfactor', 'shuffle')
             );
 
         $expout = "<moodlelabels>\n";

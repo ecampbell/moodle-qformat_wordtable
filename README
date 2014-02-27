@@ -4,8 +4,8 @@ The Word file can then be used to quickly review large numbers of questions
 
 Moodle2Word also supports importing questions from structured tables in Word,
 directly into the Moodle question database. The tables support all the question components
-(stem, answer options, option-specific and general feedback, hints, tags and question meta-data
-such as penalties grades and other options), as well as embedded images and equations. 
+(stem, answer options, option-specific and general feedback and question meta-data
+such as penalties, grades and other options), as well as embedded images and equations. 
 All the main question types except Numerical and Calculated questions are supported.
 
 The Cloze question syntax is particularly useful, as it does not require any knowledge of the
@@ -20,4 +20,5 @@ Equations written using the Microsoft Equation Editor embedded into Word are con
 into images on import.
 
 Exported questions contain metadata labelled in the language of the user, and the text is in paragraphs
-with the spell-check language also set to the same language has the user has chosen for their Moodle interface.
+with the spell-check language also set to the same language as the user has chosen for their Moodle interface.
+Both left-to-right and right-to-left languages (such as Arabic and Hebrew) are supported.
