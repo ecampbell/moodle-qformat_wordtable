@@ -23,10 +23,10 @@
  * @package wordtable
  **/
 
-$plugin->version  = 2014022701;  // The current module version (Date: YYYYMMDDXX)
+$plugin->version  = 2014042801;  // The current module version (Date: YYYYMMDDXX)
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level
 $plugin->component  = 'qformat_wordtable';  // Plugin name
-$plugin->release  = '2.7.1 (Build: 20140227)';  // The current module release in human-readable form (x.y)
+$plugin->release  = '2.8 (Build: 20140428)';  // The current module release in human-readable form (x.y)
 $plugin->requires = 2011070100.03;  // Requires Moodle 2.1 or later
 $plugin->cron     = 0;           // Period for cron to check this module (secs)
 
