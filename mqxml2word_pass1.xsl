@@ -110,8 +110,14 @@
 	</xsl:choose>
 </xsl:variable>
 <xsl:variable name="question_label" select="$moodle_labels/data[@name = 'moodle_question']"/>
-<xsl:variable name="questioncategory_label" select="$moodle_labels/data[@name = 'question_questioncategory']"/>
-<xsl:variable name="category_label" select="$moodle_labels/data[@name = 'question_category']"/>
+<xsl:variable name="category_label">
+	<xsl:choose>
+	<xsl:when test="$moodle_release_number = '1'">
+		<xsl:value-of select="$moodle_labels/data[@name = 'question_questioncategory']"/>
+	</xsl:when>
+	<xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'question_category']"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
 <xsl:variable name="tags_label" select="concat($moodle_labels/data[@name = 'moodle_tags'], $colon_string)"/>
 
 <xsl:variable name="matching_shuffle_label" select="concat($moodle_labels/data[@name = 'quiz_shuffle'], $colon_string)"/>
@@ -247,7 +253,14 @@
 </xsl:variable>
 
 <!-- Short Answer question labels -->
-<xsl:variable name="casesensitive_label" select="concat($moodle_labels/data[@name = 'quiz_casesensitive'], $colon_string)"/>
+<xsl:variable name="casesensitive_label">
+	<xsl:choose>
+	<xsl:when test="$moodle_release_number = '1'">
+		<xsl:value-of select="concat($moodle_labels/data[@name = 'quiz_casesensitive'], $colon_string)"/>
+	</xsl:when>
+	<xsl:otherwise><xsl:value-of select="concat($moodle_labels/data[@name = 'qtype_shortanswer_casesensitive'], $colon_string)"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
 <xsl:variable name="shortanswer_instructions" select="$moodle_labels/data[@name = 'qtype_shortanswer_filloutoneanswer']"/>
 
 <!-- True/False question labels -->
@@ -280,7 +293,7 @@
 		</xsl:variable>
 			
 		<head>
-			<title><xsl:value-of select="concat($course_name, ', ', $questioncategory_label, $colon_string, ' ', $category)"/></title>
+			<title><xsl:value-of select="concat($course_name, ', ', $category_label, $colon_string, ' ', $category)"/></title>
 		</head>
 		<body>
 			<xsl:comment><xsl:value-of select="concat('Release: ', $moodle_release, '; rel_number: ', $moodle_release_number)"/></xsl:comment>
@@ -949,7 +962,7 @@
 	<tr>
 		<td style="width: 1.0cm"><p class="{$numbercolumn_class}"><xsl:value-of select="$blank_cell"/></p></td>
 		<xsl:choose>
-		<xsl:when test="ancestor::question/@type = 'shortanswer'">
+		<xsl:when test="$qtype = 'SA'">
 			<td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
 		</xsl:when>
 		<xsl:otherwise>
@@ -959,8 +972,7 @@
 
 		<!-- Process body row columns 3 and 4 -->
 		<xsl:choose>
-		<xsl:when test="contains(name(), 'subquestion')">
-			<!-- i.e. qtype = MAT - Matching question -->
+		<xsl:when test="$qtype = 'MAT'">
 			<td style="{$col3_width}"><p class="Cell"><xsl:value-of select="answer/text"/></p></td>
 			<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 		</xsl:when>

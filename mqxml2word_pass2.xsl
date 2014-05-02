@@ -75,7 +75,7 @@
 </xsl:variable>
 <!-- Match document root node, and read in and process Word-compatible XHTML template -->
 <xsl:template match="/">
-<!-- Set the language and text direction -->
+	<!-- Set the language and text direction -->
 	<html lang="{$moodle_language}" dir="{$moodle_textdirection}">
 		<xsl:apply-templates select="$htmltemplate/htm:html/*" />
 	</html>
