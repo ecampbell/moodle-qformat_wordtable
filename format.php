@@ -516,6 +516,20 @@ class qformat_wordtable extends qformat_xml {
             $clean_html = preg_replace('~<br([^>]*?)/?>~si', '<br/>', $clean_html, PREG_SET_ORDER);
         }
 
+        // Fix up filenames after @@PLUGINFILE@@ to replace URL-encoded characters with ordinary characters
+        $found_pluginfilenames = preg_match_all('~(.*?)<img src="@@PLUGINFILE@@/([^"]*)(.*)~s', $clean_html, $pluginfile_matches, PREG_SET_ORDER);
+        $n_matches = count($pluginfile_matches);
+        if ($found_pluginfilenames !== FALSE and $found_pluginfilenames != 0) {
+            $urldecoded_string = "";
+            // Process the possibly-URL-escaped filename so that it matches the name in the file element
+            for ($i = 0; $i < $n_matches; $i++) {
+                // Decode the filename and add the surrounding text
+                $decoded_filename = urldecode($pluginfile_matches[$i][2]);
+                $urldecoded_string .= $pluginfile_matches[$i][1] . '<img src="@@PLUGINFILE@@/' . $decoded_filename . $pluginfile_matches[$i][3];
+            }
+            $clean_html = $urldecoded_string;
+        }
+
         // Strip soft hyphens (0xAD, or decimal 173)
         $clean_html = preg_replace('/\xad/u', '', $clean_html);
 
