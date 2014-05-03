@@ -1,24 +1,17 @@
 Moodle2Word is a plugin that allows quiz questions to be exported from Moodle into a Word file.
 The Word file can then be used to quickly review large numbers of questions
-(either online or in print), or to prepare paper tests (where the answers and feedback are hidden).
+(either online or in print), or to prepare paper tests (where the answers and feedback is hidden).
 
 Moodle2Word also supports importing questions from structured tables in Word,
 directly into the Moodle question database. The tables support all the question components
-(stem, answer options, option-specific and general feedback and question meta-data
-such as penalties, grades and other options), as well as embedded images and equations. 
-All the main question types except Numerical and Calculated questions are supported.
+(stem, answer options, option-specific and general feedback, and weights),
+as well as embedded images and equations. All the main question types are supported.
 
 The Cloze question syntax is particularly useful, as it does not require any knowledge of the
 arcane Moodle syntax; instead, use bold for drop-down menu items, and italic for fill-in text fields.
+See attached screenshot for an example.
 
-Word templates to support the plugin can be downloaded from the demonstration website
+Word templates to go with the plugin can be downloaded from the demonstration website
 www.Moodle2Word.net, and are available for Word 2002/XP, 2003, 2007 and 2010 (Windows),
-and Word 2004 and 2011 (MacOSX). The Windows templates also support a simple question preview facility,
+and Word 2004 (MacOSX). The Windows templates also support a simple question preview facility,
 as well as uploading questions from within Word.
-
-Equations written using the Microsoft Equation Editor embedded into Word are converted automatically
-into images on import.
-
-Exported questions contain metadata labelled in the language of the user, and the text is in paragraphs
-with the spell-check language also set to the same language as the user has chosen for their Moodle interface.
-Both left-to-right and right-to-left languages (such as Arabic and Hebrew) are supported.
