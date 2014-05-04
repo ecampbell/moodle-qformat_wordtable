@@ -446,10 +446,10 @@
 				<xsl:choose>
 				<xsl:when test="$qtype = 'CL'">
 					<!-- Put Cloze text into the first option table cell, and convert special markup too-->
-					<xsl:apply-templates select="questiontext/text|questiontext/file" mode="cloze"/>
+					<xsl:apply-templates select="questiontext/*" mode="cloze"/>
 				</xsl:when>
 				<xsl:otherwise>
-					<xsl:apply-templates select="questiontext/text|questiontext/file"/>
+					<xsl:apply-templates select="questiontext/*"/>
 				</xsl:otherwise>
 				</xsl:choose>
 
@@ -728,7 +728,7 @@
 					<xsl:when test="normalize-space(correctfeedback/text) = ''">
 						<p class="Cell"><xsl:value-of select="$correctfeedback_default"/></p>
 					</xsl:when>
-					<xsl:otherwise><xsl:apply-templates select="correctfeedback/text"/></xsl:otherwise>
+					<xsl:otherwise><xsl:apply-templates select="correctfeedback/*"/></xsl:otherwise>
 					</xsl:choose>
 				</td>
 				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
@@ -742,7 +742,7 @@
 					<xsl:when test="normalize-space(incorrectfeedback/text) = ''">
 						<p class="Cell"><xsl:value-of select="$incorrectfeedback_default"/></p>
 					</xsl:when>
-					<xsl:otherwise><xsl:apply-templates select="incorrectfeedback/text"/></xsl:otherwise>
+					<xsl:otherwise><xsl:apply-templates select="incorrectfeedback/*"/></xsl:otherwise>
 					</xsl:choose>
 				</td>
 				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
@@ -759,7 +759,7 @@
 					<xsl:when test="normalize-space(partiallycorrectfeedback/text) = ''">
 						<p class="Cell"><xsl:value-of select="$pcorrectfeedback_default"/></p>
 					</xsl:when>
-					<xsl:otherwise><xsl:apply-templates select="partiallycorrectfeedback/text"/></xsl:otherwise>
+					<xsl:otherwise><xsl:apply-templates select="partiallycorrectfeedback/*"/></xsl:otherwise>
 					</xsl:choose>
 				</td>
 				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
@@ -916,7 +916,7 @@
 			</xsl:when>
 			</xsl:choose>
 		</td>
-		<td style="{$col3_width}"><p class="QFFeedback"><xsl:apply-templates select="feedback/text"/></p></td>
+		<td style="{$col3_width}"><p class="QFFeedback"><xsl:apply-templates select="feedback/*"/></p></td>
 		<td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="@fraction"/></p></td>
 	</tr>
 </xsl:template>
@@ -973,11 +973,11 @@
 		<!-- Process body row columns 3 and 4 -->
 		<xsl:choose>
 		<xsl:when test="$qtype = 'MAT'">
-			<td style="{$col3_width}"><p class="Cell"><xsl:value-of select="answer/text"/></p></td>
+			<td style="{$col3_width}"><p class="Cell"><xsl:value-of select="answer/*"/></p></td>
 			<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 		</xsl:when>
 		<xsl:otherwise>
-			<td style="{$col3_width}"><p class="QFFeedback"><xsl:apply-templates select="feedback/text|feedback/file"/></p></td>
+			<td style="{$col3_width}"><p class="QFFeedback"><xsl:apply-templates select="feedback/*"/></p></td>
 			<td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="$grade_value"/></p></td>
 		</xsl:otherwise>
 		</xsl:choose>
