@@ -181,12 +181,10 @@
 	<xsl:choose>
 	<xsl:when test="contains(@src, $pluginfiles_string)">
 		<!-- Generated from Moodle 2.x, so images are handled neatly, using a reference to the data -->
-		<xsl:text>&#x0a;</xsl:text>
 		<a name="{concat('MQIMAGE_', generate-id())}" style="color:red;">x</a>
 	</xsl:when>
 	<xsl:when test="contains(@src, $embeddedbase64_string)">
 		<!-- If imported from Word2MQXML, images are base64-encoded into the @src attribute -->
-		<xsl:text>&#x0a;</xsl:text>
 		<a name="{concat('MQIMAGE_', generate-id())}" style="color:red;">x</a>
 	</xsl:when>
 	<xsl:otherwise>
