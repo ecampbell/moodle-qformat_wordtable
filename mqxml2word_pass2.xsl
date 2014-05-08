@@ -42,6 +42,7 @@
 <xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
+<xsl:param name="transformationfailed"/> <!-- Error message to display in Word file if transformation fails -->
 
 <xsl:variable name="ucase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
 <xsl:variable name="lcase" select="'abcdefghijklmnopqrstuvwxyz'" />
@@ -58,8 +59,8 @@
 <xsl:template match="/container/moodlelabels"/>
 <xsl:template match="/container/htmltemplate"/>
 
-<!-- Read in the input XML into a variable, so that it can be processed -->
-<xsl:variable name="data" select="/container/htm:container" />
+<!-- Read in the input XML into a variable, and handle unusual situation where the inner container element doesn't have an explicit namespace declaration  -->
+<xsl:variable name="data" select="/container/*[local-name() = 'container']" />
 <xsl:variable name="contains_embedded_images" select="count($data//htm:img[contains(@src, $pluginfiles_string) or starts-with(@src, $embeddedbase64_string)])"/>
 
 <!-- Map raw language value into a Word-compatible version, removing anything after an underscore and capitalising -->
@@ -76,7 +77,7 @@
 <!-- Match document root node, and read in and process Word-compatible XHTML template -->
 <xsl:template match="/">
 <!-- Set the language and text direction -->
-	<html lang="{$moodle_language}" dir="{$moodle_textdirection}">
+	<html lang="{$moodle_language_value}" dir="{$moodle_textdirection}">
 		<xsl:apply-templates select="$htmltemplate/htm:html/*" />
 	</html>
 </xsl:template>
@@ -95,6 +96,10 @@
 	
 	<!-- Handle the question tables -->
 	<xsl:apply-templates select="$data/htm:html/htm:body"/>
+	<!-- Check that the content has been successfully read in: if the title is empty, include an error message in the Word file rather than leave it blank -->
+	<xsl:if test="$data/htm:html/htm:head/htm:title = ''">
+		<p class="MsoTitle"><xsl:value-of disable-output-escaping="yes" select="$transformationfailed"/></p>
+	</xsl:if>
 
 	<!-- Add a table for images, if present -->
 	<xsl:if test="$contains_embedded_images != 0">
