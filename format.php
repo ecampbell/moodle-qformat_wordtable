@@ -132,7 +132,7 @@ class qformat_wordtable extends qformat_xml {
         // Check that cURL is available
         if (!function_exists('curl_version')) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": cURL not available", DEBUG_DEVELOPER);
-            echo $OUTPUT->notification(get_string('curlunavailable', 'qformat_wordtable', $zipfile));
+            echo $OUTPUT->notification(get_string('curlunavailable', 'qformat_wordtable'));
             return false;
         }
 
@@ -309,7 +309,8 @@ class qformat_wordtable extends qformat_xml {
             'moodle_textdirection' => (right_to_left())? 'rtl': 'ltr',
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
-            'moodle_username' => $USER->username
+            'moodle_username' => $USER->username,
+            'transformationfailed' => get_string('transformationfailed', 'qformat_wordtable', "(XSLT: $this->mqxml2word_stylesheet2)")
         );
 
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Calling XSLT Pass 1 with stylesheet \"" . $stylesheet . "\"", DEBUG_DEVELOPER);
