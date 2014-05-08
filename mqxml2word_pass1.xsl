@@ -45,7 +45,7 @@
 <xsl:variable name="lcase" select="'abcdefghijklmnopqrstuvwxyz'" />
 <xsl:variable name="pluginfiles_string" select="'@@PLUGINFILE@@/'"/>
 
-<xsl:output method="xml" version="1.0" indent="yes" omit-xml-declaration="yes"/>
+<xsl:output method="xml" version="1.0" indent="no" omit-xml-declaration="yes"/>
 
 <!-- Moodle release is significant for the format of different questions
 	Essay:
@@ -464,7 +464,7 @@
 					<p><img src="{concat($pluginfiles_string, image)}"/></p>
 
 					<!-- Emit the image in the supplementary format, to be removed later -->
-					<p class="ImageFile"><img src="{concat($image_format, image_base64)}" title="{image}"/></p>
+					<p class="ImageFile"><img src="{concat($image_format, normalize-space(image_base64))}" title="{image}"/></p>
 				</xsl:if>
 			</td>
 			<td style="width: 1.0cm"><p class="QFType"><xsl:value-of select="$qtype" /></p></td>
@@ -672,10 +672,10 @@
 						<p class="Cell"><xsl:value-of select="$blank_cell"/></p>
 					</xsl:when>
 					<xsl:when test="$moodle_release_number &gt; '1' and graderinfo and graderinfo/@format and graderinfo/@format = 'html'">
-						<xsl:apply-templates select="graderinfo"/>
+						<xsl:apply-templates select="graderinfo/*"/>
 					</xsl:when>
 					<xsl:when test="$moodle_release_number &gt; '1' and graderinfo and graderinfo/@format and graderinfo/@format != 'html'">
-						<p class="Cell"><xsl:apply-templates select="graderinfo"/></p>
+						<p class="Cell"><xsl:apply-templates select="graderinfo/*"/></p>
 					</xsl:when>
 					<xsl:otherwise>
 						<!-- No information for essay graders, so it's probably an older version of Moodle. -->
@@ -814,8 +814,8 @@
 				</xsl:if>
 			</xsl:for-each>
 
-			<!-- Include 1 empty hint row even if there are no hints, or it hint elements are present, but only have flags set -->
-			<xsl:if test="(not(hint) or hint/text = '') and ($qtype = 'CL' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC')">
+			<!-- Include 1 empty hint row even if there are no hints, or if hint elements are present, but only have flags set -->
+			<xsl:if test="(not(hint) or hint/text = '') and ($qtype = 'CL' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC' or $qtype = 'SA')">
 				<!-- Define a label for the hint text row (row 1 of 3) -->
 				<xsl:variable name="hint_number_label" select="concat(substring-before($hintn_label, '{no}'), 1)"/>
 				<tr>
@@ -842,7 +842,8 @@
 					</tr>
 				</xsl:if>
 				<xsl:text>&#x0a;</xsl:text>
-			</xsl:if>
+			</xsl:if> 
+			<!-- End Hint processing -->
 
 			<!-- Tags row (added in Moodle 2.x) -->
 			<tr>
