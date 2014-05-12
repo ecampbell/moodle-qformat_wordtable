@@ -2,6 +2,9 @@ Release notes
 -------------
 
 Date          Version   Comment
+2014/05/12    2.8.5     Handle invalid 'complete="true"' attribute in images, fix loop through all CDATA 
+                        sections, keep tr elements when cleaning HTML manually.
+
 2014/05/07    2.8.4     Fix error in image handling in Moodle 1.9, add work-around to cope with XSLT 
                         idiosyncrasies that insert namespace declaration on wrong element, breaking the
                         Word export facility. Fix mishandling of Hints in Short Answer export.

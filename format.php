@@ -427,58 +427,52 @@ class qformat_wordtable extends qformat_xml {
      * @return string
      */
     private function clean_all_questions($input_string) {
-
         debugging(__FUNCTION__ . "(input_string = " . str_replace("\n", "", substr($input_string, 0, 1000)) . " ...)", DEBUG_DEVELOPER);
-        // Start assembling the cleaned output string. First add the text before the first question
-        $found_category = preg_match('~(.*)<question~s', $input_string, $pre_question_match);
+        // Start assembling the cleaned output string, starting with empty
         $clean_output_string =  "";
 
         // Split the string into questions in order to check the text fields for clean HTML
         $found_questions = preg_match_all('~(.*?)<question type="([^"]*)"[^>]*>(.*?)</question>~s', $input_string, $question_matches, PREG_SET_ORDER);
         $n_questions = count($question_matches);
         if ($found_questions === FALSE or $found_questions == 0) {
-            //debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot decompose questions", DEBUG_DEVELOPER);
+            debugging(__FUNCTION__ . "() -> Cannot decompose questions", DEBUG_DEVELOPER);
             return $input_string;
         }
         //debugging(__FUNCTION__ . ":" . __LINE__ . ": " . $n_questions . " questions found", DEBUG_DEVELOPER);
 
         // Split the questions into text strings to check the HTML
         for ($i = 0; $i < $n_questions; $i++) {
-            //debugging(__FUNCTION__ . ":" . __LINE__ . ": pre-question = |" . $question_matches[$i][1] . "|", DEBUG_DEVELOPER);
-            //debugging(__FUNCTION__ . ":" . __LINE__ . ": post-question = |" . $question_matches[$i][4] . "|", DEBUG_DEVELOPER);
-            
             $question_type = $question_matches[$i][2];
-            if ($question_type === 'category') {
-                $clean_output_string .= '<question type="category">' . $question_matches[$i][3] . "</question>";
-            } else {
-                // Standard question type with text fields, so split the question into chunks at CDATA boundaries, using an ungreedy search (?), and matching across newlines (s modifier)
-                $found_text_fields = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $question_matches[$i][3], $cdata_matches, PREG_SET_ORDER);
-                $n_text_fields = count($cdata_matches);
-                if ($found_text_fields === FALSE or $found_text_fields == 0) {
-                    //debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot decompose text elements in question", DEBUG_DEVELOPER);
-                    return $input_string;
-                }
-
-                // Before processing what's inside the CDATA section, add the question start tag
+            $question_content = $question_matches[$i][3];
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i + 1 . " of $n_questions, type $question_type, question length = " . strlen($question_content), DEBUG_DEVELOPER);
+            // Split the question into chunks at CDATA boundaries, using an ungreedy search (?), and matching across newlines (s modifier)
+            $found_cdata_sections = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $question_content, $cdata_matches, PREG_SET_ORDER);
+            if ($found_cdata_sections === FALSE) {
+                debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot decompose CDATA sections in question " . $i + 1, DEBUG_DEVELOPER);
+                $clean_output_string .= $question_matches[$i][0];
+            } else if ($found_cdata_sections != 0) {
+                $n_cdata_sections = count($cdata_matches);
+                debugging(__FUNCTION__ . ":" . __LINE__ . ": " . $n_cdata_sections  . " CDATA sections found in question " . $i + 1 . ", question length = " . strlen($question_content), DEBUG_DEVELOPER);
+                // Found CDATA sections, so first add the question start tag and then process the body
                 $clean_output_string .= '<question type="' . $question_type . '">';
 
                 // Process content of each CDATA section to clean the HTML
-                for ($j = 0; $j < $n_text_fields; $j++) {
+                for ($j = 0; $j < $n_cdata_sections; $j++) {
                     $cdata_content = $cdata_matches[$j][2];
                     $clean_cdata_content = $this->clean_html_text($cdata_matches[$j][2]);
 
                     // Add all the text before the first CDATA start boundary, and the cleaned string, to the output string
                     $clean_output_string .= $cdata_matches[$j][1] . '<![CDATA[' . $clean_cdata_content . ']]>' ;
-                } // End CDATA section handling
+                } // End CDATA section loop
 
                 // Add the text after the last CDATA section closing delimiter
                 $text_after_last_CDATA_string = substr($question_matches[$i][0], strrpos($question_matches[$i][0], "]]>") + 3);
                 $clean_output_string .= $text_after_last_CDATA_string;
-
-                //$clean_output_string .= $question_matches[$i];
+            } else {
+                //debugging(__FUNCTION__ . ":" . __LINE__ . ": No CDATA sections in question " . $i + 1, DEBUG_DEVELOPER);
+                $clean_output_string .= $question_matches[$i][0];
             }
-
-        } // End question element handling
+        } // End question element loop
 
         debugging(__FUNCTION__ . "() -> " . substr($clean_output_string, 0, 1000) . "..." . substr($clean_output_string, -1000), DEBUG_DEVELOPER);
         return $clean_output_string;
@@ -510,12 +504,29 @@ class qformat_wordtable extends qformat_xml {
             $clean_html = tidy_repair_string($text_content_string, $tidy_config, 'utf8');
         } else { 
             // Tidy not available, so just strip most HTML tags except character-level markup and table tags
-            $clean_html = strip_tags($text_content_string, "<b><br><em><i><img><strong><sub><sup><u><table><tbody><td><th><thead>");
+            $clean_html = strip_tags($text_content_string, "<b><br><em><i><img><strong><sub><sup><u><table><tbody><td><th><thead><tr>");
 
             // The strip_tags function treats empty elements like HTML, not XHTML, so fix <br> and <img src=""> manually (i.e. <br/>, <img/>)
             $clean_html = preg_replace('~<img([^>]*?)/?>~si', '<img$1/>', $clean_html, PREG_SET_ORDER);
             $clean_html = preg_replace('~<br([^>]*?)/?>~si', '<br/>', $clean_html, PREG_SET_ORDER);
-        }
+
+            // Look for spurious img/@complete attribute and try and fix it
+            $found_img_complete_attr = preg_match_all('~(.*?)<img([^>]*complete="true"[^>]*?)/>(.*)~s', $clean_html, $complete_attr_matches, PREG_SET_ORDER);
+            $n_attr_matches = count($complete_attr_matches);
+            if ($found_img_complete_attr !== FALSE and $found_img_complete_attr != 0) {
+                debugging(__FUNCTION__ . ":" . __LINE__ . ": $n_attr_matches illegal img/@complete attributes found: |" . $complete_attr_matches[0][0] . "|", DEBUG_DEVELOPER);
+                // Process the illegal attribute
+                $cleaned_images_string = "";
+                for ($i = 0; $i < $n_attr_matches; $i++) {
+                    // Delete the attribute, which may occur more than once inside a single img element
+                    $img_attrs = str_replace('complete="true"', '', $complete_attr_matches[$i][2]);
+                    $revised_img_element = "<img" . $img_attrs . "/>";
+                    debugging(__FUNCTION__ . ":" . __LINE__ . ": revised img element: |" . $revised_img_element . "|", DEBUG_DEVELOPER);
+                    $cleaned_images_string .= $complete_attr_matches[$i][1] . $revised_img_element . $complete_attr_matches[$i][3];
+                }
+                $clean_html = $cleaned_images_string;
+            }
+        } // End HTML tidy using strip_tags
 
         // Fix up filenames after @@PLUGINFILE@@ to replace URL-encoded characters with ordinary characters
         $found_pluginfilenames = preg_match_all('~(.*?)<img src="@@PLUGINFILE@@/([^"]*)(.*)~s', $clean_html, $pluginfile_matches, PREG_SET_ORDER);
@@ -539,4 +550,3 @@ class qformat_wordtable extends qformat_xml {
     }
 }
 ?>
-
