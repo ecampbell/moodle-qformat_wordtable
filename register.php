@@ -35,12 +35,9 @@ if (!$site = get_site()) {
     redirect("index.php");
 }
 
-if (!confirm_sesskey()) {
-    print_error('confirmsesskeybad', 'error');
-}
 
-if (!$admin = get_admin()) {
-    print_error("No admins");
+if (!is_siteadmin()) {
+    return;
 }
 
 if (!$admin->country and $CFG->country) {
@@ -51,10 +48,6 @@ global $DB;
 global $OUTPUT;
 // declare empty array to prevent each debug message from including a complete backtrace
 $backtrace = array();
-
-// Get the course ID so that we can return to the import page after registration
-$courseid = optional_param('courseid', 0, PARAM_INT);
-$returnurl = $CFG->wwwroot . ($courseid)? '/question/import.php?courseid=' . $courseid : "";
 
 $stradministration = get_string("registration_administration", 'qformat_wordtable');
 $strregistration = get_string("registration", 'qformat_wordtable');
@@ -79,7 +72,6 @@ if ($count > 5000) $sizeclass = 2;
 $site_defaults = array(
     'sitename' => format_string($site->fullname),
     'yolusername' => "mcq@" . $_SERVER["HTTP_HOST"],
-    'courseid' => $courseid,
     'sitesize' => $sizeclass,
     'country' => $admin->country,
     'adminemail' => $admin->email,
@@ -100,8 +92,8 @@ echo $OUTPUT->heading($strregistration);
 
 if ($from_form = $reg_form->get_data()) {
     // Send the data to Moodle2Word website for registration
-    $m2w_registration_string = "http://www.moodle2word.net/m2w_register.php?";
-    $m2w_registration_string .= "yolusername=" . urlencode($from_form->yolusername);
+    $m2w_registration_string = get_config('qformat_wordtable', 'registration_url');
+    $m2w_registration_string .= "?yolusername=" . urlencode($from_form->yolusername);
     $m2w_registration_string .= "&password=" . urlencode($from_form->password);
     $m2w_registration_string .= "&sitename=" . urlencode($from_form->sitename);
     $m2w_registration_string .= "&adminname=" . urlencode($from_form->adminname);
@@ -128,7 +120,7 @@ if ($from_form = $reg_form->get_data()) {
         set_config('password', base64_encode($from_form->password), 'qformat_wordtable');
 
         // Return to the calling page so that Administrator can continue uploading a Word file
-        redirect($returnurl);
+        //redirect($returnurl);
     }
 
 
