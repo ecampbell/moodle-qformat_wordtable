@@ -2,6 +2,10 @@ Release notes
 -------------
 
 Date          Version   Comment
+2014/06/17    2.9       Use default username and password for importing Word files to make Registration optional.
+                        Handle named numeric entities (e.g. &nbsp;) by converting them to numeric entities 
+                        instead (i.e. &#160;) to avoid XSLT processing errors.
+
 2014/05/12    2.8.5     Handle invalid 'complete="true"' attribute in images, fix loop through all CDATA 
                         sections, keep tr elements when cleaning HTML manually.
 
@@ -13,7 +17,7 @@ Date          Version   Comment
 
 2014/05/03    2.8.2     Handle images with names that include spaces or other non-alphanumeric characters.
 
-2014/05/02    2.8.1     CONTRIB-5028: clean up HTML markup (using strip_tags) better using if the PHP tidy 
+2014/05/02    2.8.1     CONTRIB-5028: clean up HTML markup better (using strip_tags) if the PHP tidy 
                         extension is not installed.
 
 2014/04/28    2.8       Use the PHP tidy extension to ensure that any HTML inside CDATA sections is well-formed
@@ -42,11 +46,12 @@ Moodle2Word is a plugin that allows quiz questions to be exported from Moodle in
 The Word file can then be used to quickly review large numbers of questions
 (either online or in print), or to prepare paper tests (where the answers and feedback are hidden).
 
-Moodle2Word also supports importing questions from structured tables in Word,
-directly into the Moodle question database. The tables support all the question components
-(stem, answer options, option-specific and general feedback, hints, tags and question meta-data
-such as penalties grades and other options), as well as embedded images and equations. 
+Moodle2Word also supports importing questions from structured tables in Word directly into the Moodle question database.
+The tables support all the question components (stem, answer options, option-specific and general feedback, hints, tags
+and question meta-data such as penalties grades and other options), as well as embedded images. 
 All the main question types except Numerical and Calculated questions are supported.
+Unregistered sites can import up to 5 questions, and registered sites 10.
+To remove these limits an annual subscription is required.
 
 The Cloze question syntax is particularly useful, as it does not require any knowledge of the
 arcane Moodle syntax; instead, use bold for drop-down menu items, and italic for fill-in text fields.
@@ -55,9 +60,6 @@ Word templates to support the plugin can be downloaded from the demonstration we
 www.Moodle2Word.net, and are available for Word 2002/XP, 2003, 2007 and 2010 (Windows),
 and Word 2004 and 2011 (MacOSX). The Windows templates also support a simple question preview facility,
 as well as uploading questions from within Word.
-
-Equations written using the Microsoft Equation Editor embedded into Word are converted automatically
-into images on import.
 
 Exported questions contain metadata labelled in the language of the user, and the text is in paragraphs
 with the spell-check language also set to the same language has the user has chosen for their Moodle interface.

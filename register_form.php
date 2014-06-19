@@ -34,7 +34,6 @@ class wordtable_register_form extends moodleform {
         $mform->addElement('hidden', 'lang', current_language());
         $mform->addElement('hidden', 'version', $CFG->version);
         $mform->addElement('hidden', 'release', $CFG->release);
-        $mform->addElement('hidden', 'courseid', '');
 
         $mform->addElement('text', 'yolusername', get_string('username'));
         $mform->addRule('yolusername', get_string('required'), 'required', '', 'client');
@@ -68,13 +67,6 @@ class wordtable_register_form extends moodleform {
         $options[2] = get_string('siteprivacylinked', 'hub');
         $mform->addElement('select', 'public', get_string('siteprivacy', 'hub'), $options );
         unset($options);
-
-/*
-        $options[0] = get_string("subtype_free", "qformat_wordtable");
-        $options[1] = get_string("subtype_unlimited", "qformat_wordtable");
-        $mform->addElement('select', 'subscription', get_string("subscription_type", "qformat_wordtable"), $options );
-        unset($options);
-*/
 
         $options[0] = "<500";
         $options[1] = "501-5,000";
