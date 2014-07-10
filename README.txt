@@ -2,6 +2,7 @@ Release notes
 -------------
 
 Date          Version   Comment
+2014/07/10    2.9.2     Fix syntax error in db/install.php
 2014/07/10    2.9.1     Fix error in registration process set-up, which prevented registration to set 10-question limit.
 
 2014/06/17    2.9       Use default username and password for importing Word files to make Registration optional.
