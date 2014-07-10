@@ -31,15 +31,20 @@ require_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
 $PAGE->set_url('/question/format/wordtable/register.php');
 $PAGE->set_pagelayout('admin'); // Set a default pagelayout
 
+// Get the full name of the Moodle site
 if (!$site = get_site()) {
     redirect("index.php");
 }
 
-
+// Ensure that the user registering has administration rights
 if (!is_siteadmin()) {
     return;
 }
 
+// Get the country of the installation from the country of the main Administration user
+if (!$admin = get_admin()) {
+    print_error("No admins");
+}
 if (!$admin->country and $CFG->country) {
     $admin->country = $CFG->country;
 }
