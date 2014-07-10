@@ -36,7 +36,7 @@ function xmldb_qformat_wordtable_install() {
     // URL of external server that does Word to Moodle Question XML conversion for question import
     set_config('converter_url', 'http://www.yawconline.com/ye_convert1.php', 'qformat_wordtable');
     // URL of external server for registering a unique login/password if upgrading from free conversion service
-    set_config('registration_url', 'http://www1.moodle2word.net/m2w_register.php';
+    set_config('registration_url', 'http://www1.moodle2word.net/m2w_register.php');
     // Default username and password for free conversion service
     set_config('username', 'unregistered@doc2mqxml.edu', 'qformat_wordtable');
     set_config('password', base64_encode('5questionlimit'), 'qformat_wordtable');
