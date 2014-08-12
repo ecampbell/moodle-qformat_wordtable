@@ -95,7 +95,7 @@
 	<xsl:comment>Contains embedded images: <xsl:value-of select="$contains_embedded_images"/></xsl:comment>
 	
 	<!-- Handle the question tables -->
-	<xsl:apply-templates select="$data/htm:html/htm:body"/>
+	<xsl:apply-templates select="$data/htm:html/htm:body/*"/>
 	<!-- Check that the content has been successfully read in: if the title is empty, include an error message in the Word file rather than leave it blank -->
 	<xsl:if test="$data/htm:html/htm:head/htm:title = ''">
 		<p class="MsoTitle"><xsl:value-of disable-output-escaping="yes" select="$transformationfailed"/></p>

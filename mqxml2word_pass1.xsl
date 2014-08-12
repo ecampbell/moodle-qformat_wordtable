@@ -39,13 +39,39 @@
 <xsl:param name="moodle_textdirection" select="'ltr'"/> <!-- ltr/rtl, ltr except for Arabic, Hebrew, Urdu, Farsi, Maldivian (who knew?) -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
+<xsl:param name="cloze_distractor_column_label" select="'Distractors'"/>      <!-- Label for Cloze question distractor column -->
+<xsl:param name="cloze_mcformat_label" select="'Orientation (D = dropdown; V = vertical, H = horizontal radio buttons):'"/>      <!-- Label for Cloze question MC subquestion format -->
+<xsl:param name="debug_flag" select="'0'"/>      <!-- Debugging on or off -->
+
+<xsl:output method="xml" version="1.0" indent="no" omit-xml-declaration="yes"/>
 
 
 <xsl:variable name="ucase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
 <xsl:variable name="lcase" select="'abcdefghijklmnopqrstuvwxyz'" />
 <xsl:variable name="pluginfiles_string" select="'@@PLUGINFILE@@/'"/>
+<!-- Cloze question keywords to watch out for -->
+<xsl:variable name="cloze_mc_keyword1" select="':MULTICHOICE:'"/>
+<xsl:variable name="cloze_mc_keyword2" select="':MC:'"/>
+<xsl:variable name="cloze_mch_keyword1" select="':MCH:'"/>
+<xsl:variable name="cloze_mch_keyword2" select="':MULTICHOICE_H:'"/>
+<xsl:variable name="cloze_mcv_keyword1" select="':MULTICHOICE_V:'"/>
+<xsl:variable name="cloze_mcv_keyword2" select="':MCV:'"/>
+<xsl:variable name="cloze_sa_keyword1" select="':SHORTANSWER:'"/>
+<xsl:variable name="cloze_sa_keyword2" select="':SA:'"/>
+<xsl:variable name="cloze_sa_keyword3" select="':MW:'"/>
+<xsl:variable name="cloze_sac_keyword1" select="':SHORTANSWER_C:'"/>
+<xsl:variable name="cloze_sac_keyword2" select="':SAC:'"/>
+<xsl:variable name="cloze_sac_keyword3" select="':MWC:'"/>
+<xsl:variable name="cloze_num_keyword1" select="':NUMERICAL:'"/>
+<xsl:variable name="cloze_num_keyword2" select="':NM:'"/>
+<xsl:variable name="cloze_correct_prefix1" select="'%100%'"/>
+<xsl:variable name="cloze_correct_prefix2" select="'='"/>
+<xsl:variable name="cloze_incorrect_prefix" select="'%0%'"/>
+<xsl:variable name="cloze_start_delimiter" select="'{'"/>
+<xsl:variable name="cloze_end_delimiter" select="'}'"/>
+<xsl:variable name="cloze_keyword_delimiter" select="':'"/>
+<xsl:variable name="cloze_answer_delimiter" select="'~'"/>
 
-<xsl:output method="xml" version="1.0" indent="no" omit-xml-declaration="yes"/>
 
 <!-- Moodle release is significant for the format of different questions
 	Essay:
@@ -344,11 +370,25 @@
 	</xsl:variable>
 
 
-	<!-- Heading rows for metadata -->
-	<xsl:variable name="weight">
+	<!-- Figure out the metadata to be included in table heading rows -->
+	<!-- Get Cloze text string if it's a Cloze question containing subquestions -->
+	<xsl:variable name="cloze_questiontext_string">
+		<xsl:if test="$qtype = 'CL'">
+			<xsl:value-of select="questiontext/text"/>
+		</xsl:if>
+	</xsl:variable>
+	<!-- Get the default mark from defaultgrade or from Cloze subquestions. If it isn't the same for all Cloze subquestions, set it to 0 -->
+	<xsl:variable name="defaultmark_value">
 		<xsl:choose>
-		<xsl:when test="defaultgrade"><xsl:value-of select="number(defaultgrade)"/></xsl:when>
-		<xsl:otherwise>1.0</xsl:otherwise>
+		<xsl:when test="defaultgrade">
+			<xsl:value-of select="number(defaultgrade)"/>
+		</xsl:when>
+		<xsl:when test="$qtype = 'CL' and contains($cloze_questiontext_string, $cloze_start_delimiter)">
+			<xsl:call-template name="get_cloze_defaultmark">
+				<xsl:with-param name="cloze_questiontext_string" select="$cloze_questiontext_string"/>
+			</xsl:call-template>
+		</xsl:when>
+		<xsl:otherwise><xsl:text>1</xsl:text></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
 
@@ -400,7 +440,7 @@
 	<!-- Answer/Option column heading for most question types, distractors for Cloze, and the response template for Essays (2.5 and above) -->
 	<xsl:variable name="colheading2_label">
 		<xsl:choose>
-		<xsl:when test="$qtype = 'CL'"><xsl:value-of select="$blank_cell"/></xsl:when>
+		<xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_distractor_column_label"/></xsl:when>
 		<xsl:when test="$qtype = 'DE'"><xsl:value-of select="$blank_cell"/></xsl:when>
 		<xsl:when test="$qtype = 'ES' and $moodle_release_number &gt; '24'"><xsl:value-of select="$responsetemplate_label"/></xsl:when>
 		<xsl:when test="$qtype = 'ES'"><xsl:value-of select="$blank_cell"/></xsl:when>
@@ -416,7 +456,7 @@
 		<xsl:when test="$qtype = 'ES' and $moodle_release_number = '1'"><xsl:value-of select="$blank_cell"/></xsl:when>
 		<xsl:when test="$qtype = 'ES'"><xsl:value-of select="$graderinfo_label"/></xsl:when>
 		<xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$answer_label"/></xsl:when>
-		<xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'"><xsl:value-of select="$feedback_label"/></xsl:when>
+		<xsl:when test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'"><xsl:value-of select="$feedback_label"/></xsl:when>
 		<xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
@@ -424,15 +464,94 @@
 	<!-- Grade column heading, or blank if no grade (CL, DE, ES, MAT) -->
 	<xsl:variable name="colheading4_label">
 		<xsl:choose>
-		<xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'">
+		<xsl:when test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'">
 			<xsl:value-of select="$grade_label"/>
 		</xsl:when>
 		<xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
 
+	<!-- Configure Cloze flags to define whether mixed formatting is used in MC and SA subquestions -->
+	<!-- Does :MULTICHOICE: or :MC: occur in a Cloze question? -->
+	<xsl:variable name="cloze_mc_formatting_dropdown">
+		<xsl:choose>
+		<xsl:when test="contains($cloze_questiontext_string, $cloze_mc_keyword1) or contains($cloze_questiontext_string, $cloze_mc_keyword2)">
+			<xsl:text>D</xsl:text>
+		</xsl:when>
+		<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<!-- Does :MULTICHOICE_H: or :MCH: occur in a Cloze question? -->
+	<xsl:variable name="cloze_mc_formatting_radio_horizontal">
+		<xsl:choose>
+		<xsl:when test="contains($cloze_questiontext_string, $cloze_mch_keyword1) or contains($cloze_questiontext_string, $cloze_mch_keyword2)">
+			<xsl:text>1</xsl:text>
+		</xsl:when>
+		<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<!-- Does :MULTICHOICE_V: or :MCV: occur in a Cloze question? -->
+	<xsl:variable name="cloze_mc_formatting_radio_vertical">
+		<xsl:choose>
+		<xsl:when test="contains($cloze_questiontext_string, $cloze_mcv_keyword1) or contains($cloze_questiontext_string, $cloze_mcv_keyword2)">
+			<xsl:text>1</xsl:text>
+		</xsl:when>
+		<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<!-- Does :SHORTANSWER:, :MW: or :SA: occur in a Cloze question? -->
+	<xsl:variable name="cloze_sa_formatting_case_insensitive">
+		<xsl:choose>
+		<xsl:when test="contains($cloze_questiontext_string, $cloze_sa_keyword1) or contains($cloze_questiontext_string, $cloze_sa_keyword2) or contains($cloze_questiontext_string, $cloze_sa_keyword3)">
+			<xsl:text>1</xsl:text>
+		</xsl:when>
+		<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<!-- Does :SHORTANSWER_C:, :MWC: or :SAC: occur in a Cloze question? -->
+	<xsl:variable name="cloze_sa_formatting_case_sensitive">
+		<xsl:choose>
+		<xsl:when test="contains($cloze_questiontext_string, $cloze_sac_keyword1) or contains($cloze_questiontext_string, $cloze_sac_keyword2) or contains($cloze_questiontext_string, $cloze_sac_keyword3)">
+			<xsl:text>1</xsl:text>
+		</xsl:when>
+		<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
 
-<!-- Get the question name and put it in the heading -->
+	<!-- Now set flags to define the default values for CL/SA case and CL/MC style row indicators -->
+	<xsl:variable name="cloze_sa_casesensitive_flag">
+		<xsl:choose>
+		<xsl:when test="$cloze_sa_formatting_case_sensitive = '1' and $cloze_sa_formatting_case_insensitive = '0'"><xsl:text>1</xsl:text></xsl:when>
+		<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<xsl:variable name="cloze_mc_formatting_flag">
+		<xsl:choose>
+		<xsl:when test="$cloze_mc_formatting_dropdown = '0' and $cloze_mc_formatting_radio_horizontal = '0' and $cloze_mc_formatting_radio_vertical = '1'"><xsl:text>V</xsl:text></xsl:when>
+		<xsl:when test="$cloze_mc_formatting_dropdown = '0' and $cloze_mc_formatting_radio_horizontal = '1' and $cloze_mc_formatting_radio_vertical = '0'"><xsl:text>H</xsl:text></xsl:when>
+		<xsl:otherwise><xsl:text>D</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+
+	<!-- Instruction text for each question type -->
+	<xsl:variable name="instruction_text">
+		<xsl:choose>
+		<xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_instructions"/></xsl:when>
+		<xsl:when test="$qtype = 'DE'"><xsl:value-of select="$description_instructions"/></xsl:when>
+		<xsl:when test="$qtype = 'ES'"><xsl:value-of select="$essay_instructions"/></xsl:when>
+		<xsl:when test="$qtype = 'MA'"><xsl:value-of select="$multichoice_instructions"/></xsl:when>
+		<xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$matching_instructions"/></xsl:when>
+		<xsl:when test="$qtype = 'MC'"><xsl:value-of select="$multichoice_instructions"/></xsl:when>
+		<xsl:when test="$qtype = 'SA'"><xsl:value-of select="$shortanswer_instructions"/></xsl:when>
+		<xsl:when test="$qtype = 'TF'"><xsl:value-of select="$truefalse_instructions"/></xsl:when>
+		<xsl:otherwise>
+		</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+
+
+	<!-- Start generating the HTML output, now that we've finished figuring out all the values -->
+	<!-- Put the question name in a heading, so it can be easily viewed in the Word navigation window -->
 	<h2 class="MsoHeading2"><xsl:value-of select="normalize-space(name)"/></h2>
 	<p class="MsoBodyText"> </p>
 	
@@ -440,13 +559,19 @@
 	<div class="TableDiv">
 	<table border="1" dir="{$moodle_textdirection}">
 	<thead>
+		<!-- 1st heading row: question stem/description and type cells -->
 		<xsl:text>&#x0a;</xsl:text>
 		<tr>
 			<td colspan="3" style="width: 12.0cm">
 				<xsl:choose>
 				<xsl:when test="$qtype = 'CL'">
-					<!-- Put Cloze text into the first option table cell, and convert special markup too-->
-					<xsl:apply-templates select="questiontext/*" mode="cloze"/>
+					<!-- Put Cloze text into the first option table cell, and convert subquestion markup too-->
+					<xsl:apply-templates select="questiontext/text" mode="cloze">
+						<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+						<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+						<xsl:with-param name="cloze_defaultmark_value" select="$defaultmark_value"/>
+					</xsl:apply-templates>
+					<xsl:apply-templates select="questiontext/file"/>
 				</xsl:when>
 				<xsl:otherwise>
 					<xsl:apply-templates select="questiontext/*"/>
@@ -472,11 +597,11 @@
 		<xsl:text>&#x0a;</xsl:text>
 
 		<!-- Handle heading rows for various metadata specific to each question -->
-		<!-- Default mark / Default grade / Question weighting, i.e. total marks available for question -->
-		<xsl:if test="$qtype = 'ES' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'">
+		<!-- 2nd heading row: Default mark / Default grade / Question weighting, i.e. total marks available for question -->
+		<xsl:if test="$qtype = 'CL' or $qtype = 'ES' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'">
 			<tr>
 				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$defaultmark_label"/></p></td>
-					<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$weight"/></p></td>
+					<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$defaultmark_value"/></p></td>
 			</tr>
 			<xsl:text>&#x0a;</xsl:text>
 		</xsl:if>
@@ -588,11 +713,34 @@
 			<xsl:text>&#x0a;</xsl:text>
 		</xsl:if>
 
-		<!-- Penalty for each incorrect try: Don't include for True/False, as it is always 100% in this case -->
-		<xsl:if test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC' or $qtype = 'SA'">
+		<!-- Cloze question flags: are SA case-sensitive?, are MC drop-down, vertical or horizontal radio? -->
+		<xsl:if test="$qtype = 'CL'">
+			<xsl:call-template name="debugComment">
+				<xsl:with-param name="comment_text">
+					<xsl:value-of select="concat('cloze_sa_casesensitive_flag: ', $cloze_sa_casesensitive_flag, '; cloze_sa_formatting_case_sensitive: ', $cloze_sa_formatting_case_sensitive, '; cloze_sa_formatting_case_insensitive: ', $cloze_sa_formatting_case_insensitive, '&#x0a;')"/>
+					<xsl:value-of select="concat('cloze_mc_formatting_flag: ', $cloze_mc_formatting_flag, '; cloze_mc_formatting_radio_horizontal: ', $cloze_mc_formatting_radio_horizontal, '; cloze_mc_formatting_dropdown: ', $cloze_mc_formatting_dropdown, '; cloze_mc_formatting_radio_vertical: ', $cloze_mc_formatting_radio_vertical, '&#x0a;')"/>
+					<xsl:value-of select="concat('cloze_defaultmark_value: ', $defaultmark_value, '&#x0a;')"/>
+					<xsl:value-of select="concat('cloze_questiontext_string: ', translate($cloze_questiontext_string, '&#x0a;', ' '), '&#x0a;')"/>
+				</xsl:with-param>
+			</xsl:call-template>
+
+			<!-- Case sensitivity for SA subquestions -->
 			<tr>
-				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$penalty_label"/></p></td>
-					<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$penalty_value"/></p></td>
+				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$casesensitive_label"/></p></td>
+				<td style="width: 1.0cm"><p class="Cell">
+					<xsl:choose>
+					<xsl:when test="$cloze_sa_casesensitive_flag = '1'">
+						<xsl:value-of select="$yes_label"/>
+					</xsl:when>
+					<xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+					</xsl:choose>
+				</p></td>
+			</tr>
+			<xsl:text>&#x0a;</xsl:text>
+			<!-- Style and orientation for MC subquestions: Drop-down menu, vertical or horizontal radio button -->
+			<tr>
+				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$cloze_mcformat_label"/></p></td>
+				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$cloze_mc_formatting_flag"/></p></td>
 			</tr>
 			<xsl:text>&#x0a;</xsl:text>
 		</xsl:if>
@@ -602,20 +750,29 @@
 			<tr>
 				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$shownumcorrectfeedback_label"/></p></td>
 				<td style="width: 1.0cm">
-						<p class="Cell">
-							<xsl:choose>
-							<xsl:when test="shownumcorrect">
-								<xsl:value-of select="$yes_label"/>
-							</xsl:when>
-							<xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
-							</xsl:choose>
-						</p>
+					<p class="Cell">
+						<xsl:choose>
+						<xsl:when test="shownumcorrect">
+							<xsl:value-of select="$yes_label"/>
+						</xsl:when>
+						<xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+						</xsl:choose>
+					</p>
 				</td>
 			</tr>
 			<xsl:text>&#x0a;</xsl:text>
 		</xsl:if>
 
-		<!-- Heading row for answers -->
+		<!-- 2nd last heading row: Penalty for each incorrect try: Don't include for True/False, as it is always 100% in this case -->
+		<xsl:if test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC' or $qtype = 'NUM' or $qtype = 'SA'">
+			<tr>
+				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$penalty_label"/></p></td>
+				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$penalty_value"/></p></td>
+			</tr>
+			<xsl:text>&#x0a;</xsl:text>
+		</xsl:if>
+
+		<!-- Last heading row: column headings for table body -->
 		<tr>
 			<td style="width: 1.0cm"><p class="{$colheading1_style}"><xsl:value-of select="$colheading1_label"/></p></td>
 			<td style="{$col2_width}"><p class="TableHead"><xsl:value-of select="$colheading2_label"/></p></td>
@@ -632,14 +789,13 @@
 		<!-- The first body row is the most complicated depending on the question, so do the special cases first -->
 		<xsl:choose>
 		<xsl:when test="$qtype = 'CL'">
-			<!-- Cloze questions should ideally have distractors in the rows, but that's too complicated at the moment, so leave it blank
+			<!-- Cloze questions should ideally have distractors in the rows, but that's too complicated at the moment, so just include one empty row -->
 			<tr>
 				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 				<td style="{$col2_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 				<td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 			</tr>
-			-->
 		</xsl:when>
 		<xsl:when test="$qtype = 'ES'">
 			<!-- Essay questions in Moodle 2.5+ have a response template and information for graders, so put in a row for these -->
@@ -874,22 +1030,7 @@
 			<xsl:text>&#x0a;</xsl:text>
 		</xsl:if>
 
-		<!-- Simple instructions feedback for some question types: MA, MAT, MC, TF, SA -->
-		<xsl:variable name="instruction_text">
-			<xsl:choose>
-			<xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_instructions"/></xsl:when>
-			<xsl:when test="$qtype = 'DE'"><xsl:value-of select="$description_instructions"/></xsl:when>
-			<xsl:when test="$qtype = 'ES'"><xsl:value-of select="$essay_instructions"/></xsl:when>
-			<xsl:when test="$qtype = 'MA'"><xsl:value-of select="$multichoice_instructions"/></xsl:when>
-			<xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$matching_instructions"/></xsl:when>
-			<xsl:when test="$qtype = 'MC'"><xsl:value-of select="$multichoice_instructions"/></xsl:when>
-			<xsl:when test="$qtype = 'SA'"><xsl:value-of select="$shortanswer_instructions"/></xsl:when>
-			<xsl:when test="$qtype = 'TF'"><xsl:value-of select="$truefalse_instructions"/></xsl:when>
-			<xsl:otherwise>
-			</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
-		
+		<!-- Instructions row for each question type -->
 		<tr>
 			<td colspan="3" style="width: 12.0cm"><p class="Cell"><i><xsl:value-of select="$instruction_text"/></i></p></td>
 			<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
@@ -1008,8 +1149,12 @@
 	<xsl:value-of select="$text_string" disable-output-escaping="yes"/>
 </xsl:template>
 
-<!-- Handle Cloze text -->
+<!-- Handle Cloze text by converting it back to nicely formatted bold/italic, instead of ugly Moodle format, if we can -->
 <xsl:template match="text" mode="cloze">
+	<xsl:param name="cloze_mc_formatting_flag"/>
+	<xsl:param name="cloze_sa_casesensitive_flag"/>
+	<xsl:param name="cloze_defaultmark_value"/>
+
 	<xsl:variable name="text_string">
 		<xsl:variable name="raw_text" select="normalize-space(.)"/>
 		
@@ -1024,71 +1169,286 @@
 		</xsl:choose>
 	</xsl:variable>
 
-	<xsl:call-template name="convert_cloze_string">
-		<xsl:with-param name="cloze_string" select="$text_string"/>
-	</xsl:call-template>
-	
-	<!--<xsl:value-of select="$text_string" disable-output-escaping="yes"/>-->
+	<!-- Convert the Cloze string to nice Word format -->
+	<xsl:if test="normalize-space($text_string) != '' and normalize-space($text_string) != '&#160;'">
+		<xsl:call-template name="convert_cloze_string">
+			<xsl:with-param name="cloze_string" select="$text_string"/>
+			<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+			<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+			<xsl:with-param name="cloze_defaultmark_value" select="$cloze_defaultmark_value"/>
+		</xsl:call-template>
+	</xsl:if>
 </xsl:template>
 
-<!-- Convert Cloze text strings -->
+<!-- Convert Cloze text strings into bold or italic, or leave as is if conversion not possible -->
+<!-- This template calls itself recursively to handle each subquestion in the string -->
 <xsl:template name="convert_cloze_string">
 	<xsl:param name="cloze_string"/>
-	
+	<xsl:param name="cloze_mc_formatting_flag"/> <!-- Default MC format: D, H or V -->
+	<xsl:param name="cloze_sa_casesensitive_flag"/> <!-- Default SA case: 0 or 1 -->
+	<xsl:param name="cloze_defaultmark_value"/> <!-- Default mark/weight -->
+
+	<!--
+	<xsl:message>
+		<xsl:value-of select="concat('convert_cloze_string(cloze_string = &quot;', translate(substring($cloze_string, 1, 100), '&#x0a;', ''), '&quot;; default = ', $cloze_defaultmark_value, ')')"/>
+	</xsl:message>
+	-->
 	<xsl:choose>
-	<xsl:when test="contains($cloze_string, '{')">
-		<!-- Copy the text prior to the embedded question -->
-		<xsl:value-of select="substring-before($cloze_string, '{')" disable-output-escaping="yes"/>
-		
-		<!-- Process the embedded cloze -->
-		<xsl:call-template name="convert_cloze_item">
-			<xsl:with-param name="cloze_item" 
-				select="substring-before(substring-after($cloze_string, '{'), '}')"/>
-		</xsl:call-template>
-		<!-- Recurse through the string again -->
-		<xsl:call-template name="convert_cloze_string">
-			<xsl:with-param name="cloze_string" select="substring-after($cloze_string, '}')"/>
-		</xsl:call-template>
+	<xsl:when test="not(contains($cloze_string, $cloze_start_delimiter))">
+		<!-- Simple case: No subquestion left, so return the remaining string -->
+		<xsl:value-of select="$cloze_string" disable-output-escaping="yes"/>
 	</xsl:when>
 	<xsl:otherwise>
-		<xsl:value-of select="$cloze_string" disable-output-escaping="yes"/>
+		<!-- Have a subquestion, so handle it -->
+		<!-- First, copy the text prior to the first subquestion -->
+		<xsl:value-of select="substring-before($cloze_string, $cloze_start_delimiter)" disable-output-escaping="yes"/>
+		
+		<!-- Next, identify the first subquestion, and figure out what is its type and default mark -->
+		<xsl:variable name="this_subquestion_string" select="substring-before(substring-after($cloze_string, $cloze_start_delimiter), $cloze_end_delimiter)"/>
+		<xsl:variable name="this_subquestion_defaultmark">
+			<xsl:call-template name="get_cloze_defaultmark">
+				<xsl:with-param name="cloze_questiontext_string" select="concat($cloze_start_delimiter, $this_subquestion_string, $cloze_end_delimiter)"/>
+			</xsl:call-template>
+		</xsl:variable>
+
+		<xsl:variable name="this_subquestion_type">
+			<xsl:variable name="this_subquestion_type_string" select="concat(':', substring-before(substring-after($this_subquestion_string, $cloze_keyword_delimiter), $cloze_keyword_delimiter), ':')"/>
+			<xsl:choose>
+			<!-- Numerical -->
+			<xsl:when test="$this_subquestion_type_string = $cloze_num_keyword1 or $this_subquestion_type_string = $cloze_num_keyword2">
+				<xsl:value-of select="$cloze_num_keyword1"/>
+			</xsl:when>
+			<!-- Case-insensitive SA -->
+			<xsl:when test="$this_subquestion_type_string = $cloze_sa_keyword1 or $this_subquestion_type_string = $cloze_sa_keyword2 or $this_subquestion_type_string = $cloze_sa_keyword3">
+				<xsl:value-of select="$cloze_sa_keyword1"/>
+			</xsl:when>
+			<!-- Case-sensitive SA -->
+			<xsl:when test="$this_subquestion_type_string = $cloze_sac_keyword1 or $this_subquestion_type_string = $cloze_sac_keyword2 or $this_subquestion_type_string = $cloze_sac_keyword3">
+				<xsl:value-of select="$cloze_sac_keyword1"/>
+			</xsl:when>
+			<!-- Dropdown MC -->
+			<xsl:when test="$this_subquestion_type_string = $cloze_mc_keyword1 or $this_subquestion_type_string = $cloze_mc_keyword2">
+				<xsl:value-of select="$cloze_mc_keyword1"/>
+			</xsl:when>
+			<!-- Vertical radio-button MC -->
+			<xsl:when test="$this_subquestion_type_string = $cloze_mcv_keyword1 or $this_subquestion_type_string = $cloze_mcv_keyword2">
+				<xsl:value-of select="$cloze_mcv_keyword1"/>
+			</xsl:when>
+			<!-- Horizontal radio-button MC -->
+			<xsl:when test="$this_subquestion_type_string = $cloze_mch_keyword1 or $this_subquestion_type_string = $cloze_mch_keyword2">
+				<xsl:value-of select="$cloze_mch_keyword1"/>
+			</xsl:when>
+				</xsl:choose>
+		</xsl:variable>
+
+		<xsl:call-template name="debugComment">
+			<xsl:with-param name="comment_text" select="concat('this_subquestion: type = ', $this_subquestion_type, ', mark = ', normalize-space(translate($this_subquestion_defaultmark, '&#x0a;', '')), '; default: ', $cloze_defaultmark_value)"/>
+		</xsl:call-template>
+
+		<!-- Compare this subquestions' type and mark against the defaults, to figure out how best to present it -->
+		<xsl:choose>
+		<xsl:when test="$this_subquestion_defaultmark != $cloze_defaultmark_value">
+			<!-- The default mark for this subquestion doesn't match the default for the whole Cloze, so just copy the raw text -->
+			<xsl:value-of select="concat($cloze_start_delimiter, $this_subquestion_string, $cloze_end_delimiter)" disable-output-escaping="yes"/>
+		</xsl:when>
+		<xsl:when test="($this_subquestion_type = $cloze_sa_keyword1 and $cloze_sa_casesensitive_flag = '0') or ($this_subquestion_type = $cloze_sac_keyword1 and $cloze_sa_casesensitive_flag = '1')">
+			<!-- An SA subquestion in a consistent case-sensitivity cloze, so convert it to nice format -->
+			<xsl:call-template name="convert_cloze_subquestion">
+				<xsl:with-param name="cloze_subquestion_string" select="$this_subquestion_string"/>
+				<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+				<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+			</xsl:call-template>
+			</xsl:when>
+		<xsl:when test="($this_subquestion_type = $cloze_mc_keyword1 and $cloze_mc_formatting_flag = 'D') or ($this_subquestion_type = $cloze_mch_keyword1 and $cloze_mc_formatting_flag = 'H') or ($this_subquestion_type = $cloze_mcv_keyword1 and $cloze_mc_formatting_flag = 'V')">
+			<!-- An MCD, MCH or MCV subquestion in a consistent cloze, so convert it to a slightly nicer format-->
+			<xsl:call-template name="convert_cloze_subquestion">
+				<xsl:with-param name="cloze_subquestion_string" select="$this_subquestion_string"/>
+				<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+				<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+			</xsl:call-template>
+		</xsl:when>
+		<xsl:otherwise>
+			<!-- Some other case we don't handle well, so just copy the raw text -->
+			<xsl:value-of select="concat($cloze_start_delimiter, $this_subquestion_string, $cloze_end_delimiter)" disable-output-escaping="yes"/>
+		</xsl:otherwise>
+		</xsl:choose>
+
+		<!-- Finally, recurse through the remaining part of the string to do the remaining subquestions -->
+		<xsl:call-template name="convert_cloze_string">
+			<xsl:with-param name="cloze_string" select="substring-after($cloze_string, $cloze_end_delimiter)"/>
+			<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+			<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+			<xsl:with-param name="cloze_defaultmark_value" select="$cloze_defaultmark_value"/>
+		</xsl:call-template>
 	</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
 
-<!-- Convert embedded NUMERICAL, SHORTANSWER or MULTICHOICE into markup-->
-<xsl:template name="convert_cloze_item">
-	<xsl:param name="cloze_item"/>
-	
+<!-- Convert a single embedded NUMERICAL, SHORTANSWER or MULTICHOICE subquestion into corresponding Word markup -->
+<xsl:template name="convert_cloze_subquestion">
+	<xsl:param name="cloze_subquestion_string"/>
+	<xsl:param name="cloze_mc_formatting_flag"/>
+	<xsl:param name="cloze_sa_casesensitive_flag"/>
+
+	<!-- Get the remainder of the string, after the 2nd colon, which occurs as the keyword end delimiter, e.g. ':SA:' -->
+	<xsl:variable name="cloze_remainder_string" select="substring-after(substring-after($cloze_subquestion_string, $cloze_keyword_delimiter), $cloze_keyword_delimiter)"/>
+
 	<xsl:choose>
-	<xsl:when test="contains($cloze_item, 'NUMERICAL')">
+	<xsl:when test="contains($cloze_subquestion_string, $cloze_num_keyword1) or contains($cloze_subquestion_string, $cloze_num_keyword2)">
 		<u>
-			<xsl:call-template name="format_cloze_item">
-				<xsl:with-param name="cloze_item" select="substring-after($cloze_item, 'NUMERICAL:')"/>
+			<xsl:call-template name="format_cloze_subquestion">
+				<xsl:with-param name="cloze_subquestion_string" select="$cloze_remainder_string"/>
+				<xsl:with-param name="first_answer_item" select="'true'"/>
+				<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+				<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
 			</xsl:call-template>
 		</u>
 	</xsl:when>
-	<xsl:when test="contains($cloze_item, 'SHORTANSWER')">
+	<xsl:when test="contains($cloze_subquestion_string, $cloze_sa_keyword1) or contains($cloze_subquestion_string, $cloze_sa_keyword2) or contains($cloze_subquestion_string, $cloze_sa_keyword3) or contains($cloze_subquestion_string, $cloze_sac_keyword1) or contains($cloze_subquestion_string, $cloze_sac_keyword2) or contains($cloze_subquestion_string, $cloze_sac_keyword3)">
 		<i>
-			<xsl:call-template name="format_cloze_item">
-				<xsl:with-param name="cloze_item" select="substring-after($cloze_item, 'SHORTANSWER:')"/>
+			<xsl:call-template name="format_cloze_subquestion">
+				<xsl:with-param name="cloze_subquestion_string" select="$cloze_remainder_string"/>
+				<xsl:with-param name="first_answer_item" select="'true'"/>
+				<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+				<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
 			</xsl:call-template>
 		</i>
 	</xsl:when>
-	<xsl:when test="contains($cloze_item, 'MULTICHOICE')">
+	<xsl:when test="contains($cloze_subquestion_string, $cloze_mc_keyword1) or contains($cloze_subquestion_string, $cloze_mc_keyword2) or contains($cloze_subquestion_string, $cloze_mch_keyword1) or contains($cloze_subquestion_string, $cloze_mch_keyword2) or contains($cloze_subquestion_string, $cloze_mcv_keyword1) or contains($cloze_subquestion_string, $cloze_mcv_keyword2)">
 		<b>
-			<xsl:call-template name="format_cloze_item">
-				<xsl:with-param name="cloze_item" select="substring-after($cloze_item, 'MULTICHOICE:')"/>
+			<xsl:call-template name="format_cloze_subquestion">
+				<xsl:with-param name="cloze_subquestion_string" select="$cloze_remainder_string"/>
+				<xsl:with-param name="first_answer_item" select="'true'"/>
+				<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+				<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
 			</xsl:call-template>
 		</b>
 	</xsl:when>
 	</xsl:choose>
 </xsl:template>
 
-<!-- Cloze items simply get converted into formatted text, retaining the horrible Moodle ~ markup formatting -->
-<xsl:template name="format_cloze_item">
-	<xsl:param name="cloze_item"/>
-	<xsl:value-of select="$cloze_item"/>
+<!-- Clean up Cloze subquestion items by removing '%100%'  or '=', empty feedback, etc. -->
+<xsl:template name="format_cloze_subquestion">
+	<xsl:param name="cloze_subquestion_string"/>
+	<xsl:param name="first_answer_item" select="'false'"/>
+	<xsl:param name="cloze_mc_formatting_flag"/>
+	<xsl:param name="cloze_sa_casesensitive_flag"/>
+
+	<xsl:if test="$first_answer_item = 'false'">
+		<xsl:value-of select="$cloze_answer_delimiter"/>
+	</xsl:if>
+
+	<xsl:choose>
+	<!-- Does the answer contain multiple components separated by tilda delimiter (~)? -->
+	<xsl:when test="contains($cloze_subquestion_string, $cloze_answer_delimiter)">
+		<!-- Format the answer before the ~ delimiter -->
+		<xsl:call-template name="format_cloze_answer">
+			<xsl:with-param name="cloze_subquestion_string" select="substring-before($cloze_subquestion_string, $cloze_answer_delimiter)"/>
+			<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+			<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+		</xsl:call-template>
+
+		<!-- Recurse to format the answers after the ~ delimiter -->
+		<xsl:call-template name="format_cloze_subquestion">
+			<xsl:with-param name="cloze_subquestion_string" select="substring-after($cloze_subquestion_string, $cloze_answer_delimiter)"/>
+			<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+			<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+		</xsl:call-template>
+	</xsl:when>
+	<xsl:otherwise>
+		<!-- Format the only answer -->
+		<xsl:call-template name="format_cloze_answer">
+			<xsl:with-param name="cloze_subquestion_string" select="$cloze_subquestion_string"/>
+			<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+			<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+		</xsl:call-template>
+	</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<!-- Clean up answer string Cloze inside subquestion -->
+<xsl:template name="format_cloze_answer">
+	<xsl:param name="cloze_subquestion_string"/>
+	<xsl:param name="cloze_mc_formatting_flag"/>
+	<xsl:param name="cloze_sa_casesensitive_flag"/>
+
+	<xsl:choose>
+	<!-- If an answer starts with '%100%', leave it out -->
+	<xsl:when test="starts-with($cloze_subquestion_string, $cloze_correct_prefix1)">
+		<xsl:value-of select="substring-after($cloze_subquestion_string, $cloze_correct_prefix1)"/>
+	</xsl:when>
+	<!-- If an answer starts with '=', leave it out -->
+	<xsl:when test="starts-with($cloze_subquestion_string, $cloze_correct_prefix2)">
+		<xsl:value-of select="substring-after($cloze_subquestion_string, $cloze_correct_prefix2)"/>
+	</xsl:when>
+	<!-- If an answer has an incorrect prefix ('%0%'), just copy it -->
+	<xsl:when test="starts-with($cloze_subquestion_string, $cloze_incorrect_prefix)">
+		<xsl:value-of select="$cloze_subquestion_string"/>
+	</xsl:when>
+	<!-- If an answer has a partially correct prefix (i.e. starts with '%', but not '%0%' or '%100%', just copy it -->
+	<xsl:when test="starts-with($cloze_subquestion_string, $cloze_incorrect_prefix)">
+		<xsl:value-of select="$cloze_subquestion_string"/>
+	</xsl:when>
+	<xsl:otherwise>
+		<!-- Add explicit incorrect marker '%0%' if it is not present -->
+		<xsl:value-of select="concat($cloze_incorrect_prefix, $cloze_subquestion_string)"/>
+	</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+
+<!-- Get the default mark in Cloze subquestions; it must be the same for all subquestions or we cannot optimise the Word output -->
+<xsl:template name="get_cloze_defaultmark">
+	<xsl:param name="cloze_questiontext_string"/>
+	<xsl:param name="current_defaultmark" select="'0'"/>
+
+	<!-- This template assumes there is always be a subquestion to process -->
+	<!--
+	<xsl:if test="$current_defaultmark = '0' and $cloze_questiontext_string != ''">
+		<xsl:message>
+			<xsl:value-of select="concat('get_cloze_defaultmark: starting string = &quot;', translate(substring(normalize-space($cloze_questiontext_string), 1, 100), '&#x0a;', ''), '&quot;')"/>
+		</xsl:message>
+	</xsl:if>
+	-->
+
+	<!-- Get the default mark for the first subquestion -->
+	<xsl:variable name="defaultmark_string" select="substring-before(substring-after($cloze_questiontext_string, $cloze_start_delimiter), $cloze_keyword_delimiter)"/>
+	<xsl:variable name="this_defaultmark">
+		<xsl:choose>
+		<xsl:when test="$defaultmark_string != ''">
+			<xsl:value-of select="$defaultmark_string"/>
+		</xsl:when>
+		<!-- Default mark not explicitly specified, so use Moodle-defined default of 1 -->
+		<xsl:otherwise><xsl:text>1</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+
+	<!--
+	<xsl:message>
+		<xsl:value-of select="concat('get_cloze_defaultmark: this_defaultmark = ', $this_defaultmark, ', defaultmark_string = ', $defaultmark_string, '; cloze_questiontext_string: &quot;', translate(substring(normalize-space(substring-after($cloze_questiontext_string, $cloze_start_delimiter)), 1, 30), '&#x0a;', ''), '&quot;')"/>
+	</xsl:message>
+	-->
+
+	<!-- Are there more subquestions? Check the remainder of the string after the end of the first subquestion to find out -->
+	<xsl:variable name="cloze_questiontext_remainder" select="substring-after($cloze_questiontext_string, $cloze_end_delimiter)"/>
+	<xsl:choose>
+	<xsl:when test="contains($cloze_questiontext_remainder,  $cloze_start_delimiter)">
+		<!-- Yes, more subquestions, so recurse to the next one, passing this defaultmark value through as the current default -->
+		<xsl:call-template name="get_cloze_defaultmark">
+			<xsl:with-param name="cloze_questiontext_string" select="$cloze_questiontext_remainder"/>
+			<xsl:with-param name="current_defaultmark" select="$this_defaultmark"/>
+		</xsl:call-template>
+	</xsl:when>
+	<xsl:when test="$current_defaultmark = 0 or $current_defaultmark = $this_defaultmark">
+		<!-- No more subquestions, so check the default mark for this subquestion against the current value to decide what to return -->
+		<!-- If current default mark is 0, just return this default mark, since this is the first recursive call -->
+		<xsl:value-of select="$this_defaultmark"/>
+	</xsl:when>
+	<xsl:when test="$current_defaultmark != $this_defaultmark">
+		<!-- If current and this default marks are not the same, return 0 to indicate that different subquestions have different marks, because it means we cannot optimise Word output -->
+		<xsl:value-of select="'0'"/>
+	</xsl:when>
+	</xsl:choose>
 </xsl:template>
 
 <!-- Handle images associated with '@@PLUGINFILE@@' keyword by including them in temporary supplementary paragraphs in whatever component they occur in -->
@@ -1121,4 +1481,14 @@
 	</xsl:for-each>
 </xsl:template>
 
+<!-- Include debugging information in the output -->
+<xsl:template name="debugComment">
+	<xsl:param name="comment_text"/>
+
+	<xsl:if test="$debug_flag = '1'">
+		<xsl:text>&#x0a;</xsl:text>
+		<xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
+		<xsl:text>&#x0a;</xsl:text>
+	</xsl:if>
+</xsl:template>
 </xsl:stylesheet>

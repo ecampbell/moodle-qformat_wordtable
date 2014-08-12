@@ -308,6 +308,7 @@ class qformat_wordtable extends qformat_xml {
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
+            'debug_flag' => debugging('', DEBUG_DEVELOPER),
             'transformationfailed' => get_string('transformationfailed', 'qformat_wordtable', "(XSLT: $this->mqxml2word_stylesheet2)")
         );
 
@@ -379,7 +380,7 @@ class qformat_wordtable extends qformat_xml {
         $textstrings = array(
             'grades' => array('item'),
             'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown', 'formatplain', 'formattext', 'grade', 'question', 'tags'),
-            'qformat_wordtable' => array('cloze_instructions', 'description_instructions', 'essay_instructions', 'multichoice_instructions', 'truefalse_instructions'),
+            'qformat_wordtable' => array('cloze_instructions', 'cloze_distractor_label', 'cloze_mcformat_label', 'description_instructions', 'essay_instructions', 'multichoice_instructions', 'truefalse_instructions'),
             'qtype_description' => array('pluginnamesummary'),
             'qtype_essay' => array('allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat'),
             'qtype_match' => array('filloutthreeqsandtwoas'),
