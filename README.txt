@@ -2,6 +2,8 @@ Release notes
 -------------
 
 Date          Version   Comment
+2014/08/12    2.10      Support case-sensitivity and selection style and orientation in Cloze Short Answer / Multiple choice subquestions.
+                        Support specification of default mark in Cloze questions. Fix merging of paragraphs.
 2014/07/10    2.9.2     Fix syntax error in db/install.php
 2014/07/10    2.9.1     Fix error in registration process set-up, which prevented registration to set 10-question limit.
 
