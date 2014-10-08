@@ -2,6 +2,7 @@ Release notes
 -------------
 
 Date          Version   Comment
+2014/10/08    2.10.1    Fix bug in handling of image filenames containing spaces.
 2014/08/12    2.10      Support case-sensitivity and selection style and orientation in Cloze Short Answer / Multiple choice subquestions.
                         Support specification of default mark in Cloze questions. Fix merging of paragraphs.
 2014/07/10    2.9.2     Fix syntax error in db/install.php
