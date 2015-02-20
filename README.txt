@@ -2,6 +2,9 @@ Release notes
 -------------
 
 Date          Version   Comment
+2015/02/20    3.0.0     Support import of Word 2010 (.docx) documents, remove all question import limits,
+                        and use of an external conversion server.
+                        Also add support for tables and lists inside item components.
 2014/10/08    2.10.1    Fix bug in handling of image filenames containing spaces.
 2014/08/12    2.10      Support case-sensitivity and selection style and orientation in Cloze Short Answer / Multiple choice subquestions.
                         Support specification of default mark in Cloze questions. Fix merging of paragraphs.
