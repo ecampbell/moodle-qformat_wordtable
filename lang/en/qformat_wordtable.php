@@ -25,9 +25,11 @@ $string['export_type_set'] = 'The question export type has been set to ';
 
 $string['cloze_instructions'] = 'Use <strong>bold</strong> for dropdown menu items and <em>italic</em> for text field items.';
 $string['cloze_distractor_column_label'] = 'Distractors';
+$string['cloze_feedback_column_label'] = 'Distractor Feedback';
 $string['cloze_mcformat_label'] = 'Orientation (D = dropdown; V = vertical, H = horizontal radio buttons):';
 $string['description_instructions'] = 'This is not actually a question. Instead it is a way to add some instructions, rubric or other content to the activity. This is similar to the way that labels can be used to add content to the course page.';
 $string['essay_instructions'] = 'Allows a response of a few sentences or paragraphs. This must then be graded manually.';
 $string['multichoice_instructions'] = 'Allows the selection of a single or multiple responses from a pre-defined list.';
 $string['truefalse_instructions'] = 'Set grade \'100\' to the correct answer.';
+$string['interface_language_mismatch'] = 'No questions imported because the language of the labels in the Word file does not match your current Moodle interface language.';
 ?>

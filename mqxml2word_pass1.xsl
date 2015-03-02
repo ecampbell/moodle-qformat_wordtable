@@ -39,11 +39,12 @@
 <xsl:param name="moodle_textdirection" select="'ltr'"/> <!-- ltr/rtl, ltr except for Arabic, Hebrew, Urdu, Farsi, Maldivian (who knew?) -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
-<xsl:param name="cloze_distractor_column_label" select="'Distractors'"/>      <!-- Label for Cloze question distractor column -->
-<xsl:param name="cloze_mcformat_label" select="'Orientation (D = dropdown; V = vertical, H = horizontal radio buttons):'"/>      <!-- Label for Cloze question MC subquestion format -->
 <xsl:param name="debug_flag" select="'0'"/>      <!-- Debugging on or off -->
 
 <xsl:output method="xml" version="1.0" indent="no" omit-xml-declaration="yes"/>
+
+<!-- Text labels from translated Moodle files - now stored in the input XML file -->
+<xsl:variable name="moodle_labels" select="/container/moodlelabels"/>
 
 
 <xsl:variable name="ucase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
@@ -71,7 +72,9 @@
 <xsl:variable name="cloze_end_delimiter" select="'}'"/>
 <xsl:variable name="cloze_keyword_delimiter" select="':'"/>
 <xsl:variable name="cloze_answer_delimiter" select="'~'"/>
-
+<xsl:variable name="cloze_distractor_column_label" select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_distractor_column_label']"/>
+<xsl:variable name="cloze_feedback_column_label" select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_feedback_column_label']"/>
+<xsl:variable name="cloze_mcformat_label" select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_mcformat_label']"/>
 
 <!-- Moodle release is significant for the format of different questions
 	Essay:
@@ -87,20 +90,7 @@
 		1.9  - no hints or tags
 		2.1+ - hints and tags
 -->
-<xsl:variable name="moodle_release_number">
-	<xsl:choose>
-	<xsl:when test="starts-with($moodle_release, '1')"><xsl:text>1</xsl:text></xsl:when>
-	<xsl:when test="starts-with($moodle_release, '2.0')"><xsl:text>23</xsl:text></xsl:when>
-	<xsl:when test="starts-with($moodle_release, '2.1')"><xsl:text>23</xsl:text></xsl:when>
-	<xsl:when test="starts-with($moodle_release, '2.2')"><xsl:text>23</xsl:text></xsl:when>
-	<xsl:when test="starts-with($moodle_release, '2.3')"><xsl:text>23</xsl:text></xsl:when>
-	<xsl:when test="starts-with($moodle_release, '2.4')"><xsl:text>24</xsl:text></xsl:when>
-	<xsl:otherwise><xsl:text>25</xsl:text></xsl:otherwise>
-	</xsl:choose>
-</xsl:variable>
-
-<!-- Text labels from translated Moodle files - now stored in the input XML file -->
-<xsl:variable name="moodle_labels" select="/container/moodlelabels"/>
+<xsl:variable name="moodle_release_number" select="substring($moodle_release, 1, 2)"/>
 
 <!-- Handle colon usage in French -->
 <xsl:variable name="colon_string">
@@ -452,6 +442,7 @@
 	<!-- Option feedback and general feedback column heading -->
 	<xsl:variable name="colheading3_label">
 		<xsl:choose>
+		<xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_feedback_column_label"/></xsl:when>
 		<xsl:when test="$qtype = 'DE'"><xsl:value-of select="$blank_cell"/></xsl:when>
 		<xsl:when test="$qtype = 'ES' and $moodle_release_number = '1'"><xsl:value-of select="$blank_cell"/></xsl:when>
 		<xsl:when test="$qtype = 'ES'"><xsl:value-of select="$graderinfo_label"/></xsl:when>

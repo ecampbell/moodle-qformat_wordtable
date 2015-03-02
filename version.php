@@ -22,10 +22,10 @@
  * @package qformat_wordtable
  **/
 
-$plugin->version  = 2015022002;  // The current module version (Date: YYYYMMDDXX)
+$plugin->version  = 2015030201;  // The current module version (Date: YYYYMMDDXX)
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level
 $plugin->component  = 'qformat_wordtable';  // Plugin name
-$plugin->release  = '3.0.0 (Build: 20150220)';  // The current module release in human-readable form (x.y)
+$plugin->release  = '3.1.0 (Build: 20150302)';  // The current module release in human-readable form (x.y)
 $plugin->requires = 2011070100.03;  // Requires Moodle 2.1 or later
 $plugin->cron     = 0;           // Period for cron to check this module (secs)
 

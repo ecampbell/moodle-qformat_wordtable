@@ -42,7 +42,6 @@
 <xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
-<xsl:param name="transformationfailed"/> <!-- Error message to display in Word file if transformation fails -->
 <xsl:param name="debug_flag" select="'0'"/>      <!-- Debugging on or off -->
 
 <xsl:variable name="ucase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
@@ -64,6 +63,8 @@
 <!-- Read in the input XML into a variable, and handle unusual situation where the inner container element doesn't have an explicit namespace declaration  -->
 <xsl:variable name="data" select="/container/*[local-name() = 'container']" />
 <xsl:variable name="contains_embedded_images" select="count($data//htm:img[contains(@src, $pluginfiles_string)])"/>
+
+<xsl:variable name="transformationfailed" select="$moodle_labels/data[@name = 'qformat_wordtable_transformationfailed']"/>
 
 <!-- Map raw language value into a Word-compatible version, removing anything after an underscore and capitalising -->
 <xsl:variable name="moodle_language_value">

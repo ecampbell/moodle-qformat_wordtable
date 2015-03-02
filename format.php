@@ -120,8 +120,7 @@ class qformat_wordtable extends qformat_xml {
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
-            'debug_flag' => debugging('', DEBUG_DEVELOPER),
-            'transformationfailed' => get_string('transformationfailed', 'qformat_wordtable', "(XSLT: $this->word2mqxml_stylesheet1)")
+            'debug_flag' => debugging('', DEBUG_DEVELOPER)
         );
 
 
@@ -161,6 +160,9 @@ class qformat_wordtable extends qformat_xml {
                               break;
                           case "docProps/custom.xml":
                               $wordmlData .= "<customProps>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</customProps>\n";
+                              break;
+                          case "word/styles.xml":
+                              $wordmlData .= "<styleMap>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</styleMap>\n";
                               break;
                           case "word/_rels/document.xml.rels":
                               $wordmlData .= "<documentLinks>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</documentLinks>\n";
@@ -280,6 +282,13 @@ class qformat_wordtable extends qformat_xml {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_mqxml_filename')", DEBUG_DEVELOPER);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_mqxml_filename . "(" . $nbytes . ")"));
             return false;
+        }
+
+        // Keep the original Word file for debugging if developer debugging enabled
+        if (debugging(null, DEBUG_DEVELOPER)) {
+            $copied_input_file = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".docx";
+            copy($this->filename, $copied_input_file);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Copied $this->filename to $copied_input_file", DEBUG_DEVELOPER);
         }
 
         // Now over-write the original Word file with the XML file, so that default XML file handling will work
@@ -456,7 +465,7 @@ class qformat_wordtable extends qformat_xml {
         $textstrings = array(
             'grades' => array('item'),
             'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown', 'formatplain', 'formattext', 'grade', 'question', 'tags'),
-            'qformat_wordtable' => array('cloze_instructions', 'cloze_distractor_column_label', 'cloze_mcformat_label', 'description_instructions', 'essay_instructions', 'multichoice_instructions', 'truefalse_instructions'),
+            'qformat_wordtable' => array('cloze_instructions', 'cloze_distractor_column_label', 'cloze_feedback_column_label', 'cloze_mcformat_label', 'description_instructions', 'essay_instructions', 'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions', 'transformationfailed'),
             'qtype_description' => array('pluginnamesummary'),
             'qtype_essay' => array('allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat'),
             'qtype_match' => array('filloutthreeqsandtwoas'),
