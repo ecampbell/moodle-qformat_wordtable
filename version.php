@@ -14,19 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: $
 /**
- * Code fragment to define the version of wordtable for Moodle 2.0
+ * Code fragment to define the version of wordtable for Moodle 2.x
  * This fragment is called by moodle_needs_upgrading() and /admin/index.php
  *
  * @author Eoin Campbell
- * @package wordtable
+ * @package qformat_wordtable
  **/
 
-$plugin->version  = 2014100801;  // The current module version (Date: YYYYMMDDXX)
+$plugin->version  = 2015030201;  // The current module version (Date: YYYYMMDDXX)
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level
 $plugin->component  = 'qformat_wordtable';  // Plugin name
-$plugin->release  = '2.10.1 (Build: 20141008)';  // The current module release in human-readable form (x.y)
+$plugin->release  = '3.1.0 (Build: 20150302)';  // The current module release in human-readable form (x.y)
 $plugin->requires = 2011070100.03;  // Requires Moodle 2.1 or later
 $plugin->cron     = 0;           // Period for cron to check this module (secs)
 
