@@ -227,6 +227,9 @@ class qformat_wordtable extends qformat_xml {
         }
         $this->debug_unlink($temp_wordml_filename);
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Import XSLT Pass 1 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 0, 200)), DEBUG_DEVELOPER);
+        // Strip out some superfluous namespace declarations on paragraph elements, which Moodle 2.7/2.8 on Windows seems to throw in
+        $xslt_output = str_replace('<p xmlns="http://www.w3.org/1999/xhtml"', '<p', $xslt_output);
+        $xslt_output = str_replace(' xmlns=""', '', $xslt_output);
 
         // Write output of Pass 1 to a temporary file, for use in Pass 2
         $temp_xhtml_filename = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".if1";
