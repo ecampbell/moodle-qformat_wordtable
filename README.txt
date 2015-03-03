@@ -2,6 +2,7 @@ Release notes
 -------------
 
 Date          Version   Comment
+2015/03/03    3.1.2     Fix for Moodle 2.7/2.8 to improve handling of attachments in essay questions
 2015/03/03    3.1.1     Fix for Moodle 2.7/2.8 to enable question import, by deleting superfluous namespace attributes
 2015/03/02    3.1.0     Keep original uploaded Word file in debug mode. Fix handling of Cloze questions.
                         Handle hyperlinks and other character formatting properly, support questions created 
