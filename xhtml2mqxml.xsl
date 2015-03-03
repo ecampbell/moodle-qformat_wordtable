@@ -138,6 +138,7 @@
 
 <!-- Essay question labels -->
 <xsl:variable name="allowattachments_label" select="$moodle_labels/data[@name = 'qtype_essay_allowattachments']"/>
+<xsl:variable name="attachmentsrequired_label" select="$moodle_labels/data[@name = 'qtype_essay_attachmentsrequired']"/>
 <xsl:variable name="graderinfo_label" select="$moodle_labels/data[@name = 'qtype_essay_graderinfo']"/>
 
 <xsl:variable name="responseformat_label" select="$moodle_labels/data[@name = 'qtype_essay_responseformat']"/>
@@ -782,19 +783,37 @@
     <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber &lt;= '1'">
     </xsl:when>
     <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber &gt; '1'">
-        <responseformat><xsl:value-of select="$response_format_value"/></responseformat>
-        <responsefieldlines><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responsefieldlines_label)]/x:th[position() = $flag_value_colnum])"/></responsefieldlines>
-        <attachments><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $allowattachments_label)]/x:th[position() = $flag_value_colnum])"/></attachments>
+        <xsl:if test="$moodleReleaseNumber &gt;= '25'">
+            <responseformat><xsl:value-of select="$response_format_value"/></responseformat>
+            <responsefieldlines><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responsefieldlines_label)]/x:th[position() = $flag_value_colnum])"/></responsefieldlines>
+            <attachments><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $allowattachments_label)]/x:th[position() = $flag_value_colnum])"/></attachments>
+        </xsl:if>
+
+
+        <xsl:if test="$moodleReleaseNumber &gt;= '27'">
+           <attachmentsrequired><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $attachmentsrequired_label)]/x:th[position() = $flag_value_colnum])"/></attachmentsrequired>
+        </xsl:if>
         <graderinfo format="html">
             <xsl:call-template name="rich_text_content">
                 <xsl:with-param name="content" select="$table_root/x:tbody/x:tr[1]/x:td[position() = $graderinfo_colnum]"/>
             </xsl:call-template>
         </graderinfo>
-        <responsetemplate format="html">
-            <xsl:call-template name="rich_text_content">
-                <xsl:with-param name="content" select="$table_root/x:tbody/x:tr[1]/x:td[position() = $responsetemplate_colnum]"/>
-            </xsl:call-template>
-        </responsetemplate>
+
+        <!-- The response template depends on what the response_format_value flag defines, if plain/mono, don't include markup -->
+        <xsl:choose>
+        <xsl:when test="$response_format_value = 'plain' or $response_format_value = 'mono'">
+            <responsetemplate format="html">
+                <text><xsl:value-of select="$table_root/x:tbody/x:tr[1]/x:td[position() = $responsetemplate_colnum]"/></text>
+            </responsetemplate>
+        </xsl:when>
+        <xsl:otherwise>
+            <responsetemplate format="html">
+                <xsl:call-template name="rich_text_content">
+                    <xsl:with-param name="content" select="$table_root/x:tbody/x:tr[1]/x:td[position() = $responsetemplate_colnum]"/>
+                </xsl:call-template>
+            </responsetemplate>
+        </xsl:otherwise>
+        </xsl:choose>
     </xsl:when>
     <xsl:when test="$qtype = 'SA'">
         <usecase><xsl:value-of select="$casesensitive_value"/></usecase>
