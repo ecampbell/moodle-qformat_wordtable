@@ -140,15 +140,29 @@ class qformat_wordtable extends qformat_xml {
                     $ze_filename = zip_entry_name($zip_entry);
                     $ze_filesize = zip_entry_filesize($zip_entry);
                     debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = $ze_filename, size = $ze_filesize", DEBUG_DEVELOPER);
-                    // Look for images and required XML files
+                    // Look for internal images
                     if (strpos($ze_filename, "media") !== FALSE) { 
-                        debugging(__FUNCTION__ . ":" . __LINE__ . ": media file name = $ze_filename", DEBUG_DEVELOPER);
                         $imageFormat = substr($ze_filename, strrpos($ze_filename, ".") +1);
                         $imageData = zip_entry_read($zip_entry, $ze_filesize);
                         $imageName = basename($ze_filename);
                         $imageSuffix = strtolower(substr(strrchr($ze_filename, "."), 1));
-                        $imageMimeType = ($imageSuffix == 'gif')? "image/gif": ($imageSuffix == 'png')? "image/png": "image/jpeg";
-                        $imageString .= '<file filename="media/' . $imageName . '" mime-type="' . $imageMimeType . '">' . base64_encode($imageData) . "</file>\n";
+                        // gif, png, jpg and jpeg handled OK, but bmp and other non-Internet formats are not
+                        $imageMimeType = "image/";
+                        if ($imageSuffix == 'gif' or $imageSuffix == 'png') {
+                            $imageMimeType .= $imageSuffix;
+                        }
+                        if ($imageSuffix == 'jpg' or $imageSuffix == 'jpeg') {
+                            $imageMimeType .= "jpeg";
+                        }
+                        // Handle recognised Internet formats only
+                        if ($imageMimeType != '') {
+                            debugging(__FUNCTION__ . ":" . __LINE__ . ": media file name = $ze_filename, imageName = $imageName, imageSuffix = $imageSuffix, imageMimeType = $imageMimeType", DEBUG_DEVELOPER);
+                            $imageString .= '<file filename="media/' . $imageName . '" mime-type="' . $imageMimeType . '">' . base64_encode($imageData) . "</file>\n";
+                        }
+                        else {
+                            debugging(__FUNCTION__ . ":" . __LINE__ . ": ignore unsupported media file name $ze_filename, imageName = $imageName, imageSuffix = $imageSuffix, imageMimeType = $imageMimeType", DEBUG_DEVELOPER);
+                        }
+                    // Look for required XML files
                     } else {
                         // If a required XML file is encountered, read it, wrap it, remove the XML declaration, and add it to the XML string
                         switch ($ze_filename) {
@@ -362,7 +376,7 @@ class qformat_wordtable extends qformat_xml {
         debugging(__FUNCTION__ . ":" . __LINE__ . ": preflight checks complete, xmldata length = " . strlen($content), DEBUG_DEVELOPER);
 
         // Create a temporary file to store the XML content to transform
-        if (!($temp_xml_filename = tempnam($CFG->dataroot . '/temp/', "wt1-"))) {
+        if (!($temp_xml_filename = tempnam($CFG->dataroot . '/temp/', "q2w-"))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot open temporary file ('$temp_xml_filename') to store XML", DEBUG_DEVELOPER);
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $temp_xml_filename));
             return false;
@@ -411,27 +425,27 @@ class qformat_wordtable extends qformat_xml {
         $this->debug_unlink($temp_xml_filename);
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Transformation Pass 1 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 0, 200)), DEBUG_DEVELOPER);
 
-        $temp_xml_filename = tempnam($CFG->dataroot . '/temp/', "wt2-");
+        $temp_xhtm_filename = $CFG->dataroot . '/temp/' . basename($temp_xml_filename, ".tmp") . ".xhtm";
         // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, using a temporary XML file, this time including the HTML template too
-        if (($nbytes = file_put_contents($temp_xml_filename, "<container>\n" . $xslt_output . "\n<htmltemplate>\n" . file_get_contents($htmltemplatefile_path) . "\n</htmltemplate>\n" . $this->get_text_labels() . "\n</container>")) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_xml_filename')", DEBUG_DEVELOPER);
-            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
+        if (($nbytes = file_put_contents($temp_xhtm_filename, "<container>\n" . $xslt_output . "\n<htmltemplate>\n" . file_get_contents($htmltemplatefile_path) . "\n</htmltemplate>\n" . $this->get_text_labels() . "\n</container>")) == 0) {
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_xhtm_filename')", DEBUG_DEVELOPER);
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xhtm_filename . "(" . $nbytes . ")"));
             return false;
         }
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Intermediate XHTML data saved to $temp_xml_filename", DEBUG_DEVELOPER);
+        debugging(__FUNCTION__ . ":" . __LINE__ . ": Intermediate XHTML data saved to $temp_xhtm_filename", DEBUG_DEVELOPER);
 
         // Prepare for Pass 2 XSLT transformation
         $stylesheet =  dirname(__FILE__) . "/" . $this->mqxml2word_stylesheet2;
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Calling XSLT Pass 2 with stylesheet \"" . $stylesheet . "\"", DEBUG_DEVELOPER);
-        if(!($xslt_output = xslt_process($xsltproc, $temp_xml_filename, $stylesheet, null, null, $parameters))) {
+        if(!($xslt_output = xslt_process($xsltproc, $temp_xhtm_filename, $stylesheet, null, null, $parameters))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Pass 2 Transformation failed", DEBUG_DEVELOPER);
-            echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XHTML: " . $temp_xml_filename . ")"));
-            $this->debug_unlink($temp_xml_filename);
+            echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XHTML: " . $temp_xhtm_filename . ")"));
+            $this->debug_unlink($temp_xhtm_filename);
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Transformation Pass 2 succeeded, HTML output fragment = " . str_replace("\n", "", substr($xslt_output, 400, 100)), DEBUG_DEVELOPER);
 
-        $this->debug_unlink($temp_xml_filename);
+        $this->debug_unlink($temp_xhtm_filename);
 
         // Strip off the XML declaration, if present, since Word doesn't like it
         //$content = substr($xslt_output, strpos($xslt_output, ">"));

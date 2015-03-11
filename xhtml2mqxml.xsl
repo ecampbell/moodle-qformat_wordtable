@@ -1570,7 +1570,20 @@
             </xsl:choose>
         </xsl:variable>
 
-        <img src="{concat($image_metafolder, '/', @id, '.', $real_image_format)}" alt="{$alt_text}">
+        <xsl:variable name="image_src_attr">
+            <xsl:choose>
+            <xsl:when test="$image_format != ''">
+                <!-- Image was embedded in Word file, so embed the data the way Question XML wants it  -->
+                <xsl:value-of select="concat($image_metafolder, '/', @id, '.', $real_image_format)"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <!-- Image was linked to (e.g. <img src="image.gif"...) rather than embedded in the Word file, so keep the path -->
+                <xsl:value-of select="@src"/>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
+        <img src="{$image_src_attr}" alt="{$alt_text}">
         <!--
             <xsl:if test="@class">
                 <xsl:attribute name="class"><xsl:value-of select="@class"/></xsl:attribute>
