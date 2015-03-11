@@ -626,7 +626,7 @@
 		</xsl:if>
 
 		<!-- Essay questions in Moodle 2.x have 3 specific fields, for Response field format, Attachments, and Number of lines -->
-		<xsl:if test="$qtype = 'ES' and $moodle_release_number &gt; '1'">
+		<xsl:if test="$qtype = 'ES' and $moodle_release_number &gt; '19'">
 			<tr>
 				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responseformat_label"/></p></td>
 					<td style="width: 1.0cm">
@@ -763,7 +763,7 @@
 		</xsl:if>
 
 		<!-- Show number of correct responses when finished (Moodle 2.x only) -->
-		<xsl:if test="($qtype = 'MA' or $qtype = 'MAT') and $moodle_release_number &gt; '1'">
+		<xsl:if test="($qtype = 'MA' or $qtype = 'MAT') and $moodle_release_number &gt; '19'">
 			<tr>
 				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$shownumcorrectfeedback_label"/></p></td>
 				<td style="width: 1.0cm">
@@ -841,13 +841,13 @@
 				</td>
 				<td style="{$col3_width}">
 					<xsl:choose>
-					<xsl:when test="$moodle_release_number &gt; '1' and graderinfo and graderinfo = ''">
+					<xsl:when test="$moodle_release_number &gt; '19' and graderinfo and graderinfo = ''">
 						<p class="Cell"><xsl:value-of select="$blank_cell"/></p>
 					</xsl:when>
-					<xsl:when test="$moodle_release_number &gt; '1' and graderinfo and graderinfo/@format and graderinfo/@format = 'html'">
+					<xsl:when test="$moodle_release_number &gt; '19' and graderinfo and graderinfo/@format and graderinfo/@format = 'html'">
 						<xsl:apply-templates select="graderinfo/*"/>
 					</xsl:when>
-					<xsl:when test="$moodle_release_number &gt; '1' and graderinfo and graderinfo/@format and graderinfo/@format != 'html'">
+					<xsl:when test="$moodle_release_number &gt; '19' and graderinfo and graderinfo/@format and graderinfo/@format != 'html'">
 						<p class="Cell"><xsl:apply-templates select="graderinfo/*"/></p>
 					</xsl:when>
 					<xsl:otherwise>
@@ -892,7 +892,7 @@
 		</xsl:if>
 
 		<!-- Correct and Incorrect feedback for MA, MAT and MC questions only -->
-		<xsl:if test="$qtype = 'MA' or $qtype = 'MC' or ($qtype = 'MAT' and $moodle_release_number &gt; '1')">
+		<xsl:if test="$qtype = 'MA' or $qtype = 'MC' or ($qtype = 'MAT' and $moodle_release_number &gt; '19')">
 			<tr>
 				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 				<th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$correctfeedback_label"/></p></th>
@@ -923,7 +923,7 @@
 			<xsl:text>&#x0a;</xsl:text>
 		</xsl:if>
 		<!-- Partially correct feedback for MA (Multi-answer) and MAT questions only -->
-		<xsl:if test="$qtype = 'MA' or ($qtype = 'MAT' and $moodle_release_number &gt; '1')">
+		<xsl:if test="$qtype = 'MA' or ($qtype = 'MAT' and $moodle_release_number &gt; '19')">
 			<tr>
 				<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
 				<th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$pcorrectfeedback_label"/></p></th>
@@ -941,7 +941,7 @@
 		</xsl:if>
 
 		<!-- Hints rows (added in Moodle 2.x) for CL MA MAT MC SA questions -->
-		<xsl:if test="$moodle_release_number &gt; '1'">
+		<xsl:if test="$moodle_release_number &gt; '19'">
 			<xsl:for-each select="hint[text != '']">
 				<!-- Define a label for the hint text row (row 1 of 3) -->
 				<xsl:variable name="hint_number_label" select="concat(substring-before($hintn_label, '{no}'), position())"/>

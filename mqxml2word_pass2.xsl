@@ -184,14 +184,44 @@
 	</p>
 </xsl:template>
 
+<!-- Handle a hyperlinked img element -->
+<xsl:template match="htm:a[htm:img]" priority="3">
+	<xsl:call-template name="debugComment">
+		<xsl:with-param name="comment_text" select="concat('hyperlinked a/@href = ', @href , '; a/img/@src = ', htm:img/@src)"/>
+		<xsl:with-param name="inline" select="'true'"/>
+		<xsl:with-param name="condition" select="$debug_flag = '2'"/>
+	</xsl:call-template>
+
+
+	<xsl:choose>
+	<xsl:when test="contains(htm:img/@src, $pluginfiles_string) or contains(htm:img/@src, $embeddedimagedata_string)">
+		<!-- Place the hyperlink anchor inside the bookmark anchor -->
+		<xsl:apply-templates select="htm:img" mode="linkedImage"/>
+	</xsl:when>
+	<xsl:otherwise>
+		<a>
+			<xsl:call-template name="copyAttributes"/>
+			<xsl:apply-templates/>
+		</a>
+	</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<!-- Handle a hyperlinked img element -->
+<xsl:template match="htm:img" mode="linkedImage">
+	<!-- Place the hyperlink anchor inside the bookmark anchor -->
+	<xsl:variable name="bookmark_name" select="concat('MQIMAGE_', generate-id())"/>
+	<a name="{$bookmark_name}" style="color:red;"/>
+	<a href="{../@href}">
+		<span style="{concat('mso-bookmark:', $bookmark_name)}">x</span>
+	</a>
+</xsl:template>
+
 <!-- Handle the img element within the main component text by replacing it with a bookmark as a placeholder -->
 <xsl:template match="htm:img" priority="2">
 	<xsl:choose>
-	<xsl:when test="contains(@src, $pluginfiles_string)">
+	<xsl:when test="contains(@src, $pluginfiles_string) or contains(@src, $embeddedimagedata_string)">
 		<!-- Generated from Moodle 2.x, so images are handled neatly, using a reference to the data -->
-		<a name="{concat('MQIMAGE_', generate-id())}" style="color:red;">x</a>
-	</xsl:when>
-	<xsl:when test="contains(@src, $embeddedimagedata_string)">
 		<!-- If imported from Word2MQXML, images are base64-encoded into the @src attribute -->
 		<a name="{concat('MQIMAGE_', generate-id())}" style="color:red;">x</a>
 	</xsl:when>
@@ -202,7 +232,6 @@
 	</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
-
 
 <!-- Create a row in the embedded image table with all image metadata -->
 <xsl:template match="htm:img" mode="ImageTable">

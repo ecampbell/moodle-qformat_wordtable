@@ -189,7 +189,8 @@
     <xsl:variable name="prListSuff_nothing">Nothing</xsl:variable>
 
 
-    <xsl:variable name="documentLinks" select="//documentLinks/rels:Relationships/*[@Type = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink']"/>
+    <xsl:variable name="hyperLinks" select="//documentLinks/rels:Relationships/*[contains(@Type, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink')]"/>
+    <xsl:variable name="imageLinks" select="//documentLinks/rels:Relationships/*[contains(@Type, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image')]"/>
     <xsl:variable name="customProps" select="//customProps/*"/>
     <xsl:variable name="dublinCore" select="//dublinCore/cp:coreProperties"/>
     <xsl:variable name="imagesContainer" select="//imagesContainer"/>
@@ -205,7 +206,7 @@
     <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
     <!-- Output a newline before paras and cells when debugging turned on -->
     <xsl:variable name="debug_newline">
-        <xsl:if test="$debug_flag = '1'">
+        <xsl:if test="$debug_flag &gt;= '1'">
             <xsl:value-of select="'&#x0a;'"/>
         </xsl:if>
     </xsl:variable>
@@ -2661,7 +2662,7 @@
         <!-- Figure out hyperlink targets -->
         <xsl:variable name="current_rId" select="@r:id"/>
         <xsl:call-template name="debugComment">
-            <xsl:with-param name="comment_text" select="concat('current_rId = ', $current_rId, '; link text = ', current(), '; Relationship/@Id = ', $documentLinks[@Id = $current_rId]/@Id, '; Target = ', $documentLinks[@Id = $current_rId]/@Target)"/>
+            <xsl:with-param name="comment_text" select="concat('current_rId = ', $current_rId, '; link text = ', current(), '; Relationship/@Id = ', $hyperLinks[@Id = $current_rId]/@Id, '; Target = ', $hyperLinks[@Id = $current_rId]/@Target)"/>
             <xsl:with-param name="inline" select="'true'"/>
             <xsl:with-param name="condition" select="$debug_flag = '2' and @r:id"/>
         </xsl:call-template>
@@ -2676,7 +2677,7 @@
                                     <xsl:value-of select="//footnoteLinks/rels:Relationships/rels:Relationship[@Id = $current_rId]/@Target"/>
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    <xsl:value-of select="$documentLinks[@Id = $current_rId]/@Target"/>
+                                    <xsl:value-of select="$hyperLinks[@Id = $current_rId]/@Target"/>
                                 </xsl:otherwise>    
                             </xsl:choose>
                         </xsl:variable>
@@ -4583,101 +4584,90 @@
     
         <html>
             <head>
-                    <!-- Dublin Core properties -->
-                    <xsl:for-each select="$dublinCore/*">
-                        <xsl:if test="string-length(.) &gt; 0">
-                            <xsl:value-of select="$debug_newline"/>
-                            <meta name="{concat('dc:', local-name())}" content="{normalize-space(.)}"/>
-                        </xsl:if>
-                    </xsl:for-each>
-                    <!-- Custom document properties 
-                    -->
-                    <xsl:for-each select="$customProps/*">
-                        <xsl:if test="local-name() = 'property'">
-                            <xsl:value-of select="$debug_newline"/>
-                            <meta name="{@name}" content="{normalize-space(.)}"/>
-                        </xsl:if>
-                    </xsl:for-each>
+                <!-- Dublin Core properties from file docProps/core.xml-->
+                <xsl:for-each select="$dublinCore/*">
+                    <xsl:if test="string-length(.) &gt; 0">
+                        <xsl:value-of select="$debug_newline"/>
+                        <meta name="{concat('dc:', local-name())}" content="{normalize-space(.)}"/>
+                    </xsl:if>
+                </xsl:for-each>
+                <!-- Custom document properties from file docProps/custom.xml-->
+                <xsl:for-each select="$customProps/*">
+                    <xsl:if test="local-name() = 'property'">
+                        <xsl:value-of select="$debug_newline"/>
+                        <meta name="{@name}" content="{normalize-space(.)}"/>
+                    </xsl:if>
+                </xsl:for-each>
 
-                <!-- Image data 
-                <images>
-                    <xsl:for-each select="$imagesContainer/*">
+                <!-- Image data in Base64, generated from files in word/media folder of .docx file -->
+                <xsl:if test="$debug_flag &gt; 1">
+                    <xsl:value-of select="$debug_newline"/>
+                    <imagesContainer>
+                        <xsl:for-each select="$imagesContainer/*">
                             <xsl:value-of select="$debug_newline"/>
-                        <xsl:element name="file">
-                            <xsl:attribute name="filename">
-                                <xsl:value-of select="@filename"/>
-                            </xsl:attribute>
-                            <xsl:attribute name="elname">
-                                <xsl:value-of select="name()"/>
-                            </xsl:attribute>
-                            <xsl:value-of select="substring(normalize-space(.), 1, 100)"/>
-                        </xsl:element>
-                    </xsl:for-each>
-                </images>
-                -->
-                <!-- Image relationships 
-                <imageRefs>
-                    <xsl:for-each select="$documentLinks/*">
-                        <xsl:if test="contains(@Target, 'media')">
+                            <file filename="{@filename}" mime-type="{@mime-type}">
+                                <xsl:value-of select="substring(normalize-space(.), 1, 100)"/>
+                            </file>
+                        </xsl:for-each>
+                        <xsl:value-of select="$debug_newline"/>
+                    </imagesContainer>
+                </xsl:if>
+                <!-- Image relationships from file word/_rels/document.xml.rels -->
+                <xsl:if test="$debug_flag &gt; 1">
+                    <xsl:value-of select="$debug_newline"/>
+                    <imageLinks>
+                        <xsl:for-each select="$imageLinks">
                             <xsl:value-of select="$debug_newline"/>
-                            <xsl:element name="imageRef">
-                                <xsl:attribute name="filename">
-                                    <xsl:value-of select="@Target"/>
-                                </xsl:attribute>
-                                <xsl:attribute name="id">
+                            <Relationship Id="{@Id}" Target="{@Target}" TargetMode="{@TargetMode}">
+                                <xsl:variable name="ref_target" select="@Target"/>
+                                <xsl:choose>
+                                <xsl:when test="count($imagesContainer/file[@filename = $ref_target]) != 0">
+                                    <xsl:value-of select="concat('Matching file &quot;', $imagesContainer/file[@filename = $ref_target]/@filename, '&quot; found')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="'No matching file found'"/>
+                                </xsl:otherwise>
+                                </xsl:choose>
+                            </Relationship>
+                        </xsl:for-each>
+                        <xsl:value-of select="$debug_newline"/>
+                    </imageLinks>
+                </xsl:if>
+                <!-- Style mapping language-specific names to language-independent ids from file word/styles.xml -->
+                <xsl:if test="$debug_flag &gt; 1">
+                    <xsl:value-of select="$debug_newline"/>
+                    <styleMap>
+                        <xsl:comment><xsl:value-of select="concat('style count: ', count($nsStyles[name() = 'w:style']))"/></xsl:comment>
+                        <xsl:for-each select="$nsStyles">
+                            <xsl:value-of select="$debug_newline"/>
+                            <style styleId="{@w:styleId}" styleName="{w:name/@w:val}" customStyle="{@w:customStyle}"/>
+                        </xsl:for-each>
+                        <xsl:value-of select="$debug_newline"/>
+                    </styleMap>
+                </xsl:if>
+                <!-- Hyperlink mapping from file word/_rels/document.xml.rels -->
+                <xsl:if test="$debug_flag &gt; 1">
+                    <xsl:value-of select="$debug_newline"/>
+                    <hyperLinks>
+                        <xsl:comment><xsl:value-of select="concat('link count: ', count($hyperLinks))"/></xsl:comment>
+                        <xsl:for-each select="$hyperLinks">
+                            <xsl:value-of select="$debug_newline"/>
+                            <xsl:element name="Relationship">
+                                <xsl:attribute name="Id">
                                     <xsl:value-of select="@Id"/>
                                 </xsl:attribute>
-                                <xsl:attribute name="elname">
-                                    <xsl:value-of select="name()"/>
+                                <xsl:attribute name="Target">
+                                    <xsl:value-of select="@Target"/>
+                                </xsl:attribute>
+                                <xsl:attribute name="TargetMode">
+                                    <xsl:value-of select="@TargetMode"/>
                                 </xsl:attribute>
                             </xsl:element>
-                        </xsl:if>
-                    </xsl:for-each>
-                </imageRefs>
-                -->
-                <!-- Style mapping 
-                <styleMap>
-                    <xsl:comment><xsl:value-of select="concat('style count: ', count($nsStyles[name() = 'w:style']))"/></xsl:comment>
-                    <xsl:for-each select="$nsStyles">
+                        </xsl:for-each>
                         <xsl:value-of select="$debug_newline"/>
-                        <xsl:element name="style">
-                            <xsl:attribute name="elname">
-                                <xsl:value-of select="name()"/>
-                            </xsl:attribute>
-                            <xsl:attribute name="styleId">
-                                <xsl:value-of select="@w:styleId"/>
-                            </xsl:attribute>
-                            <xsl:attribute name="styleName">
-                                <xsl:value-of select="w:name/@w:val"/>
-                            </xsl:attribute>
-                            <xsl:if test="@w:customStyle">
-                                <xsl:attribute name="customStyle">
-                                    <xsl:value-of select="@w:customStyle"/>
-                                </xsl:attribute>
-                            </xsl:if>
-                        </xsl:element>
-                    </xsl:for-each>
-                </styleMap>
-                -->
-                <!-- Hyperlink mapping 
-                <hyperLinks>
-                    <xsl:comment><xsl:value-of select="concat('link count: ', count($documentLinks))"/></xsl:comment>
-                    <xsl:for-each select="$documentLinks">
-                        <xsl:value-of select="$debug_newline"/>
-                        <xsl:element name="relationship">
-                            <xsl:attribute name="elname">
-                                <xsl:value-of select="name()"/>
-                            </xsl:attribute>
-                            <xsl:attribute name="Id">
-                                <xsl:value-of select="@Id"/>
-                            </xsl:attribute>
-                            <xsl:attribute name="Target">
-                                <xsl:value-of select="@Target"/>
-                            </xsl:attribute>
-                        </xsl:element>
-                    </xsl:for-each>
-                </hyperLinks>
-                -->
+                    </hyperLinks>
+                    <xsl:value-of select="$debug_newline"/>
+                </xsl:if>
             </head>
             <body>
                 <div class="level1">
@@ -4719,36 +4709,69 @@
 
     <!-- Handle images -->
     <xsl:template match="w:p/w:r/w:drawing">
-        <img>
-            <!-- Map title field to alt attribute -->
-            <xsl:if test="wp:inline/wp:docPr/@title">
-                <xsl:attribute name="alt">
-                    <xsl:value-of select="wp:inline/wp:docPr/@title"/>
-                </xsl:attribute>
-            </xsl:if>
-            <!-- Map description field to longdesc attribute -->
-            <xsl:if test="wp:inline/wp:docPr/@descr">
-                <xsl:attribute name="longdesc"><xsl:value-of select="wp:inline/wp:docPr/@descr"/></xsl:attribute>
-            </xsl:if>
-            <!-- Map name field to id attribute: it contains a sequence number for the image, e.g. "Picture 1" -->
-            <xsl:if test="wp:inline/wp:docPr/@name">
-                <xsl:attribute name="id">
-                    <xsl:value-of select="translate(wp:inline/wp:docPr/@name, ' ', '')"/>
-                </xsl:attribute>
-            </xsl:if>
-            <!-- Dereference the reference ID field to get the file name, and map to the src attribute -->
-            <xsl:if test=".//a:blip/@r:embed">
-                <xsl:variable name="img_rid" select=".//a:blip/@r:embed"/>
-                <xsl:variable name="img_filename" select="$documentLinks/*[@Id = $img_rid]/@Target"/>
-                <xsl:attribute name="src">
-                    <xsl:value-of select="concat('data:', $imagesContainer/file[@filename = $img_filename]/@mime-type, ';base64,', $imagesContainer/file[@filename = $img_filename])"/>
-                </xsl:attribute>
-                <!-- Store the internal file name in the class attribute, for want of a better place -->
-                <xsl:attribute name="class">
-                    <xsl:value-of select="$img_filename"/>
-                </xsl:attribute>
-            </xsl:if>
-        </img>
+        <!-- Embedded images -->
+        <xsl:variable name="img_rid" select=".//a:blip/@r:embed"/>
+        <xsl:variable name="img_filename" select="$imageLinks[@Id = $img_rid]/@Target"/>
+        <xsl:call-template name="debugComment">
+            <xsl:with-param name="comment_text" select="concat('img_rid = ', $img_rid, '; img_filename = ', $img_filename)"/>
+            <xsl:with-param name="inline" select="'true'"/>
+            <xsl:with-param name="condition" select="$debug_flag = '2' and $img_rid != ''"/>
+        </xsl:call-template>
+
+        <!-- External linked images -->
+        <xsl:variable name="img_external_rid" select=".//a:blip/@r:link"/>
+        <xsl:variable name="img_external_filename" select="$imageLinks[@Id = $img_external_rid]/@Target"/>
+        <xsl:call-template name="debugComment">
+            <xsl:with-param name="comment_text" select="concat('img_external_rid = ', $img_external_rid, '; img_external_filename = ', $img_external_filename)"/>
+            <xsl:with-param name="inline" select="'true'"/>
+            <xsl:with-param name="condition" select="$debug_flag = '2' and $img_external_rid != ''"/>
+        </xsl:call-template>
+
+        <!-- Hyperlinked images -->
+        <xsl:variable name="img_hyperlink_rid" select=".//a:hlinkClick/@r:id"/>
+        <xsl:variable name="img_hyperlink" select="$hyperLinks[@Id = $img_hyperlink_rid]/@Target"/>
+        <xsl:call-template name="debugComment">
+            <xsl:with-param name="comment_text" select="concat('img_hyperlink_rid = ', $img_hyperlink_rid, '; img_hyperlink = ', $img_hyperlink)"/>
+            <xsl:with-param name="inline" select="'true'"/>
+            <xsl:with-param name="condition" select="$debug_flag = '2' and $img_hyperlink_rid != ''"/>
+        </xsl:call-template>
+
+        <!-- Map title field to alt attribute -->
+        <xsl:variable name="img_alt" select="wp:inline/wp:docPr/@title"/>
+        <!-- Map description field to longdesc attribute -->
+        <xsl:variable name="img_longdesc" select="wp:inline/wp:docPr/@descr"/>
+        <!-- Map name field to id attribute: it contains a sequence number for the image, e.g. "Picture 1" -->
+        <xsl:variable name="img_id" select="translate(wp:inline/wp:docPr/@name, ' ', '')"/>
+        <!-- Store the internal file name in the class attribute, for want of a better place
+        <xsl:variable name="img_class" select="$img_filename"/>
+        -->
+        <!-- Store the image data or URL in the src attribute -->
+        <xsl:variable name="img_src">
+            <xsl:choose>
+            <xsl:when test="$img_rid != ''">
+                <!-- Dereference the reference ID field to get the file name, and map to the src attribute -->
+                <xsl:value-of select="concat('data:', $imagesContainer/file[@filename = $img_filename]/@mime-type, ';base64,', $imagesContainer/file[@filename = $img_filename])"/>
+            </xsl:when>
+            <xsl:when test="$img_external_rid != ''">
+                <!-- External image, so just keep the URL -->
+                <xsl:value-of select="$img_external_filename"/>
+            </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+
+        <!-- Handle case where image might be hyperlinked -->
+        <xsl:choose>
+        <xsl:when test="$img_hyperlink != ''">
+            <!-- The image is linked -->
+            <a href="{$img_hyperlink}">
+                <img src="{$img_src}" id="{$img_id}" alt="{$img_alt}" longdesc="{$img_longdesc}"/>
+            </a>
+        </xsl:when>
+        <xsl:otherwise>
+            <!-- The image is not linked -->
+            <img src="{$img_src}" id="{$img_id}" alt="{$img_alt}" longdesc="{$img_longdesc}"/>
+        </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
     
     <xsl:template match="w:p/w:r/w:pict">

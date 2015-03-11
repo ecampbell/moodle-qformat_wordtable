@@ -176,7 +176,7 @@
                 </xsl:apply-templates>
             </sub>
         </xsl:when>
-        <xsl:when test="$stylePropertyFirst = 'font-size:smaller'">
+        <xsl:when test="$stylePropertyFirst = 'font-size:smaller' or $stylePropertyFirst = 'font-size:11pt' or $stylePropertyFirst = 'font-size:12pt' or $stylePropertyFirst = 'font-size:13pt'">
             <!-- Ignore smaller font size style, as it is only in sub and superscripts -->
             <xsl:apply-templates select="." mode="styleProperty">
                 <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
