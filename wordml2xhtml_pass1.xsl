@@ -374,7 +374,7 @@
 
     <xsl:template name="EvalBooleanType">
         <xsl:choose>
-            <xsl:when test="@w:val = 'off' or @w:val = 'none'"><xsl:value-of select="$off"/></xsl:when>
+            <xsl:when test="@w:val = 'off' or @w:val = 'none'  or @w:val = '0'"><xsl:value-of select="$off"/></xsl:when>
             <xsl:otherwise><xsl:value-of select="$on"/></xsl:otherwise>
         </xsl:choose>
     </xsl:template>

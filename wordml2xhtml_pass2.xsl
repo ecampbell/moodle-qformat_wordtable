@@ -68,8 +68,8 @@
     <!-- Remove empty class attributes -->
     <xsl:template match="@class[.='']"/>
     
-    <!-- Remove redundant style information, retaining only borders and widths on table cells -->
-    <xsl:template match="@style[not(parent::x:table)]" priority="1"/>
+    <!-- Remove redundant style information, retaining only borders and widths on table cells, and text direction in paragraphs-->
+    <xsl:template match="@style[not(parent::x:table) and not(contains(., 'direction:'))]" priority="1"/>
 
 
      <!-- Delete superfluous spans that wrap the complete para content -->
@@ -78,7 +78,7 @@
     <!-- Out go horizontal bars -->
     <xsl:template match="x:p[@class='horizontalbar']"/>
 
-    
+
     <!-- For character level formatting - bold, italic, subscript, superscript - use semantic HTML rather than CSS styling -->
     <!-- Convert style properties inside span element to elements instead -->
     <xsl:template match="x:span[@style]">
@@ -176,8 +176,17 @@
                 </xsl:apply-templates>
             </sub>
         </xsl:when>
-        <xsl:when test="$stylePropertyFirst = 'font-size:smaller' or $stylePropertyFirst = 'font-size:11pt' or $stylePropertyFirst = 'font-size:12pt' or $stylePropertyFirst = 'font-size:13pt'">
-            <!-- Ignore smaller font size style, as it is only in sub and superscripts -->
+        <xsl:when test="starts-with($stylePropertyFirst, 'direction:')">
+            <!-- Handle inline text direction directive-->
+            <xsl:variable name="textDirection" select="substring-after($stylePropertyFirst, 'direction:')"/>
+            <span dir="{$textDirection}">
+                <xsl:apply-templates select="." mode="styleProperty">
+                    <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
+                </xsl:apply-templates>
+            </span>
+        </xsl:when>
+        <xsl:when test="$stylePropertyFirst = 'font-size:smaller' or $stylePropertyFirst = 'font-size:11pt' or $stylePropertyFirst = 'font-size:12pt' or $stylePropertyFirst = 'font-size:13pt' or $stylePropertyFirst = 'font-style:normal' or $stylePropertyFirst = 'font-weight:normal' or $stylePropertyFirst = 'font-size:1pt' or $stylePropertyFirst = 'unicode-bidi:embed'">
+            <!-- Ignore smaller font size style, as it is only in sub and superscripts; ignore some odd styles in Arabic samples -->
             <xsl:apply-templates select="." mode="styleProperty">
                 <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
             </xsl:apply-templates>
@@ -312,6 +321,12 @@
     <!-- Paragraphs -->
     <xsl:template match="x:p">
         <p>
+            <xsl:if test="contains(@style, 'direction:')">
+                <xsl:attribute name="dir">
+                    <xsl:value-of select="substring-before(substring-after(@style, 'direction:'), ';')"/>
+                </xsl:attribute>
+            </xsl:if>
+
             <xsl:apply-templates select="node()"/>
         </p>
     </xsl:template>
