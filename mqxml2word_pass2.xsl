@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: $ 
+<!--
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,11 +17,10 @@
 
  * XSLT stylesheet to wrap questions formatted as HTML tables with a Word-compatible wrapper that defines the styles, metadata, etc.
  *
- * @package questionbank
- * @subpackage importexport
- * @copyright 2010 Eoin Campbell
- * @author Eoin Campbell
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
+ * @package    qformat_wordtable
+ * @copyright  2010-2015 Eoin Campbell
+ * @author     Eoin Campbell
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
 -->
 <xsl:stylesheet exclude-result-prefixes="htm o w"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -38,7 +37,6 @@
 <xsl:param name="institution_name"/>
 <xsl:param name="moodle_country" select="'US'"/> <!-- Country of Moodle installation -->
 <xsl:param name="moodle_language" select="'en'"/> <!-- Interface language for user -->
-<xsl:param name="moodle_textdirection" select="'ltr'"/>  <!-- ltr/rtl, ltr except for Arabic, Hebrew, Urdu, Farsi, Maldivian (who knew?) -->
 <xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
@@ -65,6 +63,7 @@
 <xsl:variable name="contains_embedded_images" select="count($data//htm:img[contains(@src, $pluginfiles_string)])"/>
 
 <xsl:variable name="transformationfailed" select="$moodle_labels/data[@name = 'qformat_wordtable_transformationfailed']"/>
+<xsl:variable name="moodle_textdirection" select="$moodle_labels/data[@name = 'langconfig_thisdirection']"/>
 
 <!-- Map raw language value into a Word-compatible version, removing anything after an underscore and capitalising -->
 <xsl:variable name="moodle_language_value">
@@ -77,10 +76,34 @@
 	</xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
+<xsl:variable name="moodle_language_locale">
+	<xsl:if test="contains($moodle_language, '_')">
+		<xsl:value-of select="translate(substring-after($moodle_language, '_'), $lcase, $ucase)"/>
+	</xsl:if>
+</xsl:variable>
+
+<!-- Figure out the correct language and locale values to use in Word -->
+<xsl:variable name="word_language_and_locale">
+	<xsl:choose>
+	<xsl:when test="$moodle_language_locale != ''">
+		<xsl:value-of select="concat($moodle_language_value, '-', $moodle_language_locale)"/>
+	</xsl:when>
+	<xsl:otherwise>
+		<xsl:value-of select="$moodle_language_value"/>
+	</xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
+<!-- Does the language use CSS property 'mso-fareast-language' in Word? -->
+<xsl:variable name="word_language_fareast">
+	<xsl:if test="$moodle_language_value = 'JA' or $moodle_language_value = 'KO' or $moodle_language_value = 'ZH'">
+		<xsl:value-of select="'true'"/>
+	</xsl:if>
+</xsl:variable>
+
 <!-- Match document root node, and read in and process Word-compatible XHTML template -->
 <xsl:template match="/">
 <!-- Set the language and text direction -->
-	<html lang="{$moodle_language_value}" dir="{$moodle_textdirection}">
+	<html lang="{$word_language_and_locale}" dir="{$moodle_textdirection}">
 		<xsl:apply-templates select="$htmltemplate/htm:html/*" />
 	</html>
 </xsl:template>
@@ -140,13 +163,12 @@
 </xsl:template>
 
 <xsl:template match="processing-instruction('replace')[.='insert-meta']">
-	<!-- Place category info and course name into document title -->
+	<!-- Include custom properties used by Moodle2Word Startup Word template and re-import code -->
 	<o:DC.Type><xsl:value-of select="'Question'"/></o:DC.Type>
-	<o:moodleCategory><xsl:value-of select="$moodle_labels/data[@name = 'question_category']"/></o:moodleCategory>
+	<o:moodleCategory><xsl:value-of select="$moodle_labels/data[@name = 'moodle_categoryname']"/></o:moodleCategory>
 	<o:moodleCourseID><xsl:value-of select="$course_id"/></o:moodleCourseID>
 	<o:moodleImages><xsl:value-of select="$contains_embedded_images"/></o:moodleImages>
 	<o:moodleLanguage><xsl:value-of select="$moodle_language"/></o:moodleLanguage>
-	<o:moodleTextDirection><xsl:value-of select="$moodle_textdirection"/></o:moodleTextDirection>
 	<o:moodleNo><xsl:value-of select="$moodle_labels/data[@name = 'moodle_no']"/></o:moodleNo>
 	<o:moodleQuestion><xsl:value-of select="$moodle_labels/data[@name = 'moodle_question']"/></o:moodleQuestion>
 	<o:moodleYes><xsl:value-of select="$moodle_labels/data[@name = 'moodle_yes']"/></o:moodleYes>
@@ -159,7 +181,21 @@
 
 <xsl:template match="processing-instruction('replace')[.='insert-language']">
 	<!-- Set the language of each style to be whatever is defined in Moodle, to assist spell-checking -->
-	<xsl:value-of select="concat($moodle_language_value, '-', $moodle_country)"/>
+
+	<xsl:choose>
+	<!-- For Right-to-Left languages, use the mso-bidi-language property -->
+	<xsl:when test="$moodle_textdirection = 'rtl'">
+		<xsl:value-of select="concat('EN-GB;&#x0a;&#x09;mso-bidi-language:', $word_language_and_locale, ';&#x0a;&#x09;direction:rtl')"/>
+	</xsl:when>
+	<!-- For far-eastern languages, use the mso-fareast-language property -->
+	<xsl:when test="$word_language_fareast = 'true'">
+		<xsl:value-of select="concat('EN-GB;mso-fareast-language:', $word_language_and_locale)"/>
+	</xsl:when>
+	<xsl:otherwise>
+		<xsl:value-of select="$word_language_and_locale"/>
+	</xsl:otherwise>
+	</xsl:choose>
+
 </xsl:template>
 
 <!-- Look for table cells with just text, and wrap them in a Cell paragraph style -->

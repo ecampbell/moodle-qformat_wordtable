@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: $ 
+<!--
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,11 +17,10 @@
 
  * XSLT stylesheet to transform Moodle Question XML-formatted questions into Word-compatible HTML tables 
  *
- * @package questionbank
- * @subpackage importexport
- * @copyright 2010 Eoin Campbell
- * @author Eoin Campbell
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
+ * @package    qformat_wordtable
+ * @copyright  2010-2015 Eoin Campbell
+ * @author     Eoin Campbell
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
 -->
 <xsl:stylesheet exclude-result-prefixes="htm"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -74,7 +73,7 @@
 <xsl:variable name="cloze_answer_delimiter" select="'~'"/>
 <xsl:variable name="cloze_distractor_column_label" select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_distractor_column_label']"/>
 <xsl:variable name="cloze_feedback_column_label" select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_feedback_column_label']"/>
-<xsl:variable name="cloze_mcformat_label" select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_mcformat_label']"/>
+<xsl:variable name="cloze_mcformat_label" select="concat($moodle_labels/data[@name = 'qformat_wordtable_cloze_mcformat_label'], $colon_string)"/>
 
 <!-- Moodle release is significant for the format of different questions
 	Essay:
@@ -316,7 +315,7 @@
 			<title><xsl:value-of select="concat($course_name, ', ', $category_label, $colon_string, ' ', $category)"/></title>
 		</head>
 		<body>
-			<xsl:comment><xsl:value-of select="concat('Release: ', $moodle_release, '; rel_number: ', $moodle_release_number)"/></xsl:comment>
+			<!--<xsl:comment><xsl:value-of select="concat('Release: ', $moodle_release, '; rel_number: ', $moodle_release_number)"/></xsl:comment>-->
 			<p class="MsoTitle"><xsl:value-of select="$course_name"/></p>
 			<xsl:apply-templates select="./question"/>
 		</body>
@@ -368,7 +367,7 @@
 	<!-- Get Cloze text string if it's a Cloze question containing subquestions -->
 	<xsl:variable name="cloze_questiontext_string">
 		<xsl:if test="$qtype = 'CL'">
-			<xsl:value-of select="questiontext/text"/>
+			<xsl:apply-templates select="questiontext/text"/>
 		</xsl:if>
 	</xsl:variable>
 	<!-- Get the default mark from defaultgrade or from Cloze subquestions. If it isn't the same for all Cloze subquestions, set it to 0 -->
@@ -547,7 +546,10 @@
 
 	<!-- Start generating the HTML output, now that we've finished figuring out all the values -->
 	<!-- Put the question name in a heading, so it can be easily viewed in the Word navigation window -->
-	<h2 class="MsoHeading2"><xsl:value-of select="normalize-space(name)"/></h2>
+	<xsl:variable name="qheading">
+		<xsl:apply-templates select="name/text"/>
+	</xsl:variable>
+	<h2 class="MsoHeading2"><xsl:value-of select="normalize-space($qheading)"/></h2>
 	<p class="MsoBodyText"> </p>
 	
 	<!-- Generate the table containing the question stem and the answers -->
@@ -1187,14 +1189,19 @@
 	</xsl:variable>
 
 	<!-- Convert the Cloze string to nice Word format -->
-	<xsl:if test="normalize-space($text_string) != '' and normalize-space($text_string) != '&#160;'">
+	<xsl:choose>
+	<xsl:when test="normalize-space($text_string) != '' and normalize-space($text_string) != '&#160;'">
 		<xsl:call-template name="convert_cloze_string">
 			<xsl:with-param name="cloze_string" select="$text_string"/>
 			<xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
 			<xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
 			<xsl:with-param name="cloze_defaultmark_value" select="$cloze_defaultmark_value"/>
 		</xsl:call-template>
-	</xsl:if>
+	</xsl:when>
+	<xsl:otherwise>
+		<xsl:value-of select="$blank_cell"/>
+	</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- Convert Cloze text strings into bold or italic, or leave as is if conversion not possible -->

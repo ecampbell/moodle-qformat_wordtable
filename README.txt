@@ -2,6 +2,7 @@ Release notes
 -------------
 
 Date          Version   Comment
+2015/07/02    3.1.5     Improve export of far-eastern languages like Chinese and Japanese
 2015/04/02    3.1.4     Fix text direction in non-Arabic Word templates, handle strikethrough better
 2015/03/11    3.1.3     Fix image handling, including external images not embedded in Word file, and hyperlinked images
 2015/03/03    3.1.2     Fix for Moodle 2.7/2.8 to improve handling of attachments in essay questions
