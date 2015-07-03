@@ -102,19 +102,12 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
 
-        // Get the locale, so we can set the language and locale in Word for better spell-checking
-        $locale_country = $CFG->country;
-        if (empty($CFG->country) or $CFG->country == 0 or $CFG->country == '0') {
-            $admin_user_config = get_admin();
-            $locale_country = $admin_user_config->country;
-        }
-
         // Set common parameters for all XSLT transformations. Note that we cannot use arguments because the XSLT processor doesn't support them
         $parameters = array (
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
-            'moodle_country' => $locale_country,
+            'moodle_country' => $USER->country,
             'moodle_language' => current_language(),
             'moodle_textdirection' => (right_to_left())? 'rtl': 'ltr',
             'moodle_release' => $CFG->release,
@@ -393,18 +386,12 @@ class qformat_wordtable extends qformat_xml {
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": XML data saved to $temp_xml_filename", DEBUG_DEVELOPER);
 
-        // Get the locale, so we can set the language and locale in Word for better spell-checking
-        $locale_country = $CFG->country;
-        if (empty($CFG->country) or $CFG->country == 0 or $CFG->country == '0') {
-            $admin_user_config = get_admin();
-            $locale_country = $admin_user_config->country;
-        }
         // Set parameters for XSLT transformation. Note that we cannot use arguments though
         $parameters = array (
             'course_id' => $this->course->id,
             'course_name' => $this->course->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
-            'moodle_country' => $locale_country,
+            'moodle_country' => $USER->country,
             'moodle_language' => current_language(),
             'moodle_textdirection' => (right_to_left())? 'rtl': 'ltr',
             'moodle_release' => $CFG->release,

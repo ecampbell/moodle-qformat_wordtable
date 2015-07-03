@@ -35,7 +35,7 @@
 <xsl:param name="author_name"/>
 <xsl:param name="author_id"/>
 <xsl:param name="institution_name"/>
-<xsl:param name="moodle_country" select="'US'"/> <!-- Country of Moodle installation -->
+<xsl:param name="moodle_country"/> <!-- Users country -->
 <xsl:param name="moodle_language" select="'en'"/> <!-- Interface language for user -->
 <xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
@@ -65,8 +65,15 @@
 <xsl:variable name="transformationfailed" select="$moodle_labels/data[@name = 'qformat_wordtable_transformationfailed']"/>
 <xsl:variable name="moodle_textdirection" select="$moodle_labels/data[@name = 'langconfig_thisdirection']"/>
 
-<!-- Map raw language value into a Word-compatible version, removing anything after an underscore and capitalising -->
-<xsl:variable name="moodle_language_value">
+<!-- Get the locale if present as part of the language definition (e.g. zh_cn) -->
+<xsl:variable name="moodle_language_locale">
+	<xsl:if test="contains($moodle_language, '_')">
+		<xsl:value-of select="translate(substring-after($moodle_language, '_'), $lcase, $ucase)"/>
+	</xsl:if>
+</xsl:variable>
+
+<!-- Map Moodle language into a Word-compatible version, removing anything after an underscore and capitalising -->
+<xsl:variable name="word_language">
 	<xsl:choose>
 	<xsl:when test="contains($moodle_language, '_')">
 		<xsl:value-of select="translate(substring-before($moodle_language, '_'), $lcase, $ucase)"/>
@@ -76,26 +83,39 @@
 	</xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
-<xsl:variable name="moodle_language_locale">
-	<xsl:if test="contains($moodle_language, '_')">
-		<xsl:value-of select="translate(substring-after($moodle_language, '_'), $lcase, $ucase)"/>
-	</xsl:if>
-</xsl:variable>
 
-<!-- Figure out the correct language and locale values to use in Word -->
-<xsl:variable name="word_language_and_locale">
+<!-- Guess a suitable Word locale based on the users location, the location of the Moodle server, or the Moodle language locale -->
+<xsl:variable name="word_locale">
 	<xsl:choose>
-	<xsl:when test="$moodle_language_locale != ''">
-		<xsl:value-of select="concat($moodle_language_value, '-', $moodle_language_locale)"/>
+	<xsl:when test="$word_language = 'EN' and ($moodle_country = 'AU' or $moodle_country = 'CA' or $moodle_country = 'GB' or $moodle_country = 'IE' or $moodle_country = 'IN' or $moodle_country = 'NZ')">
+		<xsl:value-of select="$moodle_country"/>
+	</xsl:when>
+	<xsl:when test="$word_language = 'EN'">
+		<xsl:value-of select="'US'"/>
+	</xsl:when>
+	<xsl:when test="$word_language = 'FR' and ($moodle_country = 'BE' or $moodle_country = 'CH')">
+		<xsl:value-of select="$moodle_country"/>
 	</xsl:when>
 	<xsl:otherwise>
-		<xsl:value-of select="$moodle_language_value"/>
+		<xsl:value-of select="$moodle_language_locale"/>
+	</xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
+
+<!-- Assemble the language-locale combination for Word style template language settings (for spellchecking) -->
+<xsl:variable name="word_language_and_locale">
+	<xsl:choose>
+	<xsl:when test="$word_locale != ''">
+		<xsl:value-of select="concat($word_language, '-', $word_locale)"/>
+	</xsl:when>
+	<xsl:otherwise>
+		<xsl:value-of select="$word_language"/>
 	</xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
 <!-- Does the language use CSS property 'mso-fareast-language' in Word? -->
 <xsl:variable name="word_language_fareast">
-	<xsl:if test="$moodle_language_value = 'JA' or $moodle_language_value = 'KO' or $moodle_language_value = 'ZH'">
+	<xsl:if test="$word_language = 'JA' or $word_language = 'KO' or $word_language = 'ZH'">
 		<xsl:value-of select="'true'"/>
 	</xsl:if>
 </xsl:variable>

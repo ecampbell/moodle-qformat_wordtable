@@ -45,7 +45,6 @@
     <xsl:variable name="moodleLanguage" select="$metadata/x:meta[@name='moodleLanguage']/@content" />
     <xsl:choose>
     <xsl:when test="$moodleLanguage = ''"><xsl:value-of select="'en'"/></xsl:when>
-    <xsl:when test="contains($moodleLanguage, '_')"><xsl:value-of select="substring-before($moodleLanguage, '_')"/></xsl:when>
     <xsl:otherwise><xsl:value-of select="$moodleLanguage"/></xsl:otherwise>
     </xsl:choose>
 </xsl:variable>
@@ -221,7 +220,7 @@
                 </xsl:if>
             </xsl:for-each>
         </xsl:when>
-        <xsl:when test="$fileLanguage != substring($moodle_language, 1, 2)">
+        <xsl:when test="$fileLanguage != $moodle_language">
             <!-- The Moodle user interface language doesn't match the documents template language, so the question labels won't match: report an error in a dummy question that will display on the screen -->
             <xsl:variable name="language_mismatch_error_message" select="concat($interface_language_mismatch, ' &quot;', $fileLanguage, '&quot; != &quot;', $moodle_language, '&quot;')"/>
             <question type="category">
