@@ -81,6 +81,7 @@
 		2.1-4 - grader info and attachments, but no response template
 		2.5+  - grader info, attachments and response template
 		2.7+  - number of required attachments field
+		2.9+  - response text required/optional field
 
 	Cloze:
 		2.1-3 - no per-hint options
@@ -147,10 +148,10 @@
 <xsl:variable name="generalfeedback_label">
 	<xsl:choose>
 	<xsl:when test="$moodle_release_number = '19'">
-		<xsl:value-of  select="concat($moodle_labels/data[@name = 'quiz_generalfeedback'], $colon_string)"/>
+		<xsl:value-of select="concat($moodle_labels/data[@name = 'quiz_generalfeedback'], $colon_string)"/>
 	</xsl:when>
 	<xsl:otherwise>
-		<xsl:value-of  select="concat($moodle_labels/data[@name = 'question_generalfeedback'], $colon_string)"/>
+		<xsl:value-of select="concat($moodle_labels/data[@name = 'question_generalfeedback'], $colon_string)"/>
 	</xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
@@ -215,6 +216,7 @@
 <xsl:variable name="responsetemplate_help_label" select="$moodle_labels/data[@name = 'qtype_essay_responsetemplate_help']"/>
 <xsl:variable name="responsefieldlines_label" select="concat($moodle_labels/data[@name = 'qtype_essay_responsefieldlines'], $colon_string)"/>
 <xsl:variable name="responseformat_label" select="concat($moodle_labels/data[@name = 'qtype_essay_responseformat'], $colon_string)"/>
+<xsl:variable name="responserequired_label" select="concat($moodle_labels/data[@name = 'qtype_essay_responserequired'], $colon_string)"/>
 <xsl:variable name="format_html_label">
 	<xsl:choose>
 	<xsl:when test="$moodle_release_number = '19'">
@@ -663,6 +665,20 @@
 			</tr>
 			<xsl:text>&#x0a;</xsl:text>
 
+			<!-- Essays: text input required flag -->
+			<xsl:if test="$moodle_release_number &gt;= '29'">
+				<xsl:variable name="responserequired_flag">
+					<xsl:choose>
+					<xsl:when test="responserequired = 0"><xsl:value-of select="$no_label"/></xsl:when>
+					<xsl:otherwise><xsl:value-of select="$yes_label"/></xsl:otherwise>
+					</xsl:choose>
+				</xsl:variable>
+				<tr>
+					<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responserequired_label"/></p></td>
+					<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$responserequired_flag"/></p></td>
+				</tr>
+			</xsl:if>
+
 			<tr>
 				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responsefieldlines_label"/></p></td>
 					<td style="width: 1.0cm">
@@ -677,7 +693,8 @@
 					</td>
 			</tr>
 			<xsl:text>&#x0a;</xsl:text>
-			<!-- Attachments -->
+
+			<!-- Essays: number of attachments field -->
 			<tr>
 				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$allowattachments_label"/></p></td>
 				<td style="width: 1.0cm">
@@ -692,29 +709,32 @@
 				</td>
 			</tr>
 			<xsl:text>&#x0a;</xsl:text>
+		</xsl:if>
+
+		<!-- Essays: number of attachments required field -->
+		<xsl:if test="$moodle_release_number &gt;= '27'">
+			<xsl:text>&#x0a;</xsl:text>
 			<xsl:call-template name="debugComment">
 				<xsl:with-param name="comment_text">
 					<xsl:value-of select="concat('$attachmentsrequired_label: ', $attachmentsrequired_label, '; attachmentsrequired: ', attachmentsrequired, '&#x0a;')"/>
 					<xsl:value-of select="concat('$moodle_release_number: ', $moodle_release_number, '&#x0a;')"/>
 				</xsl:with-param>
 			</xsl:call-template>
-			<xsl:if test="$moodle_release_number &gt;= '27'">
-				<tr>
-					<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$attachmentsrequired_label"/></p></td>
-					<td style="width: 1.0cm">
-						<p class="Cell">
-							<xsl:choose>
-							<xsl:when test="attachmentsrequired">
-								<xsl:value-of select="attachmentsrequired"/>
-							</xsl:when>
-							<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
-							</xsl:choose>
-						</p>
-					</td>
-				</tr>
-			</xsl:if>
-			<xsl:text>&#x0a;</xsl:text>
+			<tr>
+				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$attachmentsrequired_label"/></p></td>
+				<td style="width: 1.0cm">
+					<p class="Cell">
+						<xsl:choose>
+						<xsl:when test="attachmentsrequired">
+							<xsl:value-of select="attachmentsrequired"/>
+						</xsl:when>
+						<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+						</xsl:choose>
+					</p>
+				</td>
+			</tr>
 		</xsl:if>
+		<xsl:text>&#x0a;</xsl:text>
 
 		<!-- Short answers: are they case-sensitive? -->
 		<xsl:if test="$qtype = 'SA'">
@@ -1351,7 +1371,7 @@
 	</xsl:choose>
 </xsl:template>
 
-<!-- Clean up Cloze subquestion items by removing '%100%'  or '=', empty feedback, etc. -->
+<!-- Clean up Cloze subquestion items by removing '%100%' or '=', empty feedback, etc. -->
 <xsl:template name="format_cloze_subquestion">
 	<xsl:param name="cloze_subquestion_string"/>
 	<xsl:param name="first_answer_item" select="'false'"/>
@@ -1456,7 +1476,7 @@
 	<!-- Are there more subquestions? Check the remainder of the string after the end of the first subquestion to find out -->
 	<xsl:variable name="cloze_questiontext_remainder" select="substring-after($cloze_questiontext_string, $cloze_end_delimiter)"/>
 	<xsl:choose>
-	<xsl:when test="contains($cloze_questiontext_remainder,  $cloze_start_delimiter)">
+	<xsl:when test="contains($cloze_questiontext_remainder, $cloze_start_delimiter)">
 		<!-- Yes, more subquestions, so recurse to the next one, passing this defaultmark value through as the current default -->
 		<xsl:call-template name="get_cloze_defaultmark">
 			<xsl:with-param name="cloze_questiontext_string" select="$cloze_questiontext_remainder"/>

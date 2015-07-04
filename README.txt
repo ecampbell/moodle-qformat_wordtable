@@ -2,6 +2,7 @@ Release notes
 -------------
 
 Date          Version   Comment
+2015/07/04    3.1.6     Support the new 'Require text' field added to Essay questions in Moodle 2.9
 2015/07/03    3.1.5     Improve export of far-eastern languages like Chinese and Japanese
 2015/04/02    3.1.4     Fix text direction in non-Arabic Word templates, handle strikethrough better
 2015/03/11    3.1.3     Fix image handling, including external images not embedded in Word file, and hyperlinked images

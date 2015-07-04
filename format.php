@@ -471,7 +471,7 @@ class qformat_wordtable extends qformat_xml {
             'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown', 'formatplain', 'formattext', 'grade', 'question', 'tags'),
             'qformat_wordtable' => array('cloze_instructions', 'cloze_distractor_column_label', 'cloze_feedback_column_label', 'cloze_mcformat_label', 'description_instructions', 'essay_instructions', 'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions', 'transformationfailed'),
             'qtype_description' => array('pluginnamesummary'),
-            'qtype_essay' => array('allowattachments', 'attachmentsoptional', 'attachmentsrequired', 'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat'),
+            'qtype_essay' => array('allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat'),
             'qtype_match' => array('filloutthreeqsandtwoas'),
             'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback', 'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
             'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
@@ -493,6 +493,14 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['question'][] = 'hintnoptions';
             $textstrings['question'][] = 'incorrectfeedbackdefault';
             $textstrings['question'][] = 'partiallycorrectfeedbackdefault';
+        }
+        if ($CFG->release >= '2.7') {
+            $textstrings['qtype_essay'][] = 'attachmentsrequired';
+        }
+        if ($CFG->release >= '2.9') {
+            $textstrings['qtype_essay'][] = 'responserequired';
+            $textstrings['qtype_essay'][] = 'responseisrequired';
+            $textstrings['qtype_essay'][] = 'responsenotrequired';
         }
 
         $expout = "<moodlelabels>\n";

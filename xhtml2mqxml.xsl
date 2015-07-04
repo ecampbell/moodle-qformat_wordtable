@@ -141,6 +141,7 @@
 <xsl:variable name="graderinfo_label" select="$moodle_labels/data[@name = 'qtype_essay_graderinfo']"/>
 
 <xsl:variable name="responseformat_label" select="$moodle_labels/data[@name = 'qtype_essay_responseformat']"/>
+<xsl:variable name="responserequired_label" select="$moodle_labels/data[@name = 'qtype_essay_responserequired']"/>
 <xsl:variable name="responseformateditor_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formateditor'], $ucase, $lcase))"/>
 <xsl:variable name="responseformateditorfilepicker_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formateditorfilepicker'], $ucase, $lcase))"/>
 <xsl:variable name="responseformatmono_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formatmonospaced'], $ucase, $lcase))"/>
@@ -784,11 +785,30 @@
     <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber &gt; '1'">
         <xsl:if test="$moodleReleaseNumber &gt;= '25'">
             <responseformat><xsl:value-of select="$response_format_value"/></responseformat>
+
+            <!-- Essays (2.9+): Is text response required? -->
+            <xsl:if test="$moodleReleaseNumber &gt;= '29'">
+                <xsl:variable name="responseRequired_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responserequired_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
+                <!-- 0 = not required, 1 = required -->
+                <xsl:variable name="responseRequired_value">
+                    <xsl:choose>
+                    <xsl:when test="starts-with($responseRequired_flag, $yes_label)">
+                        <xsl:text>1</xsl:text>
+                    </xsl:when>
+                    <xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:call-template name="debugComment">
+                    <xsl:with-param name="comment_text" select="concat('$responseRequired_value: ', $responseRequired_value, ', $responserequired_label: ', $responserequired_label, '; $responseRequired_flag: ', $responseRequired_flag)"/>
+                </xsl:call-template>
+                <responserequired><xsl:value-of select="$responseRequired_value"/></responserequired>
+            </xsl:if>
+
             <responsefieldlines><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responsefieldlines_label)]/x:th[position() = $flag_value_colnum])"/></responsefieldlines>
             <attachments><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $allowattachments_label)]/x:th[position() = $flag_value_colnum])"/></attachments>
         </xsl:if>
 
-
+        <!-- Essays: How many attachments required? -->
         <xsl:if test="$moodleReleaseNumber &gt;= '27'">
            <attachmentsrequired><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $attachmentsrequired_label)]/x:th[position() = $flag_value_colnum])"/></attachmentsrequired>
         </xsl:if>
