@@ -709,32 +709,32 @@
 				</td>
 			</tr>
 			<xsl:text>&#x0a;</xsl:text>
-		</xsl:if>
 
-		<!-- Essays: number of attachments required field -->
-		<xsl:if test="$moodle_release_number &gt;= '27'">
-			<xsl:text>&#x0a;</xsl:text>
-			<xsl:call-template name="debugComment">
-				<xsl:with-param name="comment_text">
-					<xsl:value-of select="concat('$attachmentsrequired_label: ', $attachmentsrequired_label, '; attachmentsrequired: ', attachmentsrequired, '&#x0a;')"/>
-					<xsl:value-of select="concat('$moodle_release_number: ', $moodle_release_number, '&#x0a;')"/>
-				</xsl:with-param>
-			</xsl:call-template>
-			<tr>
-				<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$attachmentsrequired_label"/></p></td>
-				<td style="width: 1.0cm">
-					<p class="Cell">
-						<xsl:choose>
-						<xsl:when test="attachmentsrequired">
-							<xsl:value-of select="attachmentsrequired"/>
-						</xsl:when>
-						<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
-						</xsl:choose>
-					</p>
-				</td>
-			</tr>
-		</xsl:if>
-		<xsl:text>&#x0a;</xsl:text>
+			<!-- Essays: number of attachments required field -->
+			<xsl:if test="$moodle_release_number &gt;= '27'">
+				<xsl:text>&#x0a;</xsl:text>
+				<xsl:call-template name="debugComment">
+					<xsl:with-param name="comment_text">
+						<xsl:value-of select="concat('$attachmentsrequired_label: ', $attachmentsrequired_label, '; attachmentsrequired: ', attachmentsrequired, '&#x0a;')"/>
+						<xsl:value-of select="concat('$moodle_release_number: ', $moodle_release_number, '&#x0a;')"/>
+					</xsl:with-param>
+				</xsl:call-template>
+				<tr>
+					<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$attachmentsrequired_label"/></p></td>
+					<td style="width: 1.0cm">
+						<p class="Cell">
+							<xsl:choose>
+							<xsl:when test="attachmentsrequired">
+								<xsl:value-of select="attachmentsrequired"/>
+							</xsl:when>
+							<xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+							</xsl:choose>
+						</p>
+					</td>
+				</tr>
+				<xsl:text>&#x0a;</xsl:text>
+			</xsl:if>
+		</xsl:if> <!-- 2.x Essay-specific question fields -->
 
 		<!-- Short answers: are they case-sensitive? -->
 		<xsl:if test="$qtype = 'SA'">
@@ -1492,6 +1492,51 @@
 		<!-- If current and this default marks are not the same, return 0 to indicate that different subquestions have different marks, because it means we cannot optimise Word output -->
 		<xsl:value-of select="'0'"/>
 	</xsl:when>
+	</xsl:choose>
+</xsl:template>
+
+<!-- Handle images associated with '@@PLUGINFILE@@' keyword by including them in temporary supplementary paragraphs in whatever component they occur in -->
+<xsl:template match="file">
+	<xsl:variable name="image_file_suffix">
+		<xsl:value-of select="translate(substring-after(@name, '.'), $ucase, $lcase)"/>
+	</xsl:variable>
+	<xsl:variable name="image_format">
+		<xsl:value-of select="concat('data:image/', $image_file_suffix, ';', @encoding, ',')"/>
+	</xsl:variable>
+	<p class="ImageFile"><img src="{concat($image_format, .)}" title="{@name}"/></p>
+</xsl:template>
+
+<!-- got to preserve comments for style definitions -->
+<xsl:template match="comment()">
+	<xsl:comment><xsl:value-of select="."/></xsl:comment>
+</xsl:template>
+
+<!-- Identity transformations -->
+<xsl:template match="*">
+	<xsl:element name="{name()}">
+		<xsl:call-template name="copyAttributes" />
+		<xsl:apply-templates select="node()"/>
+	</xsl:element>
+</xsl:template>
+
+<xsl:template name="copyAttributes">
+	<xsl:for-each select="@*">
+		<xsl:attribute name="{name()}"><xsl:value-of select="."/></xsl:attribute>
+	</xsl:for-each>
+</xsl:template>
+
+<!-- Include debugging information in the output -->
+<xsl:template name="debugComment">
+	<xsl:param name="comment_text"/>
+
+	<xsl:if test="$debug_flag = '1'">
+		<xsl:text>&#x0a;</xsl:text>
+		<xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
+		<xsl:text>&#x0a;</xsl:text>
+	</xsl:if>
+</xsl:template>
+</xsl:stylesheet>
+
 	</xsl:choose>
 </xsl:template>
 

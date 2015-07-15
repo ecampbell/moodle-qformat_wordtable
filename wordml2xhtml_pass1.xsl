@@ -4738,6 +4738,13 @@
 
         <!-- Map title field to alt attribute -->
         <xsl:variable name="img_alt" select="wp:inline/wp:docPr/@title"/>
+        <!-- The wp:extent/@cx and @cy attributes define the size of the image. They are denominated in 
+             EMUs (English Metric Units); 1 inch = 914400, therefore 1 pixel = 914400 / 96 (dpi) = 9525 
+             cf. http://polymathprogrammer.com/2009/10/22/english-metric-units-and-open-xml/ -->
+        <!-- Map wp:extent/@cx field to width attribute -->
+        <xsl:variable name="img_width" select="wp:inline/wp:extent/@cx div 9525"/>
+        <xsl:variable name="img_height" select="wp:inline/wp:extent/@cy div 9525"/>
+
         <!-- Map description field to longdesc attribute -->
         <xsl:variable name="img_longdesc" select="wp:inline/wp:docPr/@descr"/>
         <!-- Map name field to id attribute: it contains a sequence number for the image, e.g. "Picture 1" -->
@@ -4764,12 +4771,30 @@
         <xsl:when test="$img_hyperlink != ''">
             <!-- The image is linked -->
             <a href="{$img_hyperlink}">
-                <img src="{$img_src}" id="{$img_id}" alt="{$img_alt}" longdesc="{$img_longdesc}"/>
+                <img src="{$img_src}" id="{$img_id}" alt="{$img_alt}" longdesc="{$img_longdesc}">
+                    <xsl:if test="$img_width != ''">
+                        <xsl:attribute name="width">
+                            <xsl:value-of select="$img_width"/>
+                        </xsl:attribute>
+                        <xsl:attribute name="height">
+                            <xsl:value-of select="$img_height"/>
+                        </xsl:attribute>
+                    </xsl:if>
+                </img>
             </a>
         </xsl:when>
         <xsl:otherwise>
             <!-- The image is not linked -->
-            <img src="{$img_src}" id="{$img_id}" alt="{$img_alt}" longdesc="{$img_longdesc}"/>
+            <img src="{$img_src}" id="{$img_id}" alt="{$img_alt}" longdesc="{$img_longdesc}">
+                <xsl:if test="$img_width != ''">
+                    <xsl:attribute name="width">
+                        <xsl:value-of select="$img_width"/>
+                    </xsl:attribute>
+                    <xsl:attribute name="height">
+                        <xsl:value-of select="$img_height"/>
+                    </xsl:attribute>
+                </xsl:if>
+            </img>
         </xsl:otherwise>
         </xsl:choose>
     </xsl:template>

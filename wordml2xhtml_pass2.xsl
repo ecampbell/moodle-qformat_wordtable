@@ -321,9 +321,16 @@
     <!-- Paragraphs -->
     <xsl:template match="x:p">
         <p>
+            <!-- Keep text direction if specified -->
             <xsl:if test="contains(@style, 'direction:')">
                 <xsl:attribute name="dir">
                     <xsl:value-of select="substring-before(substring-after(@style, 'direction:'), ';')"/>
+                </xsl:attribute>
+            </xsl:if>
+            <!-- Keep text alignment if specified -->
+            <xsl:if test="contains(@style, 'text-align:')">
+                <xsl:attribute name="style">
+                    <xsl:value-of select="concat('text-align:', substring-before(substring-after(@style, 'text-align:'), ';'))"/>
                 </xsl:attribute>
             </xsl:if>
 

@@ -543,6 +543,12 @@ class qformat_wordtable extends qformat_xml {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i + 1 . " of $n_questions, type $question_type, question length = " . strlen($question_content), DEBUG_DEVELOPER);
             // Split the question into chunks at CDATA boundaries, using an ungreedy search (?), and matching across newlines (s modifier)
             $found_cdata_sections = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $question_content, $cdata_matches, PREG_SET_ORDER);
+            // Has the question been imported using WordTable? If so, assume it is clean and don't process it
+            //$imported_from_wordtable = preg_match('~ImportFromWordTable~', $question_content);
+            //if ($imported_from_wordtable !== FALSE and $imported_from_wordtable != 0) {
+            //    debugging(__FUNCTION__ . ":" . __LINE__ . ": Skip cleaning previously imported question " . $i + 1, DEBUG_DEVELOPER);
+            //    $clean_output_string .= $question_matches[$i][0];
+            //} else if ($found_cdata_sections === FALSE) {
             if ($found_cdata_sections === FALSE) {
                 debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot decompose CDATA sections in question " . $i + 1, DEBUG_DEVELOPER);
                 $clean_output_string .= $question_matches[$i][0];
@@ -601,7 +607,9 @@ class qformat_wordtable extends qformat_xml {
             $clean_html = tidy_repair_string($text_content_string, $tidy_config, 'utf8');
         } else { 
             // Tidy not available, so just strip most HTML tags except character-level markup and table tags
-            $clean_html = strip_tags($text_content_string, "<b><br><em><i><img><strong><sub><sup><u><table><tbody><td><th><thead><tr>");
+            $keep_tag_list = "<b><br><em><i><img><strong><sub><sup><u><table><tbody><td><th><thead><tr>";
+            $keep_tag_list .= "<p>";
+            $clean_html = strip_tags($text_content_string, $keep_tag_list);
 
             // The strip_tags function treats empty elements like HTML, not XHTML, so fix <br> and <img src=""> manually (i.e. <br/>, <img/>)
             $clean_html = preg_replace('~<img([^>]*?)/?>~si', '<img$1/>', $clean_html, PREG_SET_ORDER);
@@ -1027,6 +1035,27 @@ class qformat_wordtable extends qformat_xml {
         $string = str_replace("&Uuml;", "&#220;", $string);
         $string = str_replace("&uuml;", "&#252;", $string);
         $string = str_replace("&vellip;", "&#x22EE;", $string);
+        $string = str_replace("&verbar;", "&#x007C;", $string);
+        $string = str_replace("&Verbar;", "&#x2016;", $string);
+        $string = str_replace("&wedgeq;", "&#x2259;", $string);
+        $string = str_replace("&weierp;", "&#8472;", $string);
+        $string = str_replace("&Xi;", "&#926;", $string);
+        $string = str_replace("&xi;", "&#958;", $string);
+        $string = str_replace("&Yacute;", "&#221;", $string);
+        $string = str_replace("&yacute;", "&#253;", $string);
+        $string = str_replace("&yen;", "&#x00A5;", $string);
+        $string = str_replace("&yuml;", "&#255;", $string);
+        $string = str_replace("&Yuml;", "&#376;", $string);
+        $string = str_replace("&Zeta;", "&#918;", $string);
+        $string = str_replace("&zeta;", "&#950;", $string);
+        $string = str_replace("&zwnj;", "&#8204;", $string);
+
+        debugging(__FUNCTION__ . "() -> |" . str_replace("\n", "", substr($string, 0, 100)) . " ...)", DEBUG_DEVELOPER);
+        return $string;
+    }
+}
+?>
+"&#x22EE;", $string);
         $string = str_replace("&verbar;", "&#x007C;", $string);
         $string = str_replace("&Verbar;", "&#x2016;", $string);
         $string = str_replace("&wedgeq;", "&#x2259;", $string);

@@ -236,6 +236,7 @@
 <!-- Any paragraphs without an explicit class are set to have the Cell style -->
 <xsl:template match="htm:p[not(@class)]">
 	<p class="Cell">
+		<xsl:call-template name="copyAttributes"/>
 		<xsl:apply-templates/>
 	</p>
 </xsl:template>
