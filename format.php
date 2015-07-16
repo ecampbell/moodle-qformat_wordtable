@@ -1055,24 +1055,3 @@ class qformat_wordtable extends qformat_xml {
     }
 }
 ?>
-"&#x22EE;", $string);
-        $string = str_replace("&verbar;", "&#x007C;", $string);
-        $string = str_replace("&Verbar;", "&#x2016;", $string);
-        $string = str_replace("&wedgeq;", "&#x2259;", $string);
-        $string = str_replace("&weierp;", "&#8472;", $string);
-        $string = str_replace("&Xi;", "&#926;", $string);
-        $string = str_replace("&xi;", "&#958;", $string);
-        $string = str_replace("&Yacute;", "&#221;", $string);
-        $string = str_replace("&yacute;", "&#253;", $string);
-        $string = str_replace("&yen;", "&#x00A5;", $string);
-        $string = str_replace("&yuml;", "&#255;", $string);
-        $string = str_replace("&Yuml;", "&#376;", $string);
-        $string = str_replace("&Zeta;", "&#918;", $string);
-        $string = str_replace("&zeta;", "&#950;", $string);
-        $string = str_replace("&zwnj;", "&#8204;", $string);
-
-        debugging(__FUNCTION__ . "() -> |" . str_replace("\n", "", substr($string, 0, 100)) . " ...)", DEBUG_DEVELOPER);
-        return $string;
-    }
-}
-?>
