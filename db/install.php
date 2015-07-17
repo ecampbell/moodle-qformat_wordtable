@@ -30,14 +30,5 @@ defined('MOODLE_INTERNAL') || die();
  */
 function xmldb_qformat_wordtable_install() {
 
-    // Add a default account for YAWC Online conversion service to the plugins configuration table
-    // Place the YAWC Online web server URL into the table, instead of hardcoding it
-
-    // URL of external server that does Word to Moodle Question XML conversion for question import
-    set_config('converter_url', 'http://www.yawconline.com/ye_convert1.php', 'qformat_wordtable');
-    // URL of external server for registering a unique login/password if upgrading from free conversion service
-    set_config('registration_url', 'http://www1.moodle2word.net/m2w_register.php');
-    // Default username and password for free conversion service
-    set_config('username', 'unregistered@doc2mqxml.edu', 'qformat_wordtable');
-    set_config('password', base64_encode('5questionlimit'), 'qformat_wordtable');
+    // Don't add anything to the plugins configuration table
 }

@@ -2,6 +2,7 @@ Release notes
 -------------
 
 Date          Version   Comment
+2015/07/17    3.1.9     Minor change to delete old and unused configuration values from config_plugins table
 2015/07/15    3.1.8     Improve export formatting to handle paragraph attributes better (alignment, etc.)
 2015/07/13    3.1.7     On import, retain the size of images as defined within Word, and retain text alignment
 2015/07/04    3.1.6     Support the new 'Require text' field added to Essay questions in Moodle 2.9
