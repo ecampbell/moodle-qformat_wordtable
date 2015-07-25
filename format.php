@@ -69,21 +69,36 @@ class qformat_wordtable extends qformat_xml {
      */
     function importpreprocess() {
         global $CFG, $USER, $COURSE, $OUTPUT;
+        $realfilename = "";
+        $filename = "";
 
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Word file = $this->realfilename; path = $this->filename", DEBUG_DEVELOPER);
+        // Handle question imports in Lesson module by using mform, not the question/format.php qformat_default class
+        if(property_exists('qformat_default', 'realfilename')) {
+            $realfilename = $this->realfilename;
+        } else {
+            global $mform;
+            $realfilename = $mform->get_new_filename('questionfile');
+        }
+        if(property_exists('qformat_default', 'filename')) {
+            $filename = $this->filename;
+        } else {
+            global $mform;
+            $filename = "{$CFG->tempdir}/questionimport/{$realfilename}";
+        }
+        debugging(__FUNCTION__ . ":" . __LINE__ . ": Word file = $realfilename; path = $filename", DEBUG_DEVELOPER);
 
         // Check that the file is in Word 2010 format, not HTML, XML, or Word 2003
-        if((substr($this->realfilename, -3, 3) == 'doc')) {
-            echo $OUTPUT->notification(get_string('docnotsupported', 'qformat_wordtable', $this->realfilename));
+        if((substr($realfilename, -3, 3) == 'doc')) {
+            echo $OUTPUT->notification(get_string('docnotsupported', 'qformat_wordtable', $realfilename));
             return false;
-        }else if ((substr($this->realfilename, -3, 3) == 'xml')) {
-            echo $OUTPUT->notification(get_string('xmlnotsupported', 'qformat_wordtable', $this->realfilename));
+        }else if ((substr($realfilename, -3, 3) == 'xml')) {
+            echo $OUTPUT->notification(get_string('xmlnotsupported', 'qformat_wordtable', $realfilename));
             return false;
-        } else if ((stripos($this->realfilename, 'htm'))) {
-            echo $OUTPUT->notification(get_string('htmlnotsupported', 'qformat_wordtable', $this->realfilename));
+        } else if ((stripos($realfilename, 'htm'))) {
+            echo $OUTPUT->notification(get_string('htmlnotsupported', 'qformat_wordtable', $realfilename));
             return false;
-        } else if ((stripos(file_get_contents($this->filename, 0, null, 0, 100), 'html'))) {
-            echo $OUTPUT->notification(get_string('htmldocnotsupported', 'qformat_wordtable', $this->realfilename));
+        } else if ((stripos(file_get_contents($filename, 0, null, 0, 100), 'html'))) {
+            echo $OUTPUT->notification(get_string('htmldocnotsupported', 'qformat_wordtable', $realfilename));
             return false;
         }
 
@@ -104,8 +119,8 @@ class qformat_wordtable extends qformat_xml {
 
         // Set common parameters for all XSLT transformations. Note that we cannot use arguments because the XSLT processor doesn't support them
         $parameters = array (
-            'course_id' => $this->course->id,
-            'course_name' => $this->course->fullname,
+            'course_id' => $COURSE->id,
+            'course_name' => $COURSE->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
             'moodle_country' => $USER->country,
             'moodle_language' => current_language(),
@@ -125,14 +140,15 @@ class qformat_wordtable extends qformat_xml {
         $imageString = "";
 
         // Open the Word 2010 Zip-formatted file and extract the WordProcessingML XML files
-        $zfh = zip_open($this->filename);
+        $zfh = zip_open($filename);
         if ($zfh) {
             $zip_entry = zip_read($zfh);
             while ($zip_entry !== FALSE) {
                 if (zip_entry_open($zfh, $zip_entry, "r")) {
                     $ze_filename = zip_entry_name($zip_entry);
                     $ze_filesize = zip_entry_filesize($zip_entry);
-                    debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = $ze_filename, size = $ze_filesize", DEBUG_DEVELOPER);
+                    //debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = $ze_filename, size = $ze_filesize", DEBUG_DEVELOPER);
+
                     // Look for internal images
                     if (strpos($ze_filename, "media") !== FALSE) { 
                         $imageFormat = substr($ze_filename, strrpos($ze_filename, ".") +1);
@@ -149,7 +165,7 @@ class qformat_wordtable extends qformat_xml {
                         }
                         // Handle recognised Internet formats only
                         if ($imageMimeType != '') {
-                            debugging(__FUNCTION__ . ":" . __LINE__ . ": media file name = $ze_filename, imageName = $imageName, imageSuffix = $imageSuffix, imageMimeType = $imageMimeType", DEBUG_DEVELOPER);
+                            //debugging(__FUNCTION__ . ":" . __LINE__ . ": media file name = $ze_filename, imageName = $imageName, imageSuffix = $imageSuffix, imageMimeType = $imageMimeType", DEBUG_DEVELOPER);
                             $imageString .= '<file filename="media/' . $imageName . '" mime-type="' . $imageMimeType . '">' . base64_encode($imageData) . "</file>\n";
                         }
                         else {
@@ -186,11 +202,11 @@ class qformat_wordtable extends qformat_xml {
                               break;
                           */
                           default:
-                              debugging(__FUNCTION__ . ":" . __LINE__ . ": Ignore $ze_filename", DEBUG_DEVELOPER);
+                              //debugging(__FUNCTION__ . ":" . __LINE__ . ": Ignore $ze_filename", DEBUG_DEVELOPER);
                         }
                     }
                 } else { // Can't read the file from the Word .docx file
-                    echo $OUTPUT->notification(get_string('cannotreadzippedfile', 'qformat_wordtable', $this->filename));
+                    echo $OUTPUT->notification(get_string('cannotreadzippedfile', 'qformat_wordtable', $filename));
                     zip_close($zfh);
                     return false;
                 }
@@ -198,7 +214,7 @@ class qformat_wordtable extends qformat_xml {
                 $zip_entry = zip_read($zfh);
             }  // End while
         } else { // Can't open the Word .docx file for reading
-            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $this->filename));
+            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $filename));
             $this->debug_unlink($zipfile);
             return false;
         }
@@ -297,14 +313,14 @@ class qformat_wordtable extends qformat_xml {
         // Keep the original Word file for debugging if developer debugging enabled
         if (debugging(null, DEBUG_DEVELOPER)) {
             $copied_input_file = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".docx";
-            copy($this->filename, $copied_input_file);
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Copied $this->filename to $copied_input_file", DEBUG_DEVELOPER);
+            copy($filename, $copied_input_file);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Copied $filename to $copied_input_file", DEBUG_DEVELOPER);
         }
 
         // Now over-write the original Word file with the XML file, so that default XML file handling will work
-        if(($fp = fopen($this->filename, "wb"))) {
+        if(($fp = fopen($filename, "wb"))) {
             if(($nbytes = fwrite($fp, $xslt_output)) == 0) {
-                echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $this->filename));
+                echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $filename));
                 return false;
             }
             fclose($fp);
@@ -337,7 +353,7 @@ class qformat_wordtable extends qformat_xml {
      */
     function presave_process( $content ) {
         // override method to allow us convert to Word-compatible XHTML format
-        global $CFG, $USER;
+        global $CFG, $USER, $COURSE;
         global $OUTPUT;
 
         debugging(__FUNCTION__ . '($content = "' . str_replace("\n", "", substr($content, 80, 500)) . ' ...")', DEBUG_DEVELOPER);
@@ -388,8 +404,8 @@ class qformat_wordtable extends qformat_xml {
 
         // Set parameters for XSLT transformation. Note that we cannot use arguments though
         $parameters = array (
-            'course_id' => $this->course->id,
-            'course_name' => $this->course->fullname,
+            'course_id' => $COURSE->id,
+            'course_name' => $COURSE->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
             'moodle_country' => $USER->country,
             'moodle_language' => current_language(),
