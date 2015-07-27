@@ -308,7 +308,9 @@
             <!-- End Multi-choice -->
         </xsl:when>
         <xsl:when test="$qtype = 'MA' or $qtype = 'MULTI-ANSWER'">
-            <xsl:attribute name="type"><xsl:value-of select="'multichoice'"/></xsl:attribute>
+            <xsl:attribute name="type">
+                <xsl:value-of select="'multichoice'"/>
+            </xsl:attribute>
             <xsl:call-template name="itemStem">
                 <xsl:with-param name="table_root" select="$table_root"/>
                 <xsl:with-param name="qtype" select="$qtype"/>
@@ -369,7 +371,7 @@
 
             <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns]">
                 <subquestion>
-                    <xsl:if test="$moodleReleaseNumber &gt; '1'">
+                    <xsl:if test="$moodleReleaseNumber &gt; '19'">
                         <xsl:attribute name="format"><xsl:text>html</xsl:text></xsl:attribute>
                     </xsl:if>
 
@@ -441,7 +443,7 @@
         </xsl:choose>
 
         <!-- Handle any hints that are included, three rows for each successive hint -->
-        <xsl:if test="$moodleReleaseNumber &gt; '1'">
+        <xsl:if test="$moodleReleaseNumber &gt; '19'">
             <xsl:variable name="hintn_prefix" select="normalize-space(substring-before($hintn_label, '{no}'))"/>
             <xsl:for-each select="$table_root/x:tbody/x:tr[starts-with(x:th, $hintn_prefix)]">
                 <xsl:variable name="current_hint_row_num" select="position()"/>
@@ -489,7 +491,7 @@
 
         <!-- Handle any tags that are included - all in one cell, comma-separated, no distinction between pre-defined and free tags -->
         <xsl:variable name="tags_row" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $tags_label)]/x:td[position() = $tags_colnum]/*"/>
-        <xsl:if test="$moodleReleaseNumber &gt; '1' and normalize-space($tags_row) != '' and normalize-space($tags_row) != '&#160;' and normalize-space($tags_row) != '_'">
+        <xsl:if test="$moodleReleaseNumber &gt; '19' and normalize-space($tags_row) != '' and normalize-space($tags_row) != '&#160;' and normalize-space($tags_row) != '_'">
             <tags>
                 <xsl:choose>
                 <xsl:when test="contains($tags_row, ',')">
@@ -655,7 +657,6 @@
 
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('$cloze_distractor_answer_string:', $cloze_distractor_answer_string)"/>
-        <xsl:with-param name="condition" select="$debug_flag &gt;= 2"/>
     </xsl:call-template>
 
     <!-- Multiple try handling -->
@@ -780,9 +781,9 @@
     <!-- Specific metadata for each question type -->
     <xsl:choose>
     <!-- If the type is Essay, and it is generated from Moodle 2.x, it might have a response template -->
-    <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber &lt;= '1'">
+    <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber = '19'">
     </xsl:when>
-    <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber &gt; '1'">
+    <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber &gt; '19'">
         <xsl:if test="$moodleReleaseNumber &gt;= '25'">
             <responseformat><xsl:value-of select="$response_format_value"/></responseformat>
 
@@ -853,7 +854,7 @@
     </xsl:choose>
 
     <!-- Handle the Correct/Incorrect/Partially Correct feedback -->
-    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '1')">
+    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
         <xsl:variable name="cfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Correct') or starts-with(normalize-space(x:th), $correctfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="ifb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Incorrect') or starts-with(normalize-space(x:th), $incorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="pcfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Partial') or starts-with(normalize-space(x:th), $pcorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
@@ -993,7 +994,7 @@
             
             <!-- Specific feedback for the current answer -->
             <feedback>
-                <xsl:if test="$moodleReleaseNumber &gt; '1'">
+                <xsl:if test="$moodleReleaseNumber &gt; '19'">
                     <xsl:attribute name="format"><xsl:text>html</xsl:text></xsl:attribute>
                 </xsl:if>
                 <xsl:call-template name="rich_text_content">
@@ -1268,7 +1269,7 @@
         <!-- MC subquestion contains Moodle keywords, so no need to process it further -->
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('No Cloze processing required: ', $correct_option)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt;= 2"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
         <xsl:value-of select="$correct_option"/>
     </xsl:when>
@@ -1276,7 +1277,7 @@
         <!-- Text doesn't starts with grade indicator ('%' or '='), but does contain distractors delimited by ~, so prefix the first entry with a correct indicator -->
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('Minimum Cloze processing required: ', $correct_option)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt;= 2"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
         <xsl:value-of select="concat($cloze_mc_prefix, $cloze_correct_prefix2, $correct_option, $cloze_end_delimiter)"/>
     </xsl:when>
@@ -1284,14 +1285,14 @@
         <!-- Text starts with grade indicator (percent or '='), so just wrap the content with the keyword prefix and suffix, omitting distractors -->
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('Minimum Cloze processing required: ', $correct_option)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt;= 2"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
         <xsl:value-of select="concat($cloze_mc_prefix, $correct_option, $cloze_end_delimiter)"/>
     </xsl:when>
     <xsl:otherwise>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('Full Cloze processing required: ', $correct_option)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt;= 2"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
         <!-- Standard MC case, so process the correct answer, add other answers as distractors, and add generic distractors (if any) too-->
 
@@ -1308,7 +1309,7 @@
         </xsl:variable>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('$other_mc_answers: ', $other_mc_answers)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt;= 2"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
 
         <!-- Get the common distractor list, but remove the SA wildcard distractor '*', if present -->
@@ -1324,7 +1325,7 @@
         </xsl:variable>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('$other_distractor_answers_string: ', $other_distractor_answers_string)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt;= 2"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
 
         <!-- Assemble the complete string, consisting of the current subquestion, other subquestions as distractors, and the generic distractors -->
@@ -1652,7 +1653,7 @@
   <xsl:param name="inline" select="'false'"/>
   <xsl:param name="condition" select="'true'"/>
 
-  <xsl:if test="boolean($condition) and $debug_flag &gt;= 1">
+  <xsl:if test="boolean($condition) and $debug_flag != '0'">
     <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
     <xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
     <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
