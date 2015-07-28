@@ -307,9 +307,12 @@
             </xsl:for-each>
             <!-- End Multi-choice -->
         </xsl:when>
-        <xsl:when test="$qtype = 'MA' or $qtype = 'MULTI-ANSWER'">
+        <xsl:when test="$qtype = 'MA' or $qtype = 'MS' or $qtype = 'MULTI-ANSWER'">
             <xsl:attribute name="type">
                 <xsl:value-of select="'multichoice'"/>
+                <xsl:if test="$qtype = 'MS'">
+                    <xsl:value-of select="'set'"/>
+                </xsl:if>
             </xsl:attribute>
             <xsl:call-template name="itemStem">
                 <xsl:with-param name="table_root" select="$table_root"/>
@@ -570,7 +573,7 @@
         <xsl:when test="$qtype = 'MAT'">
             <xsl:value-of select="$mat_shuffle_label"/>
         </xsl:when>
-        <xsl:when test="$qtype = 'MA' or $qtype = 'MC'">
+        <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
             <xsl:value-of select="$mcq_shuffleanswers_label"/>
         </xsl:when>
         <xsl:otherwise> <!-- Make sure the label isn't match if the question type does not contain a shuffle flag -->
@@ -657,6 +660,7 @@
 
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('$cloze_distractor_answer_string:', $cloze_distractor_answer_string)"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
     </xsl:call-template>
 
     <!-- Multiple try handling -->
@@ -764,11 +768,12 @@
 
     <!-- Set other Moodle XML details, using defaults based on question type -->
     <!-- Default grade set for all qustion types except Cloze -->
-    <xsl:if test="$qtype = 'DE' or $qtype = 'ES' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'">
+    <xsl:if test="$qtype != 'CL'">
+        <defaultgrade><xsl:value-of select="$questionWeight"/></defaultgrade>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('defaultmark_label: ', $defaultmark_label, '; Default mark: ', $qweight_string)"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
-        <defaultgrade><xsl:value-of select="$questionWeight"/></defaultgrade>
     </xsl:if>
 
     <!-- Penalty set for all question types, although it is 0 for some (e.g. DE, ES -->
@@ -838,7 +843,7 @@
     <xsl:when test="$qtype = 'SA'">
         <usecase><xsl:value-of select="$casesensitive_value"/></usecase>
     </xsl:when>
-    <xsl:when test="$qtype = 'MA'">
+    <xsl:when test="$qtype = 'MA' or $qtype = 'MS'">
         <single>false</single>
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
         <answernumbering><xsl:value-of select="$answerNumbering_value"/></answernumbering>
@@ -854,7 +859,7 @@
     </xsl:choose>
 
     <!-- Handle the Correct/Incorrect/Partially Correct feedback -->
-    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
+    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
         <xsl:variable name="cfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Correct') or starts-with(normalize-space(x:th), $correctfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="ifb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Incorrect') or starts-with(normalize-space(x:th), $incorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="pcfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Partial') or starts-with(normalize-space(x:th), $pcorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
@@ -862,7 +867,7 @@
         <xsl:variable name="showNumCorrect_flag" select="normalize-space(translate($table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $showNumCorrect_label)]/x:td[position() = $generic_feedback_colnum]/*, $ucase, $lcase))"/>
         <xsl:variable name="showNumCorrect_value">
             <xsl:choose>
-            <xsl:when test="$qtype = 'MA' and starts-with($showNumCorrect_flag, $yes_label)">
+            <xsl:when test="($qtype = 'MA' or $qtype = 'MS') and starts-with($showNumCorrect_flag, $yes_label)">
                 <xsl:text>true</xsl:text>
             </xsl:when>
             <xsl:otherwise><xsl:text>false</xsl:text></xsl:otherwise>
@@ -880,11 +885,13 @@
                 <xsl:with-param name="content" select="$cfb"/>
             </xsl:call-template>
         </correctfeedback>
-        <partiallycorrectfeedback format="html">
-            <xsl:call-template name="rich_text_content">
-                <xsl:with-param name="content" select="$pcfb"/>
-            </xsl:call-template>
-        </partiallycorrectfeedback>
+        <xsl:if test="$qtype != 'MS'">
+            <partiallycorrectfeedback format="html">
+                <xsl:call-template name="rich_text_content">
+                    <xsl:with-param name="content" select="$pcfb"/>
+                </xsl:call-template>
+            </partiallycorrectfeedback>
+        </xsl:if>
         <incorrectfeedback format="html">
             <xsl:call-template name="rich_text_content">
                 <xsl:with-param name="content" select="$ifb"/>
@@ -934,7 +941,7 @@
         <!-- Test for empty or non-breaking space, as happens in original T/F question template -->
         <xsl:when test="$grade_cell = '&#xa0;'"><xsl:text>0</xsl:text></xsl:when>
         <!-- Test for correct and incorrect symbols, but it is never used, I think -->
-        <xsl:when test="$grade_cell = '&#x2611;' and $qtype = 'MA'"><xsl:value-of select="'50'"/></xsl:when>
+        <xsl:when test="$grade_cell = '&#x2611;' and ($qtype = 'MA' or $qtype = 'MS')"><xsl:value-of select="'50'"/></xsl:when>
         <xsl:when test="$grade_cell = '&#x2611;' and $qtype = 'MC'"><xsl:value-of select="'100'"/></xsl:when>
         <xsl:when test="$grade_cell = '&#x2612;'"><xsl:value-of select="'0'"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$grade_cell"/></xsl:otherwise>
@@ -950,7 +957,7 @@
 
     <xsl:variable name="answer_format">
         <xsl:choose>
-        <xsl:when test="$qtype = 'MA' or $qtype = 'MC'">
+        <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
             <xsl:text>html</xsl:text>
         </xsl:when>
         <xsl:when test="$qtype = 'SA' or $qtype = 'TF'">
@@ -963,7 +970,7 @@
     <!--<xsl:comment>option: <xsl:value-of select="$plain_text"/>; feedback: <xsl:value-of select="td[position() = $generic_feedback_colnum]"/>; grade: <xsl:value-of select="$fraction"/></xsl:comment>-->
 
     <!-- Include an answer for all questions except Description and Cloze -->
-    <xsl:if test="$qtype = 'ES' or $qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF'">
+    <xsl:if test="$qtype != 'DE' and $qtype != 'CL'">
         <answer fraction="{$fraction_value}">
             <xsl:if test="$answer_format != ''">
             <xsl:attribute name="format">
