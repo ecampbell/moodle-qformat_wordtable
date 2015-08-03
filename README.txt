@@ -2,6 +2,7 @@ Release notes
 -------------
 
 Date          Version   Comment
+2015/08/03    3.2.1     Grab extra memory to allow very large Word files to be imported
 2015/08/01    3.2.0     Support All-or-Nothing Multiple Choice import and export
 2015/07/27    3.1.11    Support question export for all built-in question types
 2015/07/25    3.1.10    Support question import in Lessons
