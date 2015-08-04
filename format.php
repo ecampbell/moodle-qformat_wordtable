@@ -452,10 +452,12 @@ class qformat_wordtable extends qformat_xml {
 
         $this->debug_unlink($temp_xhtm_filename);
 
+        // Strip out any redundant namespace attributes, which XSLT on Windows seems to add
+        $xslt_output = str_replace(' xmlns=""', '', $xslt_output);
+        $xslt_output = str_replace(' xmlns="http://www.w3.org/1999/xhtml"', '', $xslt_output);
+
         // Strip off the XML declaration, if present, since Word doesn't like it
-        //$content = substr($xslt_output, strpos($xslt_output, ">"));
         if (strncasecmp($xslt_output, "<?xml ", 5) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Stripping out XML declaration (line 1)", DEBUG_DEVELOPER);
             $content = substr($xslt_output, strpos($xslt_output, "\n"));
         } else {
             $content = $xslt_output;
@@ -483,6 +485,9 @@ class qformat_wordtable extends qformat_xml {
     private function get_text_labels() {
 
         global $CFG;
+
+        debugging(__FUNCTION__ . "()", DEBUG_DEVELOPER);
+
         // Release-independent list of all strings required in the XSLT stylesheets for labels etc.
         $textstrings = array(
             'grades' => array('item'),
@@ -514,11 +519,17 @@ class qformat_wordtable extends qformat_xml {
         }
         if ($CFG->release >= '2.7') {
             $textstrings['qtype_essay'][] = 'attachmentsrequired';
-        }
-        if ($CFG->release >= '2.9') {
             $textstrings['qtype_essay'][] = 'responserequired';
             $textstrings['qtype_essay'][] = 'responseisrequired';
             $textstrings['qtype_essay'][] = 'responsenotrequired';
+        }
+
+        // Add All-or-Nothing MCQ question type strings if present
+        $qtype = question_bank::get_qtype('multichoiceset', false);
+        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": multichoiceset exists", DEBUG_DEVELOPER);
+            $textstrings['qtype_multichoiceset'][] = 'pluginnamesummary';
+            $textstrings['qtype_multichoiceset'][] = 'showeachanswerfeedback';
         }
 
         $expout = "<moodlelabels>\n";

@@ -164,6 +164,10 @@
 <xsl:variable name="showNumCorrect_label" select="$moodle_labels/data[@name = 'question_shownumpartscorrectwhenfinished']"/>
 <xsl:variable name="multichoice_instructions" select="concat($moodle_labels/data[@name = 'qtype_multichoice_pluginnamesummary'], ' (MC/MA)')"/>
 
+<!-- Multichoice Set (All-or-Nothing Multichoice) question labels -->
+<xsl:variable name="multichoiceset_showeachanswerfeedback_label" select="$moodle_labels/data[@name = 'qtype_multichoiceset_showeachanswerfeedback']"/>
+<xsl:variable name="multichoiceset_instructions" select="$moodle_labels/data[@name = 'qtype_multichoiceset_pluginnamesummary']"/>
+
 <!-- Short Answer question labels -->
 <xsl:variable name="casesensitive_label" select="$moodle_labels/data[@name = 'qtype_shortanswer_casesensitive']"/>
 <xsl:variable name="shortanswer_correctanswers_label" select="$moodle_labels/data[@name = 'qtype_shortanswer_correctanswers']"/>
@@ -483,10 +487,27 @@
                         </xsl:variable>
                         <!--
                         <xsl:comment><xsl:value-of select="concat('current_row: ', $current_hint_row_num, '; clearwrongparts: ', $current_hint_clearwrongparts_flag, '; following-sibling::x:tr[2]/x:td[1]: ', following-sibling::x:tr[2]/x:td[1])"/></xsl:comment>
-                     -->
+                         -->
                         <xsl:if test="contains($current_hint_clearwrongparts_flag, $yes_label)">
                             <clearwrong/>
                         </xsl:if>
+
+                        <!-- Get the 3rd row following the hint, check if it has a MS-specific label, defining the handling of the hint (show response feedback) -->
+                        <xsl:if test="$qtype = 'MS'">
+                            <xsl:variable name="current_hint_showeachanswerfeedback_flag">
+                                <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[3]/x:th), $ucase, $lcase), translate($multichoiceset_showeachanswerfeedback_label, $ucase, $lcase))">
+                                    <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[3]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
+                                </xsl:if>
+                            </xsl:variable>
+                            <xsl:call-template name="debugComment">
+                                <xsl:with-param name="comment_text" select="concat('multichoiceset_showeachanswerfeedback_label: ', $multichoiceset_showeachanswerfeedback_label, '; Show Response: ', $current_hint_showeachanswerfeedback_flag)"/>
+                                <xsl:with-param name="condition" select="$debug_flag &gt;= '1'"/>
+                            </xsl:call-template>
+                            <xsl:if test="contains($current_hint_showeachanswerfeedback_flag, $yes_label)">
+                                <options>1</options>
+                            </xsl:if>
+                        </xsl:if>
+
                     </hint>
                 </xsl:if>
             </xsl:for-each>
@@ -792,8 +813,8 @@
         <xsl:if test="$moodleReleaseNumber &gt;= '25'">
             <responseformat><xsl:value-of select="$response_format_value"/></responseformat>
 
-            <!-- Essays (2.9+): Is text response required? -->
-            <xsl:if test="$moodleReleaseNumber &gt;= '29'">
+            <!-- Essays (2.7+): Is text response required? -->
+            <xsl:if test="$moodleReleaseNumber &gt;= '27'">
                 <xsl:variable name="responseRequired_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responserequired_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
                 <!-- 0 = not required, 1 = required -->
                 <xsl:variable name="responseRequired_value">
@@ -864,7 +885,17 @@
         <xsl:variable name="ifb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Incorrect') or starts-with(normalize-space(x:th), $incorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="pcfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Partial') or starts-with(normalize-space(x:th), $pcorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <!-- Show number of correct responses when finished? -->
-        <xsl:variable name="showNumCorrect_flag" select="normalize-space(translate($table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $showNumCorrect_label)]/x:td[position() = $generic_feedback_colnum]/*, $ucase, $lcase))"/>
+        <xsl:variable name="showNumCorrect_flag">
+            <xsl:choose>
+            <xsl:when test="$qtype = 'MS'">
+                <xsl:value-of select="normalize-space(translate($table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $hint_shownumcorrect_label)]/x:td[position() = $generic_feedback_colnum]/*, $ucase, $lcase))"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="normalize-space(translate($table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $showNumCorrect_label)]/x:td[position() = $generic_feedback_colnum]/*, $ucase, $lcase))"/>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
         <xsl:variable name="showNumCorrect_value">
             <xsl:choose>
             <xsl:when test="($qtype = 'MA' or $qtype = 'MS') and starts-with($showNumCorrect_flag, $yes_label)">
