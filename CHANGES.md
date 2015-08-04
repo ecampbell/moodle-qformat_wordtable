@@ -1,9 +1,8 @@
-Release notes
--------------
+# Change log
 
 Date          Version   Comment
 2015/08/04    3.2.1     Grab extra memory to allow very large Word files to be imported,
-                        fix Essay and All-or-Nothing question type issues, etc.
+                        fix Essay and All-or-Nothing question type issues
 2015/08/01    3.2.0     Support All-or-Nothing Multiple Choice import and export
 2015/07/27    3.1.11    Support question export for all built-in question types
 2015/07/25    3.1.10    Support question import in Lessons
@@ -22,3 +21,46 @@ Date          Version   Comment
 2015/02/20    3.0.0     Support import of Word 2010 (.docx) documents, remove all question import limits,
                         and use of an external conversion server.
                         Also add support for tables and lists inside item components.
+
+2014/10/08    2.10.1    Fix bug in handling of image filenames containing spaces.
+2014/08/12    2.10      Support case-sensitivity and selection style and orientation in Cloze Short Answer / Multiple choice subquestions.
+                        Support specification of default mark in Cloze questions. Fix merging of paragraphs.
+2014/07/10    2.9.2     Fix syntax error in db/install.php
+2014/07/10    2.9.1     Fix error in registration process set-up, which prevented registration to set 10-question limit.
+
+2014/06/17    2.9       Use default username and password for importing Word files to make Registration optional.
+                        Handle named numeric entities (e.g. &nbsp;) by converting them to numeric entities 
+                        instead (i.e. &#160;) to avoid XSLT processing errors.
+
+2014/05/12    2.8.5     Handle invalid 'complete="true"' attribute in images, fix loop through all CDATA 
+                        sections, keep tr elements when cleaning HTML manually.
+
+2014/05/07    2.8.4     Fix error in image handling in Moodle 1.9, add work-around to cope with XSLT 
+                        idiosyncrasies that insert namespace declaration on wrong element, breaking the
+                        Word export facility. Fix mishandling of Hints in Short Answer export.
+
+2014/05/04    2.8.3     Improve image handling to properly export any images used inside feedback text.
+
+2014/05/03    2.8.2     Handle images with names that include spaces or other non-alphanumeric characters.
+
+2014/05/02    2.8.1     CONTRIB-5028: clean up HTML markup better (using strip_tags) if the PHP tidy 
+                        extension is not installed.
+
+2014/04/28    2.8       Use the PHP tidy extension to ensure that any HTML inside CDATA sections is well-formed
+                        XHTML, otherwise Word export fails.
+
+2014/02/27    2.7.1     Add Word export support for RTL languages such as Arabic and Hebrew.
+
+2014/02/03    2.7       Add Word export support for languages other than English, using labels in the language
+                        of the users' current interface language selection. Also support new Moodle 2.x
+                        question features such as Hints and Tags.
+
+2014/01/03    2.6       Add support for including any images used in questions exported into a Word file, in a
+                        two-stage process that also requires using a command in the Moodle2Word Word template to
+                        embed the encoded images into the file.
+
+2013/12/20    2.5       Improve handling of CDATA text that includes HTML markup, and the Moodle 1.9 question
+                        textancillary image element.
+
+2013/03/15    2.4       Improve handling of Cloze question formatting when exporting to Word format.
+
