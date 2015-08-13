@@ -143,7 +143,7 @@ class qformat_wordtable extends qformat_xml {
 
         // Open the Word 2010 Zip-formatted file and extract the WordProcessingML XML files
         $zfh = zip_open($filename);
-        if ($zfh) {
+        if (is_resource($zfh)) {
             $zip_entry = zip_read($zfh);
             while ($zip_entry !== FALSE) {
                 if (zip_entry_open($zfh, $zip_entry, "r")) {
