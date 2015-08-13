@@ -214,13 +214,13 @@ class qformat_wordtable extends qformat_xml {
                 }
                 // Get the next file in the Zip package
                 $zip_entry = zip_read($zfh);
+            zip_close($zfh);
             }  // End while
         } else { // Can't open the Word .docx file for reading
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $filename));
             $this->debug_unlink($zipfile);
             return false;
         }
-        zip_close($zfh);
 
         // Add Base64 images section and close the merged XML file
         $wordmlData .= "<imagesContainer>\n" . $imageString . "</imagesContainer>\n"  . "</pass1Container>";
