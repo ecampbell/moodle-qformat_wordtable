@@ -572,7 +572,7 @@ class qformat_wordtable extends qformat_xml {
         for ($i = 0; $i < $n_questions; $i++) {
             $question_type = $question_matches[$i][2];
             $question_content = $question_matches[$i][3];
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i + 1 . " of $n_questions, type $question_type, question length = " . strlen($question_content), DEBUG_DEVELOPER);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i . " of $n_questions, type $question_type, question length = " . strlen($question_content), DEBUG_DEVELOPER);
             // Split the question into chunks at CDATA boundaries, using an ungreedy search (?), and matching across newlines (s modifier)
             $found_cdata_sections = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $question_content, $cdata_matches, PREG_SET_ORDER);
             // Has the question been imported using WordTable? If so, assume it is clean and don't process it
@@ -646,9 +646,25 @@ class qformat_wordtable extends qformat_xml {
             // The strip_tags function treats empty elements like HTML, not XHTML, so fix <br> and <img src=""> manually (i.e. <br/>, <img/>)
             $clean_html = str_replace('<br>', '<br/>', $clean_html);
             $clean_html = str_replace('<hr>', '<hr/>', $clean_html);
-            $clean_html = preg_replace('~<img([^>]*?)/?>~si', '<img$1/>', $clean_html, PREG_SET_ORDER);
             $clean_html = preg_replace('~<br([^>]*?)/?>~si', '<br/>', $clean_html, PREG_SET_ORDER);
             $clean_html = preg_replace('~<hr([^>]*?)/?>~si', '<hr/>', $clean_html, PREG_SET_ORDER);
+
+            // Look for img tags and process them one at a time, because multiple images per line seems to fail
+            $found_imgs = preg_match_all('~(.*?)<img([^>]*?)>~si', $clean_html, $img_matches, PREG_SET_ORDER);
+            $n_img_matches = count($img_matches);
+            if ($found_imgs !== FALSE and $found_imgs != 0) {
+                debugging(__FUNCTION__ . ":" . __LINE__ . ": $n_img_matches imgs found: |" . $img_matches[0][0] . "|", DEBUG_DEVELOPER);
+                // Process the img element
+                $cleaned_images_string = "";
+                for ($i = 0; $i < $n_img_matches; $i++) {
+                    // Ensure that the img has a closing /
+                    $img_attrs = $img_matches[$i][2];
+                    $revised_img_element = "<img" . $img_attrs . "/>";
+                    //debugging(__FUNCTION__ . ":" . __LINE__ . ": revised img element: |" . $revised_img_element . "|", DEBUG_DEVELOPER);
+                    $cleaned_images_string .= $img_matches[$i][1] . $revised_img_element;
+                }
+                $clean_html = $cleaned_images_string;
+            }
 
             // Look for named character entities (e.g. &nbsp;) and replace them with numeric ones, to avoid XSLT processing errors
             $found_numeric_entities = preg_match('~&[a-zA-Z]~', $clean_html);
