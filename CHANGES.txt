@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2015/08/19    3.2.2     Grab extra memory to allow very large Word files to be exported, handle HTML markup in exports better
 2015/08/04    3.2.1     Grab extra memory to allow very large Word files to be imported,
                         fix Essay and All-or-Nothing question type issues
 2015/08/01    3.2.0     Support All-or-Nothing Multiple Choice import and export

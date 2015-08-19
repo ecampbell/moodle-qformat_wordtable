@@ -393,6 +393,9 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
 
+        // Maximise memory available so that very large question banks can be exported
+        raise_memory_limit(MEMORY_HUGE);
+
         $clean_content = $this->clean_all_questions($content);
         //debugging(__FUNCTION__ . ":" . __LINE__ . ": Cleaned Question XML = |" . substr($clean_content, 0, 1000) . " ...|", DEBUG_DEVELOPER);
 
@@ -552,7 +555,7 @@ class qformat_wordtable extends qformat_xml {
      * @return string
      */
     private function clean_all_questions($input_string) {
-        debugging(__FUNCTION__ . "(input_string = " . str_replace("\n", "", substr($input_string, 0, 1000)) . " ...)", DEBUG_DEVELOPER);
+        debugging(__FUNCTION__ . "(input_string = " . str_replace("\n", "", substr($input_string, 0, 200)) . " ...)", DEBUG_DEVELOPER);
         // Start assembling the cleaned output string, starting with empty
         $clean_output_string =  "";
 
@@ -605,7 +608,7 @@ class qformat_wordtable extends qformat_xml {
             }
         } // End question element loop
 
-        debugging(__FUNCTION__ . "() -> " . substr($clean_output_string, 0, 1000) . "..." . substr($clean_output_string, -1000), DEBUG_DEVELOPER);
+        debugging(__FUNCTION__ . "() -> " . str_replace("\n", "", substr($clean_output_string, 0, 200)), DEBUG_DEVELOPER);
         return $clean_output_string;
 }
 
@@ -641,8 +644,11 @@ class qformat_wordtable extends qformat_xml {
             $clean_html = strip_tags($text_content_string, $keep_tag_list);
 
             // The strip_tags function treats empty elements like HTML, not XHTML, so fix <br> and <img src=""> manually (i.e. <br/>, <img/>)
+            $clean_html = str_replace('<br>', '<br/>', $clean_html);
+            $clean_html = str_replace('<hr>', '<hr/>', $clean_html);
             $clean_html = preg_replace('~<img([^>]*?)/?>~si', '<img$1/>', $clean_html, PREG_SET_ORDER);
             $clean_html = preg_replace('~<br([^>]*?)/?>~si', '<br/>', $clean_html, PREG_SET_ORDER);
+            $clean_html = preg_replace('~<hr([^>]*?)/?>~si', '<hr/>', $clean_html, PREG_SET_ORDER);
 
             // Look for named character entities (e.g. &nbsp;) and replace them with numeric ones, to avoid XSLT processing errors
             $found_numeric_entities = preg_match('~&[a-zA-Z]~', $clean_html);
