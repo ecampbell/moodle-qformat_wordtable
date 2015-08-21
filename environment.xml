@@ -2,7 +2,6 @@
   <PLUGIN name="qformat_wordtable">
     <PHP_EXTENSIONS>
       <PHP_EXTENSION name="xsl" level="required" />
-      <PHP_EXTENSION name="tidy" level="optional" />
     </PHP_EXTENSIONS>
   </PLUGIN>
 </COMPATIBILITY_MATRIX>
