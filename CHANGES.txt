@@ -1,7 +1,7 @@
 # Change log
 
 Date          Version   Comment
-2015/08/21    3.2.3     Use DOMDocument to convert HTML into XHTML, avoiding the need for Tidy, and better results than strip_tags
+2015/09/01    3.3.0     Improve reliability of the export process by changing how question text is converted from HTML to XHTML
 2015/08/19    3.2.2     Grab extra memory to allow very large Word files to be exported, handle HTML markup in exports better
 2015/08/04    3.2.1     Grab extra memory to allow very large Word files to be imported,
                         fix Essay and All-or-Nothing question type issues
