@@ -631,9 +631,9 @@ class qformat_wordtable extends qformat_xml {
         $body_start = stripos($xml, '<body>') + strlen('<body>');
         $body_length = strripos($xml, '</body>') - $body_start;
         //debugging(__FUNCTION__ . ":" . __LINE__ . ": body_start = {$body_start}, body_length = {$body_length}", DEBUG_DEVELOPER);
-        if ($body_offset  !== FALSE || $end_body_offset !== FALSE) {
+        if ($body_start  !== FALSE || $body_length !== FALSE) {
             $clean_xhtml = substr($xml, $body_start, $body_length);
-            //debugging(__FUNCTION__ . ":" . __LINE__ . ": xhtml: |" . $clean_xhtml . "|", DEBUG_DEVELOPER);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": clean xhtml: |" . $clean_xhtml . "|", DEBUG_DEVELOPER);
         } else {
             debugging(__FUNCTION__ . "() -> Invalid XHTML, using original cdata string", DEBUG_DEVELOPER);
             $clean_xhtml = $cdata_string;
