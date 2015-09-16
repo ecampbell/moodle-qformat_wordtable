@@ -2711,11 +2711,18 @@
                 <xsl:otherwise>
                 </xsl:otherwise>
             </xsl:choose>
+            <!-- Not sure if w:hyperlink/@w:target exists, cf. http://officeopenxml.com/WPhyperlink.php -->
             <xsl:for-each select="@w:target">
                 <xsl:attribute name="target">
                     <xsl:value-of select="."/>
                 </xsl:attribute>
             </xsl:for-each>
+            <!-- Open link in new or named window, cf. http://officeopenxml.com/WPhyperlink.php -->
+            <xsl:if test="@w:tgtFrame">
+                <xsl:attribute name="target">
+                    <xsl:value-of select="@w:tgtFrame"/>
+                </xsl:attribute>
+            </xsl:if>
             <xsl:for-each select="@w:screenTip">
                 <xsl:attribute name="title">
                     <xsl:value-of select="."/>
