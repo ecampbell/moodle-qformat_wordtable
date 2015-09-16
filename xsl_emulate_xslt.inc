@@ -14,7 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: $
+/**
+ * Convert Word tables into Moodle Question XML format
+ *
+ * @package qformat_wordtable
+ * @copyright 2010-2015 Eoin Campbell
+ * @copyright 2005 Ziba Scott
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 
 // This file is copied from moodle/backup/bb/xsl_emulate_xslt.inc
 
@@ -29,30 +37,43 @@
 // This silliness is required to prevent PHP from evaluating the function() blocks before processing the return;s
 if(true) {
 
+    if(function_exists('xslt_create')) return;     // xslt_create() already exists, so emulation isn't needed.
+    if(!class_exists('XSLTProcessor')) return;     // There is no XSLTProcessor class, so emulation isn't possible.
+    if(!class_exists('DOMDocument')) return;       // There is no DOMDocument class, so emulation isn't possible.
 
-if(function_exists('xslt_create')) return;     // xslt_create() already exists, so emulation isn't needed.
-if(!class_exists('XSLTProcessor')) return;     // There is no XSLTProcessor class, so emulation isn't possible.
-if(!class_exists('DOMDocument')) return;       // There is no DOMDocument class, so emulation isn't possible.
+    /**
+     * Dummy function to call XSLT processor if not already defined
+     *
+     * @return XSLTProcessor object
+     */
+    function xslt_create() {
+        return new XSLTProcessor();
+    }
 
 
+    /**
+     * Mimic xslt_create function call using XSLTProcessor
+     *
+     * @param $proc XSLT object
+     * @param $xmlfile XML file to process
+     * @param $xslfile to process XML with
+     * @param $resultfile containing output
+     * @param $unsupported_args dummy
+     * @param $parameters dummy
+     * @return boolean true if transformation succeeded
+     */
+    function xslt_process($proc, $xmlfile, $xslfile, $resultfile = null, $unsupported_args = null, $parameters = null) {
+        $doc = new DOMDocument;
+        $doc->load($xmlfile);
+        $xsl = new DOMDocument;
+        $xsl->load($xslfile);
 
-function xslt_create() {
-       return new XSLTProcessor();
-}
+        // Set the html template file parameter
+        foreach ($parameters as $param_name => $param_value) {
+            $proc->setParameter('', $param_name, $param_value);
+        }
 
-// We don't support arguments at present
-function xslt_process($proc, $xmlfile, $xslfile, $resultfile = null, $unsupported_args = null, $parameters = null) {
-       $doc = new DOMDocument;
-       $doc->load($xmlfile);
-       $xsl = new DOMDocument;
-       $xsl->load($xslfile);
-
-	// Set the html template file parameter
-	foreach ($parameters as $param_name => $param_value) {
-		$proc->setParameter('', $param_name, $param_value);
-	}
-
-	$proc->importStylesheet($xsl);
+        $proc->importStylesheet($xsl);
 
        // Squash warnings here because xsl complains about COURSE_ACCESS tags which really are invalid XML (multiple root elements)
        if($resultfile !== null) {
@@ -63,6 +84,6 @@ function xslt_process($proc, $xmlfile, $xslfile, $resultfile = null, $unsupporte
        } else {
                return @$proc->transformToXML($doc);
        }
-}
+    }
 
 } // end if(true)
