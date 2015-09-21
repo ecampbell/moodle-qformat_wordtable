@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2015/09/21    3.4.0     Convert Microsoft Equation Editor equations into MathML for display by MathJax
 2015/09/16    3.3.2     Improve code formatting to comply better with Moodle guidelines
 2015/09/16    3.3.1     Support target attribute in hyperlinks to allow links to open in new window
 2015/09/01    3.3.0     Improve reliability of the question exports if question text content is badly formatted

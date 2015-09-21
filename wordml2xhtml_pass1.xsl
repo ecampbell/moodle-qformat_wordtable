@@ -21,6 +21,7 @@
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:dcmitype="http://purl.org/dc/dcmitype/"
+    xmlns:mml="http://www.w3.org/1998/Math/MathML"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     exclude-result-prefixes="a cp dc dcterms dcmitype xsi o r v ve w wne wp wx w10 xs rels vt customProps"
@@ -84,6 +85,8 @@
  * @author Eoin Campbell
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
 -->
+
+    <xsl:include href="omml2mml.xsl"/>
 
     <xsl:param name="debug_flag" select="'0'"/>
 
@@ -4814,6 +4817,17 @@
             <xsl:otherwise>
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+    <!-- Handle equations by converting them to MathML -->
+    <xsl:template match="m:oMathPara">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="m:oMath">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <xsl:apply-templates />
+        </math>
     </xsl:template>
 
     <!-- Footnote references -->

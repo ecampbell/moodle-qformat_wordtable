@@ -27,6 +27,7 @@
     xmlns="http://www.w3.org/1999/xhtml"
     xmlns:x="http://www.w3.org/1999/xhtml"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:mml="http://www.w3.org/1998/Math/MathML"
     exclude-result-prefixes="x"
     version="1.0">
     <xsl:output method="xml" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
@@ -52,7 +53,7 @@
     <xsl:template match="*">
         <xsl:copy>
             <xsl:apply-templates select="@*"/>
-            <xsl:apply-templates select="*"/>
+            <xsl:apply-templates/>
         </xsl:copy>
     </xsl:template>
 
@@ -65,6 +66,8 @@
         <xsl:value-of select="translate(., '&#x2009;', '&#x202f;')"/>
     </xsl:template>
     
+    <xsl:template match="@mathvariant"/>
+
     <!-- Remove empty class attributes -->
     <xsl:template match="@class[.='']"/>
     
