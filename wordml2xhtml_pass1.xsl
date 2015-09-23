@@ -4841,6 +4841,11 @@
         <xsl:apply-templates select="//wordmlContainer/w:document"/>
     </xsl:template>
 
+  <!-- Handle w:dir, which Word sometimes wraps around w:r elements in RTL texts -->
+  <xsl:template match="w:dir">
+    <xsl:apply-templates/>
+  </xsl:template>
+
     <!-- Roll up adjacent w:instrText elements to avoid splitting of Word field code 
     <xsl:template match="/">
         <xsl:variable name="instrText">
