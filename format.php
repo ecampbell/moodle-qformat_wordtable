@@ -38,8 +38,8 @@ require_once("$CFG->libdir/xmlize.php");
 require_once($CFG->dirroot.'/lib/uploadlib.php');
 
 // Development: turn on all debug messages and strict warnings.
-// define('DEBUG_WORDTABLE', E_NONE);
-define('DEBUG_WORDTABLE', E_ALL | E_STRICT);
+// define('DEBUG_WORDTABLE', E_ALL | E_STRICT);
+define('DEBUG_WORDTABLE', 0);
 
 // wordtable just extends XML import/export
 require_once("$CFG->dirroot/question/format/xml/format.php");
@@ -134,7 +134,8 @@ class qformat_wordtable extends qformat_xml {
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
-            'debug_flag' => debugging('', DEBUG_WORDTABLE)
+            'pluginname' => 'qformat_wordtable',
+            'debug_flag' => DEBUG_WORDTABLE
         );
 
         // Pre-XSLT conversion preparation - re-package the XML and image content from the .docx Word file into one large XML file, to simplify XSLT processing
@@ -195,13 +196,13 @@ class qformat_wordtable extends qformat_xml {
                           case "word/_rels/document.xml.rels":
                               $wordmlData .= "<documentLinks>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</documentLinks>\n";
                               break;
-                          /*
                           case "word/footnotes.xml":
                               $wordmlData .= "<footnotesContainer>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</footnotesContainer>\n";
                               break;
                           case "word/_rels/footnotes.xml.rels":
                               $wordmlData .= "<footnoteLinks>" . str_replace($xml_declaration, zip_entry_read($zip_entry, $ze_filesize), "") . "</footnoteLinks>\n";
                               break;
+                          /*
                           case "word/_rels/settings.xml.rels":
                               $wordmlData .= "<settingsLinks>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</settingsLinks>\n";
                               break;

@@ -89,6 +89,7 @@
     <xsl:include href="omml2mml.xsl"/>
 
     <xsl:param name="debug_flag" select="'0'"/>
+    <xsl:param name="pluginname"/>
 
     <xsl:output method="xml" encoding="utf-8" indent="no" omit-xml-declaration="yes"/>
 
@@ -2595,7 +2596,8 @@
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:variable>
-                    <a class="xref" href="{$href}"></a>
+                    <!-- Ignore cross-references -->
+                    <!--<a class="xref" href="{$href}"></a> -->
                 </xsl:when>
                 <xsl:when test="contains($refcontent, 'XE')">
                     <a class="index_term" href="{normalize-space(substring-after($refcontent, 'XE '))}"></a>
@@ -3677,9 +3679,11 @@
             <xsl:value-of select="$debug_newline"/>
             <xsl:element name="{$table_celltype}">
 
+        <xsl:if test="$sTblStyleName/@w:styleId != ''">
             <xsl:attribute name="class">
                 <xsl:value-of select="$sTblStyleName/@w:styleId"/>
             </xsl:attribute>
+        </xsl:if>
 
             <xsl:for-each select="w:tcPr[1]/w:gridSpan[1]/@w:val">
                 <xsl:attribute name="colspan">
@@ -3837,9 +3841,11 @@
         <xsl:value-of select="$debug_newline"/>
         <tr>
 
-        <xsl:attribute name="class">
-            <xsl:value-of select="$sTblStyleName/@w:styleId"/>
-        </xsl:attribute>
+        <xsl:if test="$sTblStyleName/@w:styleId != ''">
+            <xsl:attribute name="class">
+                <xsl:value-of select="$sTblStyleName/@w:styleId"/>
+            </xsl:attribute>
+        </xsl:if>
 
         <xsl:variable name="cnfRow" select="string(w:trPr[1]/w:cnfStyle[1]/@w:val)"/>
 
@@ -4621,6 +4627,7 @@
                         </xsl:for-each>
                         <xsl:value-of select="$debug_newline"/>
                     </imagesContainer>
+                    <xsl:value-of select="$debug_newline"/>
                 </xsl:if>
                 <!-- Image relationships from file word/_rels/document.xml.rels -->
                 <xsl:if test="$debug_flag &gt; 1">
@@ -4628,17 +4635,7 @@
                     <imageLinks>
                         <xsl:for-each select="$imageLinks">
                             <xsl:value-of select="$debug_newline"/>
-                            <Relationship Id="{@Id}" Target="{@Target}" TargetMode="{@TargetMode}">
-                                <xsl:variable name="ref_target" select="@Target"/>
-                                <xsl:choose>
-                                <xsl:when test="count($imagesContainer/file[@filename = $ref_target]) != 0">
-                                    <xsl:value-of select="concat('Matching file &quot;', $imagesContainer/file[@filename = $ref_target]/@filename, '&quot; found')"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="'No matching file found'"/>
-                                </xsl:otherwise>
-                                </xsl:choose>
-                            </Relationship>
+                            <Relationship Id="{@Id}" Target="{@Target}" TargetMode="{@TargetMode}"/>
                         </xsl:for-each>
                         <xsl:value-of select="$debug_newline"/>
                     </imageLinks>
@@ -4713,6 +4710,10 @@
                     </xsl:if>
                 </div>
             </body>
+            <!-- Keep original images data if importing directly into database -->
+            <xsl:if test="$pluginname = 'atto_wordimport'">
+                <xsl:apply-templates select="//imagesContainer"/>
+            </xsl:if>
         </html>
     </xsl:template>
     
@@ -4751,9 +4752,9 @@
         <!-- The wp:extent/@cx and @cy attributes define the size of the image. They are denominated in 
              EMUs (English Metric Units); 1 inch = 914400, therefore 1 pixel = 914400 / 96 (dpi) = 9525 
              cf. http://polymathprogrammer.com/2009/10/22/english-metric-units-and-open-xml/ -->
-        <!-- Map wp:extent/@cx field to width attribute -->
-        <xsl:variable name="img_width" select="wp:inline/wp:extent/@cx div 9525"/>
-        <xsl:variable name="img_height" select="wp:inline/wp:extent/@cy div 9525"/>
+        <!-- Map wp:extent/@cx and @cy fields to width/height, and round to integers -->
+        <xsl:variable name="img_width" select="substring-before(wp:inline/wp:extent/@cx div 9525, '.')"/>
+        <xsl:variable name="img_height" select="substring-before(wp:inline/wp:extent/@cy div 9525, '.')"/>
 
         <!-- Map description field to longdesc attribute -->
         <xsl:variable name="img_longdesc" select="wp:inline/wp:docPr/@descr"/>
@@ -4765,6 +4766,10 @@
         <!-- Store the image data or URL in the src attribute -->
         <xsl:variable name="img_src">
             <xsl:choose>
+            <xsl:when test="$img_rid != '' and $pluginname = 'atto_wordimport'">
+                <!-- Dereference the reference ID field to get the file name, and map to the src attribute -->
+                <xsl:value-of select="$imagesContainer/file[@filename = $img_filename]"/>
+            </xsl:when>
             <xsl:when test="$img_rid != ''">
                 <!-- Dereference the reference ID field to get the file name, and map to the src attribute -->
                 <xsl:value-of select="concat('data:', $imagesContainer/file[@filename = $img_filename]/@mime-type, ';base64,', $imagesContainer/file[@filename = $img_filename])"/>
@@ -4830,21 +4835,28 @@
         </math>
     </xsl:template>
 
-    <!-- Footnote references -->
+    <!-- Handle w:dir, which Word sometimes wraps around w:r elements in RTL texts like Arabic -->
+    <xsl:template match="w:dir">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <!-- Delete the bookmark marking the last cursor position-->
+    <xsl:template match="w:bookmarkStart[@w:name = '_GoBack']"/>
+    <xsl:template match="w:bookmarkEnd[@w:id = '0']"/>
+
+    <!-- Footnote references: ignore them for the moment -->
+    <xsl:template match="w:r[w:rPr/w:rStyle/@w:val = 'FootnoteReference' and w:footnoteReference]"/>
+    <!--
     <xsl:template match="w:footnoteReference">
         <sup>
             <a class="fnref" href="{concat('#', $footnoteRefLink, @w:id)}" name="{concat($footnoteLink, @w:id)}"/>
         </sup>
     </xsl:template>
+    -->
 
     <xsl:template match="/">
         <xsl:apply-templates select="//wordmlContainer/w:document"/>
     </xsl:template>
-
-  <!-- Handle w:dir, which Word sometimes wraps around w:r elements in RTL texts -->
-  <xsl:template match="w:dir">
-    <xsl:apply-templates/>
-  </xsl:template>
 
     <!-- Roll up adjacent w:instrText elements to avoid splitting of Word field code 
     <xsl:template match="/">
@@ -4866,7 +4878,7 @@
     </xsl:template>
 
 
-    <xsl:template match="imagesContainer|customProps">
+    <xsl:template match="imagesContainer|customProps|styleMap|imageLinks">
     <!--
         <xsl:comment>
             <xsl:value-of select="concat(name(), ' Container deleted')"/>
