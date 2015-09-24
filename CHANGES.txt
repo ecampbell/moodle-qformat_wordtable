@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2015/09/21    3.4.2     Minimise empty attributes in Pass 1 of conversion
 2015/09/21    3.4.1     Handle unusual WordML markup (w:dir) in RTL (e.g. Arabic) text
 2015/09/21    3.4.0     Convert Microsoft Equation Editor equations into MathML for display by MathJax
 2015/09/16    3.3.2     Improve code formatting to comply better with Moodle guidelines
