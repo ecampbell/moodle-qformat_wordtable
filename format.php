@@ -38,13 +38,13 @@ require_once("$CFG->libdir/xmlize.php");
 require_once($CFG->dirroot.'/lib/uploadlib.php');
 
 // Development: turn on all debug messages and strict warnings.
-// define('DEBUG_WORDTABLE', E_ALL | E_STRICT);
+// define('DEBUG_WORDTABLE', E_ALL | E_STRICT);.
 define('DEBUG_WORDTABLE', 0);
 
-// wordtable just extends XML import/export
+// The wordtable plugin just extends XML import/export.
 require_once("$CFG->dirroot/question/format/xml/format.php");
 
-// Include XSLT processor functions
+// Include XSLT processor functions.
 require_once(__DIR__ . "/xsl_emulate_xslt.inc");
 
 class qformat_wordtable extends qformat_xml {
@@ -61,7 +61,7 @@ class qformat_wordtable extends qformat_xml {
         return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
 
-    // IMPORT FUNCTIONS START HERE
+    // IMPORT FUNCTIONS START HERE.
 
     /**
      * Perform required pre-processing, i.e. convert Word file into XML
@@ -76,14 +76,14 @@ class qformat_wordtable extends qformat_xml {
         $realfilename = "";
         $filename = "";
 
-        // Handle question imports in Lesson module by using mform, not the question/format.php qformat_default class
-        if(property_exists('qformat_default', 'realfilename')) {
+        // Handle question imports in Lesson module by using mform, not the question/format.php qformat_default class.
+        if (property_exists('qformat_default', 'realfilename')) {
             $realfilename = $this->realfilename;
         } else {
             global $mform;
             $realfilename = $mform->get_new_filename('questionfile');
         }
-        if(property_exists('qformat_default', 'filename')) {
+        if (property_exists('qformat_default', 'filename')) {
             $filename = $this->filename;
         } else {
             global $mform;
@@ -93,11 +93,11 @@ class qformat_wordtable extends qformat_xml {
         // Give XSLT as much memory as possible, to enable larger Word files to be imported.
         raise_memory_limit(MEMORY_HUGE);
 
-        // Check that the file is in Word 2010 format, not HTML, XML, or Word 2003
-        if((substr($realfilename, -3, 3) == 'doc')) {
+        // Check that the file is in Word 2010 format, not HTML, XML, or Word 2003.
+        if ((substr($realfilename, -3, 3) == 'doc')) {
             echo $OUTPUT->notification(get_string('docnotsupported', 'qformat_wordtable', $realfilename));
             return false;
-        }else if ((substr($realfilename, -3, 3) == 'xml')) {
+        } else if ((substr($realfilename, -3, 3) == 'xml')) {
             echo $OUTPUT->notification(get_string('xmlnotsupported', 'qformat_wordtable', $realfilename));
             return false;
         } else if ((stripos($realfilename, 'htm'))) {
@@ -108,44 +108,44 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
 
-        // Stylesheet to convert WordML into initial XHTML format
+        // Stylesheet to convert WordML into initial XHTML format.
         $stylesheet = __DIR__ . "/" . $this->word2mqxml_stylesheet1;
 
-        // Check that XSLT is installed, and the XSLT stylesheet is present
+        // Check that XSLT is installed, and the XSLT stylesheet is present.
         if (!class_exists('XSLTProcessor') || !function_exists('xslt_create')) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": XSLT not installed", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('xsltunavailable', 'qformat_wordtable'));
             return false;
-        } else if(!file_exists($stylesheet)) {
-            // Stylesheet to transform WordML into XHTML doesn't exist
+        } else if (!file_exists($stylesheet)) {
+            // Stylesheet to transform WordML into XHTML doesn't exist.
             debugging(__FUNCTION__ . ":" . __LINE__ . ": XSLT stylesheet missing: $stylesheet", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('stylesheetunavailable', 'qformat_wordtable', $stylesheet));
             return false;
         }
 
-        // Set common parameters for all XSLT transformations. Note that we cannot use arguments because the XSLT processor doesn't support them
-        $parameters = array (
+        // Set common parameters for all XSLT transformations. Note that the XSLT processor doesn't support $arguments.
+        $parameters = array(
             'course_id' => $COURSE->id,
             'course_name' => $COURSE->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
             'moodle_country' => $USER->country,
             'moodle_language' => current_language(),
-            'moodle_textdirection' => (right_to_left())? 'rtl': 'ltr',
+            'moodle_textdirection' => (right_to_left()) ? 'rtl' : 'ltr',
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
             'pluginname' => 'qformat_wordtable',
             'debug_flag' => DEBUG_WORDTABLE
-        );
+            );
 
-        // Pre-XSLT conversion preparation - re-package the XML and image content from the .docx Word file into one large XML file, to simplify XSLT processing
+        // Pre-XSLT conversion preparation merge the document XML and image content from the .docx Word file.
 
-        // Initialise an XML string to use as a wrapper around all the XML files
+        // Initialise an XML string to use as a wrapper around all the XML files.
         $xml_declaration = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
         $wordmlData = $xml_declaration . "\n<pass1Container>\n";
         $imageString = "";
 
-        // Open the Word 2010 Zip-formatted file and extract the WordProcessingML XML files
+        // Open the Word 2010 Zip-formatted file and extract the WordProcessingML XML files.
         $zfh = zip_open($filename);
         if (is_resource($zfh)) {
             $zip_entry = zip_read($zfh);
@@ -153,15 +153,15 @@ class qformat_wordtable extends qformat_xml {
                 if (zip_entry_open($zfh, $zip_entry, "r")) {
                     $ze_filename = zip_entry_name($zip_entry);
                     $ze_filesize = zip_entry_filesize($zip_entry);
-                    // debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = $ze_filename, size = $ze_filesize", DEBUG_WORDTABLE);
+                    // debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = $ze_filename", DEBUG_WORDTABLE);
 
-                    // Look for internal images
+                    // Look for internal images.
                     if (strpos($ze_filename, "media")) {
-                        $imageFormat = substr($ze_filename, strrpos($ze_filename, ".") +1);
+                        $imageFormat = substr($ze_filename, strrpos($ze_filename, ".") + 1);
                         $imageData = zip_entry_read($zip_entry, $ze_filesize);
                         $imageName = basename($ze_filename);
                         $imageSuffix = strtolower(substr(strrchr($ze_filename, "."), 1));
-                        // gif, png, jpg and jpeg handled OK, but bmp and other non-Internet formats are not
+                        // Suffixes gif, png, jpg and jpeg handled OK, but bmp and other non-Internet formats are not.
                         $imageMimeType = "image/";
                         if ($imageSuffix == 'gif' or $imageSuffix == 'png') {
                             $imageMimeType .= $imageSuffix;
@@ -169,75 +169,91 @@ class qformat_wordtable extends qformat_xml {
                         if ($imageSuffix == 'jpg' or $imageSuffix == 'jpeg') {
                             $imageMimeType .= "jpeg";
                         }
-                        // Handle recognised Internet formats only
+                        // Handle recognised Internet formats only.
                         if ($imageMimeType != '') {
                             // debugging(__FUNCTION__ . ":" . __LINE__ . ": media file name = $ze_filename, imageName = $imageName, imageSuffix = $imageSuffix, imageMimeType = $imageMimeType", DEBUG_WORDTABLE);
-                            $imageString .= '<file filename="media/' . $imageName . '" mime-type="' . $imageMimeType . '">' . base64_encode($imageData) . "</file>\n";
+                            $imageString .= '<file filename="media/' . $imageName . '" mime-type="' . $imageMimeType . '">';
+                            $imageString .=  base64_encode($imageData) . "</file>\n";
+                        } else {
+                            debugging(__FUNCTION__ . ":" . __LINE__ . ": Unsupported media file $ze_filename", DEBUG_WORDTABLE);
                         }
-                        else {
-                            debugging(__FUNCTION__ . ":" . __LINE__ . ": ignore unsupported media file name $ze_filename, imageName = $imageName, imageSuffix = $imageSuffix, imageMimeType = $imageMimeType", DEBUG_WORDTABLE);
-                        }
-                    // Look for required XML files
+                    // Look for required XML files.
                     } else {
-                        // If a required XML file is encountered, read it, wrap it, remove the XML declaration, and add it to the XML string
+                        // If a required XML file is encountered, read it, wrap it, remove the XML declaration, and add it to the XML string.
                         switch ($ze_filename) {
                           case "word/document.xml":
-                              $wordmlData .= "<wordmlContainer>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</wordmlContainer>\n";
+                              $wordmlData .= "<wordmlContainer>";
+                              $wordmlData .= str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize));
+                              $wordmlData .= "</wordmlContainer>\n";
                               break;
                           case "docProps/core.xml":
-                              $wordmlData .= "<dublinCore>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</dublinCore>\n";
+                              $wordmlData .= "<dublinCore>";
+                              $wordmlData .= str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize));
+                              $wordmlData .= "</dublinCore>\n";
                               break;
                           case "docProps/custom.xml":
-                              $wordmlData .= "<customProps>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</customProps>\n";
+                              $wordmlData .= "<customProps>";
+                              $wordmlData .= str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize));
+                              $wordmlData .= "</customProps>\n";
                               break;
                           case "word/styles.xml":
-                              $wordmlData .= "<styleMap>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</styleMap>\n";
+                              $wordmlData .= "<styleMap>";
+                              $wordmlData .= str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize));
+                              $wordmlData .= "</styleMap>\n";
                               break;
                           case "word/_rels/document.xml.rels":
-                              $wordmlData .= "<documentLinks>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</documentLinks>\n";
+                              $wordmlData .= "<documentLinks>";
+                              $wordmlData .= str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize));
+                              $wordmlData .= "</documentLinks>\n";
                               break;
                           case "word/footnotes.xml":
-                              $wordmlData .= "<footnotesContainer>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</footnotesContainer>\n";
+                              $wordmlData .= "<footnotesContainer>";
+                              $wordmlData .= str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize));
+                              $wordmlData .= "</footnotesContainer>\n";
                               break;
                           case "word/_rels/footnotes.xml.rels":
-                              $wordmlData .= "<footnoteLinks>" . str_replace($xml_declaration, zip_entry_read($zip_entry, $ze_filesize), "") . "</footnoteLinks>\n";
+                              $wordmlData .= "<footnoteLinks>";
+                              $wordmlData .= str_replace($xml_declaration, zip_entry_read($zip_entry, $ze_filesize), "");
+                              $wordmlData .= "</footnoteLinks>\n";
                               break;
                           /*
                           case "word/_rels/settings.xml.rels":
-                              $wordmlData .= "<settingsLinks>" . str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize)) . "</settingsLinks>\n";
+                              $wordmlData .= "<settingsLinks>";
+                              $wordmlData .= str_replace($xml_declaration, "", zip_entry_read($zip_entry, $ze_filesize));
+                              $wordmlData .= "</settingsLinks>\n";
                               break;
                           */
                           default:
                               // debugging(__FUNCTION__ . ":" . __LINE__ . ": Ignore $ze_filename", DEBUG_WORDTABLE);
                         }
                     }
-                } else { // Can't read the file from the Word .docx file
+                } else { // Can't read the file from the Word .docx file.
                     echo $OUTPUT->notification(get_string('cannotreadzippedfile', 'qformat_wordtable', $filename));
                     zip_close($zfh);
                     return false;
                 }
-                // Get the next file in the Zip package
+                // Get the next file in the Zip package.
                 $zip_entry = zip_read($zfh);
-            }  // End while
+            }  // End while loop.
             zip_close($zfh);
-        } else { // Can't open the Word .docx file for reading
+        } else { // Can't open the Word .docx file for reading.
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $filename));
             $this->debug_unlink($filename);
             return false;
         }
 
-        // Add Base64 images section and close the merged XML file
+        // Add Base64 images section and close the merged XML file.
         $wordmlData .= "<imagesContainer>\n" . $imageString . "</imagesContainer>\n"  . "</pass1Container>";
 
-        // Pass 1 - convert WordML into linear XHTML
-        // Create a temporary file to store the merged WordML XML content to transform
+        // Pass 1 - convert WordML into linear XHTML.
+        // Create a temporary file to store the merged WordML XML content to transform.
         if (!($temp_wordml_filename = tempnam($CFG->dataroot . '/temp/', "w2q-"))) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot open temporary file ('$temp_wordml_filename') to store XML", DEBUG_WORDTABLE);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Can't open temporary XML file ($temp_wordml_filename)", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $temp_wordml_filename));
             return false;
         }
 
-        // Write the WordML contents to be imported
+        // Write the WordML contents to be imported.
         if (($nbytes = file_put_contents($temp_wordml_filename, $wordmlData)) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XML data to temporary file ('$temp_wordml_filename')", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_wordml_filename . "(" . $nbytes . ")"));
@@ -247,32 +263,33 @@ class qformat_wordtable extends qformat_xml {
 
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Import XSLT Pass 1 with stylesheet \"" . $stylesheet . "\"", DEBUG_WORDTABLE);
         $xsltproc = xslt_create();
-        if(!($xslt_output = xslt_process($xsltproc, $temp_wordml_filename, $stylesheet, null, null, $parameters))) {
+        if (!($xslt_output = xslt_process($xsltproc, $temp_wordml_filename, $stylesheet, null, null, $parameters))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Transformation failed", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XML: " . $temp_wordml_filename . ")"));
             $this->debug_unlink($temp_wordml_filename);
             return false;
         }
         $this->debug_unlink($temp_wordml_filename);
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Import XSLT Pass 1 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 0, 200)), DEBUG_WORDTABLE);
-        // Strip out some superfluous namespace declarations on paragraph elements, which Moodle 2.7/2.8 on Windows seems to throw in
+        $xhtml_fragment = str_replace("\n", "", substr($xslt_output, 0, 200));
+        debugging(__FUNCTION__ . ":" . __LINE__ . ": Import XSLT Pass 1 succeeded, XHTML output fragment = " . $xhtml_fragment, DEBUG_WORDTABLE);
+        // Strip out superfluous namespace declarations on paragraph elements, which Moodle 2.7/2.8 on Windows seems to throw in.
         $xslt_output = str_replace('<p xmlns="http://www.w3.org/1999/xhtml"', '<p', $xslt_output);
         $xslt_output = str_replace(' xmlns=""', '', $xslt_output);
 
-        // Write output of Pass 1 to a temporary file, for use in Pass 2
+        // Write output of Pass 1 to a temporary file, for use in Pass 2.
         $temp_xhtml_filename = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".if1";
         if (($nbytes = file_put_contents($temp_xhtml_filename, $xslt_output )) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_xhtml_filename')", DEBUG_WORDTABLE);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to $temp_xhtml_filename", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xhtml_filename . "(" . $nbytes . ")"));
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Import Pass 1 output XHTML data saved to $temp_xhtml_filename", DEBUG_WORDTABLE);
 
-        // Pass 2 - tidy up linear XHTML a bit
-        // Prepare for Import Pass 2 XSLT transformation
+        // Pass 2 - tidy up linear XHTML a bit.
+        // Prepare for Import Pass 2 XSLT transformation.
         $stylesheet = __DIR__ . "/" . $this->word2mqxml_stylesheet2;
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Import XSLT Pass 2 with stylesheet \"" . $stylesheet . "\"", DEBUG_WORDTABLE);
-        if(!($xslt_output = xslt_process($xsltproc, $temp_xhtml_filename, $stylesheet, null, null, $parameters))) {
+        if (!($xslt_output = xslt_process($xsltproc, $temp_xhtml_filename, $stylesheet, null, null, $parameters))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Import Pass 2 Transformation failed", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XHTML: " . $temp_xhtml_filename . ")"));
             $this->debug_unlink($temp_xhtml_filename);
@@ -281,22 +298,20 @@ class qformat_wordtable extends qformat_xml {
         $this->debug_unlink($temp_xhtml_filename);
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Import Pass 2 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 600, 500)), DEBUG_WORDTABLE);
 
-        // Write the Pass 2 XHTML output to a temporary file
+        // Write the Pass 2 XHTML output to a temporary file.
         $temp_xhtml_filename = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".if2";
         if (($nbytes = file_put_contents($temp_xhtml_filename, "<pass3Container>\n" . $xslt_output . $this->get_text_labels() . "\n</pass3Container>")) == 0) {
-        // f (($nbytes = file_put_contents($temp_xhtml_filename, $xslt_output)) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_xhtml_filename')", DEBUG_WORDTABLE);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to $temp_xhtml_filename", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xhtml_filename . "(" . $nbytes . ")"));
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Pass 2 output XHTML data saved to $temp_xhtml_filename", DEBUG_WORDTABLE);
-        // file_put_contents($CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".if2", "<pass3Container>\n" . $xslt_output . $this->get_text_labels() . "\n</pass3Container>");
 
-        // Pass 3 - convert XHTML into Moodle Question XML
-        // Prepare for Import Pass 3 XSLT transformation
+        // Pass 3 - convert XHTML into Moodle Question XML.
+        // Prepare for Import Pass 3 XSLT transformation.
         $stylesheet = __DIR__ . "/" . $this->word2mqxml_stylesheet3;
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Import XSLT Pass 3 with stylesheet \"" . $stylesheet . "\"", DEBUG_WORDTABLE);
-        if(!($xslt_output = xslt_process($xsltproc, $temp_xhtml_filename, $stylesheet, null, null, $parameters))) {
+        if (!($xslt_output = xslt_process($xsltproc, $temp_xhtml_filename, $stylesheet, null, null, $parameters))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Import Pass 3 Transformation failed", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XHTML: " . $temp_xhtml_filename . ")"));
             $this->debug_unlink($temp_xhtml_filename);
@@ -305,7 +320,7 @@ class qformat_wordtable extends qformat_xml {
         $this->debug_unlink($temp_xhtml_filename);
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Import Pass 3 succeeded, Moodle Question XML output fragment = " . str_replace("\n", "", substr($xslt_output, 0, 200)), DEBUG_WORDTABLE);
 
-        // Strip out most MathML element and attributes for compatibility with MathJax
+        // Strip out most MathML element and attributes for compatibility with MathJax.
         $xslt_output = str_replace('<mml:', '<', $xslt_output);
         $xslt_output = str_replace('</mml:', '</', $xslt_output);
         $xslt_output = str_replace(' mathvariant="normal"', '', $xslt_output);
@@ -314,23 +329,23 @@ class qformat_wordtable extends qformat_xml {
         $xslt_output = str_replace('<math>', '<math xmlns="http://www.w3.org/1998/Math/MathML"' . $mml_text_direction_attribute  . '>', $xslt_output);
 
         $temp_mqxml_filename = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".xml";
-        // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, using a temporary XML file, this time including the HTML template too
+        // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, including the HTML template too.
         if (($nbytes = file_put_contents($temp_mqxml_filename, $xslt_output)) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_mqxml_filename')", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_mqxml_filename . "(" . $nbytes . ")"));
             return false;
         }
 
-        // Keep the original Word file for debugging if developer debugging enabled
+        // Keep the original Word file for debugging if developer debugging enabled.
         if (debugging(null, DEBUG_WORDTABLE)) {
             $copied_input_file = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".docx";
             copy($filename, $copied_input_file);
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Copied $filename to $copied_input_file", DEBUG_WORDTABLE);
         }
 
-        // Now over-write the original Word file with the XML file, so that default XML file handling will work
-        if(($fp = fopen($filename, "wb"))) {
-            if(($nbytes = fwrite($fp, $xslt_output)) == 0) {
+        // Now over-write the original Word file with the XML file, so that default XML file handling will work.
+        if (($fp = fopen($filename, "wb"))) {
+            if (($nbytes = fwrite($fp, $xslt_output)) == 0) {
                 echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $filename));
                 return false;
             }
@@ -338,10 +353,10 @@ class qformat_wordtable extends qformat_xml {
         }
 
         return true;
-    }   // end importpreprocess
+    }   // End importpreprocess function.
 
 
-    // EXPORT FUNCTIONS START HERE
+    // EXPORT FUNCTIONS START HERE.
 
     /**
      * Use a .doc file extension when exporting, so that Word is used to open the file
@@ -363,30 +378,30 @@ class qformat_wordtable extends qformat_xml {
      * @return string Word-compatible XHTML text
      */
     function presave_process( $content ) {
-        // override method to allow us convert to Word-compatible XHTML format
+        // Override method to allow us convert to Word-compatible XHTML format.
         global $CFG, $USER, $COURSE;
         global $OUTPUT;
 
         debugging(__FUNCTION__ . '($content = "' . str_replace("\n", "", substr($content, 80, 500)) . ' ...")', DEBUG_WORDTABLE);
 
-        // Stylesheet to convert Moodle Question XML into Word-compatible XHTML format
+        // Stylesheet to convert Moodle Question XML into Word-compatible XHTML format.
         $stylesheet = __DIR__ . "/" . $this->mqxml2word_stylesheet1;
-        // XHTML template for Word file CSS styles formatting
+        // XHTML template for Word file CSS styles formatting.
         $htmltemplatefile_path = __DIR__ . "/" . $this->wordfile_template;
 
-        // Check that XSLT is installed, and the XSLT stylesheet and XHTML template are present
+        // Check that XSLT is installed, and the XSLT stylesheet and XHTML template are present.
         if (!class_exists('XSLTProcessor') || !function_exists('xslt_create')) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": XSLT not installed", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('xsltunavailable', 'qformat_wordtable'));
             return false;
-        } else if(!file_exists($stylesheet)) {
+        } else if (!file_exists($stylesheet)) {
             // Stylesheet to transform Moodle Question XML into Word doesn't exist
             debugging(__FUNCTION__ . ":" . __LINE__ . ": XSLT stylesheet missing: $stylesheet", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('stylesheetunavailable', 'qformat_wordtable', $stylesheet));
             return false;
         }
 
-        // Check that there is some content to convert into Word
+        // Check that there is some content to convert into Word.
         if (!strlen($content)) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": No XML questions in category", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('noquestions', 'qformat_wordtable'));
@@ -395,20 +410,20 @@ class qformat_wordtable extends qformat_xml {
 
         debugging(__FUNCTION__ . ":" . __LINE__ . ": preflight checks complete, xmldata length = " . strlen($content), DEBUG_WORDTABLE);
 
-        // Create a temporary file to store the XML content to transform
+        // Create a temporary file to store the XML content to transform.
         if (!($temp_xml_filename = tempnam($CFG->dataroot . '/temp/', "q2w-"))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot open temporary file ('$temp_xml_filename') to store XML", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $temp_xml_filename));
             return false;
         }
 
-        // Maximise memory available so that very large question banks can be exported
+        // Maximise memory available so that very large question banks can be exported.
         raise_memory_limit(MEMORY_HUGE);
 
         $clean_content = $this->clean_all_questions($content);
         // debugging(__FUNCTION__ . ":" . __LINE__ . ": Cleaned Question XML = |" . substr($clean_content, 0, 1000) . " ...|", DEBUG_WORDTABLE);
 
-        // Write the XML contents to be transformed, and also include labels data, to avoid having to use document() inside XSLT
+        // Write the XML contents to be transformed, and also include labels data, to avoid having to use document() inside XSLT.
         if (($nbytes = file_put_contents($temp_xml_filename, "<container>\n<quiz>" . $clean_content . "</quiz>\n" . $this->get_text_labels() . "\n</container>")) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XML data to temporary file ('$temp_xml_filename')", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xml_filename . "(" . $nbytes . ")"));
@@ -416,7 +431,7 @@ class qformat_wordtable extends qformat_xml {
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": XML data saved to $temp_xml_filename", DEBUG_WORDTABLE);
 
-        // Set parameters for XSLT transformation. Note that we cannot use arguments though.
+        // Set parameters for XSLT transformation. Note that we cannot use $arguments though.
         $parameters = array (
             'course_id' => $COURSE->id,
             'course_name' => $COURSE->fullname,
@@ -433,7 +448,7 @@ class qformat_wordtable extends qformat_xml {
 
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Calling XSLT Pass 1 with stylesheet \"" . $stylesheet . "\"", DEBUG_WORDTABLE);
         $xsltproc = xslt_create();
-        if(!($xslt_output = xslt_process($xsltproc, $temp_xml_filename, $stylesheet, null, null, $parameters))) {
+        if (!($xslt_output = xslt_process($xsltproc, $temp_xml_filename, $stylesheet, null, null, $parameters))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Transformation failed", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XML: " . $temp_xml_filename . ")"));
             $this->debug_unlink($temp_xml_filename);
@@ -454,7 +469,7 @@ class qformat_wordtable extends qformat_xml {
         // Prepare for Pass 2 XSLT transformation.
         $stylesheet = __DIR__ . "/" . $this->mqxml2word_stylesheet2;
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Calling XSLT Pass 2 with stylesheet \"" . $stylesheet . "\"", DEBUG_WORDTABLE);
-        if(!($xslt_output = xslt_process($xsltproc, $temp_xhtm_filename, $stylesheet, null, null, $parameters))) {
+        if (!($xslt_output = xslt_process($xsltproc, $temp_xhtm_filename, $stylesheet, null, null, $parameters))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Pass 2 Transformation failed", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('transformationfailed', 'qformat_wordtable', "(XSLT: " . $stylesheet . "; XHTML: " . $temp_xhtm_filename . ")"));
             $this->debug_unlink($temp_xhtm_filename);
@@ -476,7 +491,7 @@ class qformat_wordtable extends qformat_xml {
         }
 
         return $content;
-    }   // end presave_process
+    }   // End presave_process function.
 
     /*
      * Delete temporary files if debugging disabled
@@ -515,7 +530,7 @@ class qformat_wordtable extends qformat_xml {
             'quiz' => array('answer', 'answers', 'casesensitive', 'correct', 'correctanswers', 'defaultgrade', 'incorrect', 'shuffle')
             );
 
-        // Append Moodle release-specific text strings, thus avoiding any errors being generated when absent strings are requested
+        // Append Moodle release-specific text strings, thus avoiding any errors being generated when absent strings are requested.
         if ($CFG->release < '2.0') {
             $textstrings['quiz'][] = 'choice';
             $textstrings['quiz'][] = 'penaltyfactor';
@@ -536,7 +551,7 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['qtype_essay'][] = 'responsenotrequired';
         }
 
-        // Add All-or-Nothing MCQ question type strings if present
+        // Add All-or-Nothing MCQ question type strings if present.
         $qtype = question_bank::get_qtype('multichoiceset', false);
         if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": multichoiceset exists", DEBUG_WORDTABLE);
@@ -559,16 +574,16 @@ class qformat_wordtable extends qformat_xml {
     /**
      * Clean HTML markup inside question text element content
      *
-     * A string containing Moodle Question XML with clean HTML inside the text elements is returned
+     * A string containing Moodle Question XML with clean HTML inside the text elements is returned.
      *
      * @return string
      */
     private function clean_all_questions($input_string) {
         debugging(__FUNCTION__ . "(input_string = " . str_replace("\n", "", substr($input_string, 0, 200)) . " ...)", DEBUG_WORDTABLE);
-        // Start assembling the cleaned output string, starting with empty
+        // Start assembling the cleaned output string, starting with empty.
         $clean_output_string = "";
 
-        // Split the string into questions in order to check the text fields for clean HTML
+        // Split the string into questions in order to check the text fields for clean HTML.
         $found_questions = preg_match_all('~(.*?)<question type="([^"]*)"[^>]*>(.*?)</question>~s', $input_string, $question_matches, PREG_SET_ORDER);
         $n_questions = count($question_matches);
         if ($found_questions === false or $found_questions == 0) {
@@ -577,15 +592,15 @@ class qformat_wordtable extends qformat_xml {
         }
         // debugging(__FUNCTION__ . ":" . __LINE__ . ": " . $n_questions . " questions found", DEBUG_WORDTABLE);
 
-        // Split the questions into text strings to check the HTML
+        // Split the questions into text strings to check the HTML.
         for ($i = 0; $i < $n_questions; $i++) {
             $question_type = $question_matches[$i][2];
             $question_content = $question_matches[$i][3];
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i . " of $n_questions, type $question_type, question length = " . strlen($question_content), DEBUG_WORDTABLE);
-            // Split the question into chunks at CDATA boundaries, using an ungreedy search (?), and matching across newlines (s modifier)
+            // Split the question into chunks at CDATA boundaries, using an ungreedy search (?), and matching across newlines (s modifier).
             $found_cdata_sections = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $question_content, $cdata_matches, PREG_SET_ORDER);
-            // Has the question been imported using WordTable? If so, assume it is clean and don't process it
-            //$imported_from_wordtable = preg_match('~ImportFromWordTable~', $question_content);
+            // Has the question been imported using WordTable? If so, assume it is clean and don't process it.
+            // $imported_from_wordtable = preg_match('~ImportFromWordTable~', $question_content);
             // if ($imported_from_wordtable and $imported_from_wordtable != 0) {
             //    debugging(__FUNCTION__ . ":" . __LINE__ . ": Skip cleaning previously imported question " . $i + 1, DEBUG_WORDTABLE);
             //    $clean_output_string .= $question_matches[$i][0];
@@ -596,26 +611,26 @@ class qformat_wordtable extends qformat_xml {
             } else if ($found_cdata_sections != 0) {
                 $n_cdata_sections = count($cdata_matches);
                 debugging(__FUNCTION__ . ":" . __LINE__ . ": " . $n_cdata_sections  . " CDATA sections found in question " . $i + 1 . ", question length = " . strlen($question_content), DEBUG_WORDTABLE);
-                // Found CDATA sections, so first add the question start tag and then process the body
+                // Found CDATA sections, so first add the question start tag and then process the body.
                 $clean_output_string .= '<question type="' . $question_type . '">';
 
-                // Process content of each CDATA section to clean the HTML
+                // Process content of each CDATA section to clean the HTML.
                 for ($j = 0; $j < $n_cdata_sections; $j++) {
                     $cdata_content = $cdata_matches[$j][2];
                     $clean_cdata_content = $this->clean_html_text($cdata_matches[$j][2]);
 
-                    // Add all the text before the first CDATA start boundary, and the cleaned string, to the output string
+                    // Add all the text before the first CDATA start boundary, and the cleaned string, to the output string.
                     $clean_output_string .= $cdata_matches[$j][1] . '<![CDATA[' . $clean_cdata_content . ']]>' ;
-                } // End CDATA section loop
+                } // End CDATA section loop.
 
-                // Add the text after the last CDATA section closing delimiter
+                // Add the text after the last CDATA section closing delimiter.
                 $text_after_last_CDATA_string = substr($question_matches[$i][0], strrpos($question_matches[$i][0], "]]>") + 3);
                 $clean_output_string .= $text_after_last_CDATA_string;
             } else {
                 // debugging(__FUNCTION__ . ":" . __LINE__ . ": No CDATA sections in question " . $i + 1, DEBUG_WORDTABLE);
                 $clean_output_string .= $question_matches[$i][0];
             }
-        } // End question element loop
+        } // End question element loop.
 
         debugging(__FUNCTION__ . "() -> " . str_replace("\n", "", substr($clean_output_string, 0, 200)), DEBUG_WORDTABLE);
         return $clean_output_string;
@@ -630,7 +645,7 @@ class qformat_wordtable extends qformat_xml {
      */
     private function clean_html_text($cdata_string) {
         debugging(__FUNCTION__ . "(cdata_string = \"" . substr($cdata_string, 0, 100) . "\")", DEBUG_WORDTABLE);
-        // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML
+        // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML.
         $doc = new DOMDocument();
         $doc->loadHTML('<html><body>' . $cdata_string . '</body></html>');
         $doc->getElementsByTagName('html')->item(0)->setAttribute('xmlns','http://www.w3.org/1999/xhtml');
@@ -648,12 +663,12 @@ class qformat_wordtable extends qformat_xml {
             $clean_xhtml = $cdata_string;
         }
 
-        // Fix up filenames after @@PLUGINFILE@@ to replace URL-encoded characters with ordinary characters
+        // Fix up filenames after @@PLUGINFILE@@ to replace URL-encoded characters with ordinary characters.
         $found_pluginfilenames = preg_match_all('~(.*?)<img src="@@PLUGINFILE@@/([^"]*)(.*)~s', $clean_xhtml, $pluginfile_matches, PREG_SET_ORDER);
         $n_matches = count($pluginfile_matches);
         if ($found_pluginfilenames and $found_pluginfilenames != 0) {
             $urldecoded_string = "";
-            // Process the possibly-URL-escaped filename so that it matches the name in the file element
+            // Process the possibly-URL-escaped filename so that it matches the name in the file element.
             for ($i = 0; $i < $n_matches; $i++) {
                 // Decode the filename and add the surrounding text
                 $decoded_filename = urldecode($pluginfile_matches[$i][2]);
@@ -662,7 +677,7 @@ class qformat_wordtable extends qformat_xml {
             $clean_xhtml = $urldecoded_string;
         }
 
-        // Strip soft hyphens (0xAD, or decimal 173)
+        // Strip soft hyphens (0xAD, or decimal 173).
         $clean_xhtml = preg_replace('/\xad/u', '', $clean_xhtml);
 
         debugging(__FUNCTION__ . "() -> |" . str_replace("\n", "", substr($clean_xhtml, 0, 100)) . " ...|", DEBUG_WORDTABLE);

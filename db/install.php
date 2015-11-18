@@ -29,6 +29,5 @@ defined('MOODLE_INTERNAL') || die();
  * Post-install script
  */
 function xmldb_qformat_wordtable_install() {
-
-    // Don't add anything to the plugins configuration table
+    // Don't add anything to the plugins configuration table.
 }
