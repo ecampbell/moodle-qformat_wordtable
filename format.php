@@ -179,7 +179,7 @@ class qformat_wordtable extends qformat_xml {
                         }
                     // Look for required XML files.
                     } else {
-                        // If a required XML file is encountered, read it, wrap it, remove the XML declaration, and add it to the XML string.
+                        // Read and wrap XML files, remove the XML declaration, and add them to the XML string.
                         switch ($ze_filename) {
                           case "word/document.xml":
                               $wordmlData .= "<wordmlContainer>";
@@ -255,7 +255,7 @@ class qformat_wordtable extends qformat_xml {
 
         // Write the WordML contents to be imported.
         if (($nbytes = file_put_contents($temp_wordml_filename, $wordmlData)) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XML data to temporary file ('$temp_wordml_filename')", DEBUG_WORDTABLE);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XML data to $temp_wordml_filename", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_wordml_filename . "(" . $nbytes . ")"));
             return false;
         }
@@ -296,7 +296,8 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
         $this->debug_unlink($temp_xhtml_filename);
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": Import Pass 2 succeeded, XHTML output fragment = " . str_replace("\n", "", substr($xslt_output, 600, 500)), DEBUG_WORDTABLE);
+        $xhtml_fragment = str_replace("\n", "", substr($xslt_output, 600, 500));
+        debugging(__FUNCTION__ . ":" . __LINE__ . ": Import Pass 2 succeeded, XHTML output fragment = " . $xhtml_fragment, DEBUG_WORDTABLE);
 
         // Write the Pass 2 XHTML output to a temporary file.
         $temp_xhtml_filename = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".if2";
@@ -325,13 +326,13 @@ class qformat_wordtable extends qformat_xml {
         $xslt_output = str_replace('</mml:', '</', $xslt_output);
         $xslt_output = str_replace(' mathvariant="normal"', '', $xslt_output);
         $xslt_output = str_replace(' xmlns:mml="http://www.w3.org/1998/Math/MathML"', '', $xslt_output);
-        $mml_text_direction_attribute = (right_to_left())? ' dir="rtl"': '';
+        $mml_text_direction_attribute = (right_to_left()) ? ' dir="rtl"' : '';
         $xslt_output = str_replace('<math>', '<math xmlns="http://www.w3.org/1998/Math/MathML"' . $mml_text_direction_attribute  . '>', $xslt_output);
 
         $temp_mqxml_filename = $CFG->dataroot . '/temp/' . basename($temp_wordml_filename, ".tmp") . ".xml";
         // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, including the HTML template too.
         if (($nbytes = file_put_contents($temp_mqxml_filename, $xslt_output)) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_mqxml_filename')", DEBUG_WORDTABLE);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to $temp_mqxml_filename", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_mqxml_filename . "(" . $nbytes . ")"));
             return false;
         }
@@ -395,7 +396,7 @@ class qformat_wordtable extends qformat_xml {
             echo $OUTPUT->notification(get_string('xsltunavailable', 'qformat_wordtable'));
             return false;
         } else if (!file_exists($stylesheet)) {
-            // Stylesheet to transform Moodle Question XML into Word doesn't exist
+            // Stylesheet to transform Moodle Question XML into Word doesn't exist.
             debugging(__FUNCTION__ . ":" . __LINE__ . ": XSLT stylesheet missing: $stylesheet", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('stylesheetunavailable', 'qformat_wordtable', $stylesheet));
             return false;
@@ -408,7 +409,7 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
 
-        debugging(__FUNCTION__ . ":" . __LINE__ . ": preflight checks complete, xmldata length = " . strlen($content), DEBUG_WORDTABLE);
+        debugging(__FUNCTION__ . ":" . __LINE__ . ": Checks complete, content length = " . strlen($content), DEBUG_WORDTABLE);
 
         // Create a temporary file to store the XML content to transform.
         if (!($temp_xml_filename = tempnam($CFG->dataroot . '/temp/', "q2w-"))) {
@@ -460,7 +461,7 @@ class qformat_wordtable extends qformat_xml {
         $temp_xhtm_filename = $CFG->dataroot . '/temp/' . basename($temp_xml_filename, ".tmp") . ".xhtm";
         // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, this time including the HTML template too.
         if (($nbytes = file_put_contents($temp_xhtm_filename, "<container>\n" . $xslt_output . "\n<htmltemplate>\n" . file_get_contents($htmltemplatefile_path) . "\n</htmltemplate>\n" . $this->get_text_labels() . "\n</container>")) == 0) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to temporary file ('$temp_xhtm_filename')", DEBUG_WORDTABLE);
+            debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to $temp_xhtm_filename", DEBUG_WORDTABLE);
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $temp_xhtm_filename . "(" . $nbytes . ")"));
             return false;
         }
@@ -597,7 +598,7 @@ class qformat_wordtable extends qformat_xml {
             $question_type = $question_matches[$i][2];
             $question_content = $question_matches[$i][3];
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i . " of $n_questions, type $question_type, question length = " . strlen($question_content), DEBUG_WORDTABLE);
-            // Split the question into chunks at CDATA boundaries, using an ungreedy search (?), and matching across newlines (s modifier).
+            // Split the question into chunks at CDATA boundaries, using ungreedy (?) and matching across newlines (s modifier).
             $found_cdata_sections = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $question_content, $cdata_matches, PREG_SET_ORDER);
             // Has the question been imported using WordTable? If so, assume it is clean and don't process it.
             // $imported_from_wordtable = preg_match('~ImportFromWordTable~', $question_content);
