@@ -69,5 +69,3 @@ $string['word_multiple_answer'] = 'Multiple Answer';
 $string['word_about_moodle2word'] = 'About Moodle2Word';
 $string['word_showhide_assessment_view'] = 'Show/Hide Assessment View';
 $string['word_setunset_assessment_view'] = 'Set/Unset Assessment View';
-
-?>

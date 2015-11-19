@@ -29,4 +29,3 @@ the images in exported questions into embedded images in Word, as they are not a
 
 The Word templates are available in most major languages, including English, Spanish and Chinese.
 Templates for other languages can be easily added, so feel free to ask.
-
