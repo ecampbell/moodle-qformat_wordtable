@@ -73,7 +73,7 @@ class qformat_wordtable extends qformat_xml {
 
     /**
      * Define required MIME-Type
-     * 
+     *
      * @return string MIME-Type
      */
     public function mime_type() {
@@ -598,7 +598,7 @@ class qformat_wordtable extends qformat_xml {
      * Clean HTML markup inside question text element content
      *
      * A string containing Moodle Question XML with clean HTML inside the text elements is returned.
-     * 
+     *
      * @param string $questionxmlstring Question XML text
      * @return string
      */
