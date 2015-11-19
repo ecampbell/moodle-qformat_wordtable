@@ -172,7 +172,7 @@ class qformat_wordtable extends qformat_xml {
                 if (zip_entry_open($zfh, $zipentry, "r")) {
                     $zefilename = zip_entry_name($zipentry);
                     $zefilesize = zip_entry_filesize($zipentry);
-                    // debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = '$zefilename'", DEBUG_WORDTABLE);
+                    // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": zip_entry_name = '$zefilename'", DEBUG_WORDTABLE);
 
                     // Look for internal images.
                     if (strpos($zefilename, "media")) {
@@ -190,7 +190,7 @@ class qformat_wordtable extends qformat_xml {
                         }
                         // Handle recognised Internet formats only.
                         if ($imagemimetype != '') {
-                            // debugging(__FUNCTION__ . ":" . __LINE__ . ": media file name = '$zefilename'", DEBUG_WORDTABLE);
+                            // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": media file name = '$zefilename'", DEBUG_WORDTABLE);
                             $imagestring .= '<file filename="media/' . $imagename . '" mime-type="' . $imagemimetype . '">';
                             $imagestring .= base64_encode($imagedata) . "</file>\n";
                         } else {
@@ -227,7 +227,7 @@ class qformat_wordtable extends qformat_xml {
                                 break;
                             */
                             default:
-                                // debugging(__FUNCTION__ . ":" . __LINE__ . ": Ignore '$zefilename'", DEBUG_WORDTABLE);
+                                // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": Ignore '$zefilename'", DEBUG_WORDTABLE);
                         }
                     }
                 } else { // Can't read the file from the Word .docx file.
@@ -616,7 +616,7 @@ class qformat_wordtable extends qformat_xml {
             debugging(__FUNCTION__ . "() -> Cannot decompose questions", DEBUG_WORDTABLE);
             return $questionxmlstring;
         }
-        // debugging(__FUNCTION__ . ":" . __LINE__ . ": " . $numquestions . " questions found", DEBUG_WORDTABLE);
+        // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": " . $numquestions . " questions found", DEBUG_WORDTABLE);
 
         // Split the questions into text strings to check the HTML.
         for ($i = 0; $i < $numquestions; $i++) {
@@ -658,7 +658,7 @@ class qformat_wordtable extends qformat_xml {
                 $textafterlastcdatastring = substr($questionmatches[$i][0], strrpos($questionmatches[$i][0], "]]>") + 3);
                 $cleanquestionxmlstring .= $textafterlastcdatastring;
             } else {
-                // debugging(__FUNCTION__ . ":" . __LINE__ . ": No CDATA sections in question " . $i + 1, DEBUG_WORDTABLE);
+                // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": No CDATA sections in question " . $i + 1, DEBUG_WORDTABLE);
                 $cleanquestionxmlstring .= $questionmatches[$i][0];
             }
         } // End question element loop.
@@ -682,11 +682,11 @@ class qformat_wordtable extends qformat_xml {
         $doc->loadHTML('<html><body>' . $cdatastring . '</body></html>');
         $doc->getElementsByTagName('html')->item(0)->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
         $xml = $doc->saveXML();
-        // debugging(__FUNCTION__ . ":" . __LINE__ . ": xml: |" . str_replace("\n", "", $xml) . "|", DEBUG_WORDTABLE);
+        // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": xml: |" . str_replace("\n", "", $xml) . "|", DEBUG_WORDTABLE);
 
         $bodystart = stripos($xml, '<body>') + strlen('<body>');
         $bodylength = strripos($xml, '</body>') - $bodystart;
-        // debugging(__FUNCTION__ . ":" . __LINE__ . ": bodystart = {$bodystart}, bodylength = {$bodylength}", DEBUG_WORDTABLE);
+        // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": bodystart = {$bodystart}, bodylength = {$bodylength}", DEBUG_WORDTABLE);
         if ($bodystart || $bodylength) {
             $cleanxhtml = substr($xml, $bodystart, $bodylength);
             debugging(__FUNCTION__ . ":" . __LINE__ . ": clean xhtml: |" . $cleanxhtml . "|", DEBUG_WORDTABLE);
