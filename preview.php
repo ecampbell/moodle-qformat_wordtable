@@ -14,10 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** preview.php
+/**
+ * Provide a simple mechanism to preview a question based on the course ID and a unique question name
  *
- * Provides a simple mechanism to preview a question based on the course ID and a unique question name.
- * Copyright 2010 Eoin Campbell
+ * @package qformat_wordtable
+ * @copyright 2010-2015 Eoin Campbell
+ * @author Eoin Campbell
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
  */
 
 require_once('../../../config.php');
@@ -38,12 +41,11 @@ $courseid = required_param('courseid', PARAM_INT);
 // Get the question ID by searching for the unique name, and redirect to the preview page.
 if (($question = $DB->get_record('question', array('name' => $qname)))) {
     // Figure out the proper URL, allowing for an installation in a subfolder.
-    $moodle_root_folder_path = parse_url($CFG->wwwroot, PHP_URL_PATH);
-    $redirect_url = $moodle_root_folder_path . "/question/preview.php?id=" . $question->id . "&courseid=" . $courseid;
-    debugging("Preview question: Redirecting to $redirect_url", DEBUG_DEVELOPER, $backtrace);
-    redirect($redirect_url);
+    $moodlerootfolderpath = parse_url($CFG->wwwroot, PHP_URL_PATH);
+    $redirecturl = $moodlerootfolderpath . "/question/preview.php?id=" . $question->id . "&courseid=" . $courseid;
+    debugging("Preview question: Redirecting to $redirecturl", DEBUG_DEVELOPER, $backtrace);
+    redirect($redirecturl);
 } else {   // No question found, report an error message so the reader isn't looking at a blank screen.
     debugging("Preview question: No question found", DEBUG_DEVELOPER, $backtrace);
     echo $OUTPUT->notification(get_string('preview_question_not_found', 'qformat_wordtable', $qname . " / " . $courseid));
 }
-?>

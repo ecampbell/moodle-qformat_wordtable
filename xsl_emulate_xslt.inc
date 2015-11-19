@@ -24,7 +24,7 @@
  */
 
 
-// This file is copied from moodle/backup/bb/xsl_emulate_xslt.inc
+// This file is copied from moodle/backup/bb/xsl_emulate_xslt.inc.
 
 // This file adds xslt_xxx emulation functions.
 // It is intended for systems, e.g. those running PHP 5, where:
@@ -34,12 +34,18 @@
 // Note that not everything is implemented.
 // In particular, only the bare minimum to support the BB conversion is here.
 
-// This silliness is required to prevent PHP from evaluating the function() blocks before processing the return;s
-if(true) {
+// This silliness is required to prevent PHP from evaluating the function() blocks before processing the return;s.
+if (true) {
 
-    if(function_exists('xslt_create')) return;     // xslt_create() already exists, so emulation isn't needed.
-    if(!class_exists('XSLTProcessor')) return;     // There is no XSLTProcessor class, so emulation isn't possible.
-    if(!class_exists('DOMDocument')) return;       // There is no DOMDocument class, so emulation isn't possible.
+    if (function_exists('xslt_create')) {
+        return;     // Function xslt_create() already exists, so emulation isn't needed.
+    }
+    if (!class_exists('XSLTProcessor')) {
+        return;     // There is no XSLTProcessor class, so emulation isn't possible.
+    }
+    if (!class_exists('DOMDocument')) {
+        return;       // There is no DOMDocument class, so emulation isn't possible.
+    }
 
     /**
      * Dummy function to call XSLT processor if not already defined
@@ -54,36 +60,36 @@ if(true) {
     /**
      * Mimic xslt_create function call using XSLTProcessor
      *
-     * @param $proc XSLT object
-     * @param $xmlfile XML file to process
-     * @param $xslfile to process XML with
-     * @param $resultfile containing output
-     * @param $unsupported_args dummy
-     * @param $parameters dummy
-     * @return boolean true if transformation succeeded
+     * @param stdClass $proc XSLT object
+     * @param string $xmlfile XML file to process
+     * @param string $xslfile to process XML with
+     * @param string $resultfile containing output
+     * @param string[] $unsupportedargs dummy
+     * @param string[] $parameters dummy
+     * @return bool true if transformation succeeded
      */
-    function xslt_process($proc, $xmlfile, $xslfile, $resultfile = null, $unsupported_args = null, $parameters = null) {
+    function xslt_process($proc, $xmlfile, $xslfile, $resultfile = null, $unsupportedargs = null, $parameters = null) {
         $doc = new DOMDocument;
         $doc->load($xmlfile);
         $xsl = new DOMDocument;
         $xsl->load($xslfile);
 
-        // Set the html template file parameter
-        foreach ($parameters as $param_name => $param_value) {
-            $proc->setParameter('', $param_name, $param_value);
+        // Set the html template file parameter.
+        foreach ($parameters as $paramname => $paramvalue) {
+            $proc->setParameter('', $paramname, $paramvalue);
         }
 
         $proc->importStylesheet($xsl);
 
-       // Squash warnings here because xsl complains about COURSE_ACCESS tags which really are invalid XML (multiple root elements)
-       if($resultfile !== null) {
-               $fp = fopen($resultfile, 'w');
-               fwrite($fp, @$proc->transformToXML($doc));
-               fclose($fp);
-               return true;
-       } else {
-               return @$proc->transformToXML($doc);
-       }
+        // Squash warnings because XSLT complains about COURSE_ACCESS tags which really are invalid XML (multiple root elements).
+        if ($resultfile !== null) {
+            $fp = fopen($resultfile, 'w');
+            fwrite($fp, @$proc->transformToXML($doc));
+            fclose($fp);
+            return true;
+        } else {
+            return @$proc->transformToXML($doc);
+        }
     }
 
-} // end if(true)
+}
