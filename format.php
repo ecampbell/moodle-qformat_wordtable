@@ -332,9 +332,8 @@ class qformat_wordtable extends qformat_xml {
         $xsltoutput = str_replace('</mml:', '</', $xsltoutput);
         $xsltoutput = str_replace(' mathvariant="normal"', '', $xsltoutput);
         $xsltoutput = str_replace(' xmlns:mml="http://www.w3.org/1998/Math/MathML"', '', $xsltoutput);
-        $mmltextdirectionattribute = (right_to_left()) ? ' dir="rtl"' : '';
-        $xsltoutput = str_replace('<math>', '<math xmlns="http://www.w3.org/1998/Math/MathML"' .
-                            $mmltextdirectionattribute  . '>', $xsltoutput);
+        $mmltextdirection = (right_to_left()) ? ' dir="rtl"' : '';
+        $xsltoutput = str_replace('<math>', "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" $mmltextdirection>", $xsltoutput);
 
         $tempmqxmlfilename = $CFG->dataroot . '/temp/' . basename($tempwordmlfilename, ".tmp") . ".xml";
         // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, including the HTML template too.
