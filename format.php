@@ -176,7 +176,7 @@ class qformat_wordtable extends qformat_xml {
 
                     // Look for internal images.
                     if (strpos($zefilename, "media")) {
-                        $imageformat = substr($zefilename, strrpos($zefilename, ".") + 1);
+                        // @codingStandardsIgnoreLine $imageformat = substr($zefilename, strrpos($zefilename, ".") + 1);
                         $imagedata = zip_entry_read($zipentry, $zefilesize);
                         $imagename = basename($zefilename);
                         $imagesuffix = strtolower(substr(strrchr($zefilename, "."), 1));
@@ -221,10 +221,11 @@ class qformat_wordtable extends qformat_xml {
                                 break;
                             case "word/_rels/footnotes.xml.rels" . $xmlfiledata . "</footnoteLinks>\n";
                                 break;
-                            /*
+                            /* @codingStandardsIgnoreStart
                             case "word/_rels/settings.xml.rels":
                                 $wordmldata .= "<settingsLinks>" . $xmlfiledata . "</settingsLinks>\n";
                                 break;
+                                @codingStandardsIgnoreEnd
                             */
                             default:
                                 // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": Ignore '$zefilename'", DEBUG_WORDTABLE);
@@ -606,7 +607,7 @@ class qformat_wordtable extends qformat_xml {
         $xhtmlfragment = str_replace("\n", "", substr($questionxmlstring, 0, 200));
         debugging(__FUNCTION__ . "(questionxmlstring = $xhtmlfragment ...)", DEBUG_WORDTABLE);
         // Start assembling the cleaned output string, starting with empty.
-        $cleanquestionxmlstring = "";
+        $cleanquestionxml = "";
 
         // Split the string into questions in order to check the text fields for clean HTML.
         $foundquestions = preg_match_all('~(.*?)<question type="([^"]*)"[^>]*>(.*?)</question>~s', $questionxmlstring,
@@ -631,40 +632,39 @@ class qformat_wordtable extends qformat_xml {
             // $imported_from_wordtable = preg_match('~ImportFromWordTable~', $questioncontent);
             // if ($imported_from_wordtable and $imported_from_wordtable != 0) {
             //    debugging(__FUNCTION__ . ":" . __LINE__ . ": Skip cleaning previously imported question " . $i + 1, DEBUG_WORDTABLE);
-            //    $cleanquestionxmlstring .= $questionmatches[$i][0];
+            //    $cleanquestionxml .= $questionmatches[$i][0];
             // } else if ($foundcdatasections === false) {
             // @codingStandardsIgnoreEnd
             if ($foundcdatasections === false) {
                 debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot decompose CDATA sections in question " .
                             $i + 1, DEBUG_WORDTABLE);
-                $cleanquestionxmlstring .= $questionmatches[$i][0];
+                $cleanquestionxml .= $questionmatches[$i][0];
             } else if ($foundcdatasections != 0) {
                 $numcdatasections = count($cdatamatches);
                 debugging(__FUNCTION__ . ":" . __LINE__ . ": " . $numcdatasections  . " CDATA sections found in question "
                                 . $i + 1 . ", question length = " . strlen($questioncontent), DEBUG_WORDTABLE);
                 // Found CDATA sections, so first add the question start tag and then process the body.
-                $cleanquestionxmlstring .= '<question type="' . $qtype . '">';
+                $cleanquestionxml .= '<question type="' . $qtype . '">';
 
                 // Process content of each CDATA section to clean the HTML.
                 for ($j = 0; $j < $numcdatasections; $j++) {
-                    $cdatacontent = $cdatamatches[$j][2];
                     $cleancdatacontent = $this->clean_html_text($cdatamatches[$j][2]);
 
                     // Add all the text before the first CDATA start boundary, and the cleaned string, to the output string.
-                    $cleanquestionxmlstring .= $cdatamatches[$j][1] . '<![CDATA[' . $cleancdatacontent . ']]>';
+                    $cleanquestionxml .= $cdatamatches[$j][1] . '<![CDATA[' . $cleancdatacontent . ']]>';
                 } // End CDATA section loop.
 
                 // Add the text after the last CDATA section closing delimiter.
-                $textafterlastcdatastring = substr($questionmatches[$i][0], strrpos($questionmatches[$i][0], "]]>") + 3);
-                $cleanquestionxmlstring .= $textafterlastcdatastring;
+                $textafterlastcdata = substr($questionmatches[$i][0], strrpos($questionmatches[$i][0], "]]>") + 3);
+                $cleanquestionxml .= $textafterlastcdata;
             } else {
                 // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": No CDATA sections in question " . $i + 1, DEBUG_WORDTABLE);
-                $cleanquestionxmlstring .= $questionmatches[$i][0];
+                $cleanquestionxml .= $questionmatches[$i][0];
             }
         } // End question element loop.
 
-        debugging(__FUNCTION__ . "() -> " . str_replace("\n", "", substr($cleanquestionxmlstring, 0, 200)), DEBUG_WORDTABLE);
-        return $cleanquestionxmlstring;
+        debugging(__FUNCTION__ . "() -> " . str_replace("\n", "", substr($cleanquestionxml, 0, 200)), DEBUG_WORDTABLE);
+        return $cleanquestionxml;
     }
 
     /**
@@ -703,7 +703,7 @@ class qformat_wordtable extends qformat_xml {
             $urldecodedstring = "";
             // Process the possibly-URL-escaped filename so that it matches the name in the file element.
             for ($i = 0; $i < $nummatches; $i++) {
-                // Decode the filename and add the surrounding text
+                // Decode the filename and add the surrounding text.
                 $decodedfilename = urldecode($pluginfilematches[$i][2]);
                 $urldecodedstring .= $pluginfilematches[$i][1] . '<img src="@@PLUGINFILE@@/' . $decodedfilename .
                                         $pluginfilematches[$i][3];
