@@ -436,14 +436,14 @@
     <!-- Column heading 1 is blank if question is not numbered, otherwise it includes a #, and importantly, a list number reset style -->
     <xsl:variable name="colheading1_label">
         <xsl:choose>
-        <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MAT' or $qtype = 'MS' or $qtype = 'NUM' or starts-with($qtype, 'C')"><xsl:text>#</xsl:text></xsl:when>
+        <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MAT' or $qtype = 'MS' or $qtype = 'MW' or $qtype = 'NUM' or starts-with($qtype, 'C')"><xsl:text>#</xsl:text></xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
     <xsl:variable name="colheading1_style">
         <xsl:choose>
         <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'NUM' or starts-with($qtype, 'C')"><xsl:value-of select="'QFOptionReset'"/></xsl:when>
-        <xsl:when test="$qtype = 'MAT'"><xsl:value-of select="'ListNumberReset'"/></xsl:when>
+        <xsl:when test="$qtype = 'MAT' or $qtype = 'MW'"><xsl:value-of select="'ListNumberReset'"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="'Cell'"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -1561,7 +1561,7 @@
 <!-- Handle Missing Words-specific question elements -->
 <xsl:template match="selectoption">
     <tr>
-        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+        <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
         <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
         <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
         <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="group"/></p></td>

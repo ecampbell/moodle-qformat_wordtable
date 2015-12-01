@@ -576,7 +576,7 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['qtype_essay'][] = 'responseisrequired';
             $textstrings['qtype_essay'][] = 'responsenotrequired';
         }
-        if ($CFG->release >= '2.9') { 
+        if ($CFG->release >= '2.9') {
             // Add support for Missing Words question type (not Missing Word format).
             $textstrings['qtype_gapselect'][] = 'pluginname';
             $textstrings['qtype_gapselect'][] = 'pluginnamesummary';
