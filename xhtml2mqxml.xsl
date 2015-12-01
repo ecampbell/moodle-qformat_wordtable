@@ -29,7 +29,7 @@
 -->
 
 <!-- Settings -->
-<xsl:output encoding="UTF-8" method="xml" indent="no" />
+<xsl:output encoding="UTF-8" method="xml" indent="yes" />
 
 <!-- Top Level Parameters -->
 <xsl:param name="debug_flag" select="0" />
@@ -447,6 +447,24 @@
                 <xsl:with-param name="category" select="$category"/>
             </xsl:call-template>
             <!-- End Description -->
+        </xsl:when>
+        <xsl:when test="$qtype = 'MW' or $qtype = 'GAPSELECT'">
+            <xsl:attribute name="type"><xsl:value-of select="'gapselect'"/></xsl:attribute>
+            <xsl:call-template name="itemStem">
+                <xsl:with-param name="table_root" select="$table_root"/>
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="category" select="$category"/>
+                <xsl:with-param name="nColumns" select="$nColumns"/>
+            </xsl:call-template>
+
+            <!-- Process the words and groups -->
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns]">
+                <xsl:call-template name="process_row">
+                    <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
+                    <xsl:with-param name="qtype" select="$qtype"/>
+                </xsl:call-template>
+            </xsl:for-each>
+            <!-- End Multi-answer -->
         </xsl:when>
         </xsl:choose>
 
@@ -878,10 +896,13 @@
     <xsl:when test="$qtype = 'MAT'">
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
     </xsl:when>
+    <xsl:when test="$qtype = 'MW'">
+        <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
+    </xsl:when>
     </xsl:choose>
 
     <!-- Handle the Correct/Incorrect/Partially Correct feedback -->
-    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
+    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'MW' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
         <xsl:variable name="cfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Correct') or starts-with(normalize-space(x:th), $correctfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="ifb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Incorrect') or starts-with(normalize-space(x:th), $incorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="pcfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Partial') or starts-with(normalize-space(x:th), $pcorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
@@ -936,15 +957,15 @@
 
 </xsl:template>
 
-<!-- Answer rows for MC, MA, TF, and SA -->
+<!-- Answer rows for MC, MA, MS, MW, TF, and SA -->
 <xsl:template name="process_row">
     <xsl:param name="table_row"/>
     <xsl:param name="qtype"/>
 
     <!--<xsl:comment>td[2]: <xsl:value-of select="x:tr[1]/x:td[2]"/>; td[3]: <xsl:value-of select="x:tr[1]/x:td[3]"/>; td[4]: <xsl:value-of select="x:tr[1]/x:td[4]"/></xsl:comment>-->
 
-    <!-- Get plain text option for SA and TF question types 
-        TF can contain only 'true' or 'false', while SA anwsers must be matchable strings -->
+    <!-- Get plain text option for MW, SA and TF question types 
+        TF can contain only 'true' or 'false', while MW and SA anwsers must be matchable strings -->
     <xsl:variable name="plain_text">
         <xsl:choose>
         <xsl:when test="contains(x:td[position() = $option_colnum], '&#x9;')">
@@ -992,7 +1013,7 @@
         <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
             <xsl:text>html</xsl:text>
         </xsl:when>
-        <xsl:when test="$qtype = 'SA' or $qtype = 'TF'">
+        <xsl:when test="$qtype = 'MW' or $qtype = 'SA' or $qtype = 'TF'">
             <xsl:text></xsl:text>
         </xsl:when>
         <xsl:otherwise><xsl:text>moodle_auto_format</xsl:text></xsl:otherwise>
@@ -1002,7 +1023,18 @@
     <!--<xsl:comment>option: <xsl:value-of select="$plain_text"/>; feedback: <xsl:value-of select="td[position() = $generic_feedback_colnum]"/>; grade: <xsl:value-of select="$fraction"/></xsl:comment>-->
 
     <!-- Include an answer for all questions except Description and Cloze -->
-    <xsl:if test="$qtype != 'DE' and $qtype != 'CL'">
+    <xsl:choose>
+    <xsl:when test="$qtype = 'DE' or $qtype = 'CL'">
+        <!-- Do nothing -->
+    </xsl:when>
+    <xsl:when test="$qtype = 'MW'">
+        <selectoption>
+            <text><xsl:value-of select="normalize-space($plain_text)"/></text>
+            <!-- Fraction value contains the group number in MW questions -->
+            <group><xsl:value-of select="$fraction_value"/></group>
+        </selectoption>
+    </xsl:when>
+    <xsl:otherwise>
         <answer fraction="{$fraction_value}">
             <xsl:if test="$answer_format != ''">
             <xsl:attribute name="format">
@@ -1041,7 +1073,8 @@
                 </xsl:call-template>
             </feedback>
         </answer>
-    </xsl:if>
+    </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
 
 

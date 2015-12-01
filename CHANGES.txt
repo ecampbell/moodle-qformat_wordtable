@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2015/12/01    3.5.0     Support 'Select missing words' question type, general code clean-up
 2015/09/30    3.4.3     Support RTL equations in MathML conversion
 2015/09/24    3.4.2     Minimise empty attributes in Pass 1 of conversion
 2015/09/21    3.4.1     Handle unusual WordML markup (w:dir) in RTL (e.g. Arabic) text

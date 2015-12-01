@@ -558,9 +558,11 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['quiz'][] = 'choice';
             $textstrings['quiz'][] = 'penaltyfactor';
         } else if ($CFG->release >= '2.5') {
+            // Add support for new Essay fields added in Moodle 2.5.
             $textstrings['qtype_essay'][] = 'responsetemplate';
             $textstrings['qtype_essay'][] = 'responsetemplate_help';
             $textstrings['qtype_match'][] = 'blanksforxmorequestions';
+            // Add support for new generic question fields added in Moodle 2.5.
             $textstrings['question'][] = 'addmorechoiceblanks';
             $textstrings['question'][] = 'correctfeedbackdefault';
             $textstrings['question'][] = 'hintnoptions';
@@ -568,10 +570,17 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['question'][] = 'partiallycorrectfeedbackdefault';
         }
         if ($CFG->release >= '2.7') {
+            // Add support for new Essay fields added in Moodle 2.7.
             $textstrings['qtype_essay'][] = 'attachmentsrequired';
             $textstrings['qtype_essay'][] = 'responserequired';
             $textstrings['qtype_essay'][] = 'responseisrequired';
             $textstrings['qtype_essay'][] = 'responsenotrequired';
+        }
+        if ($CFG->release >= '2.9') { 
+            // Add support for Missing Words question type (not Missing Word format).
+            $textstrings['qtype_gapselect'][] = 'pluginname';
+            $textstrings['qtype_gapselect'][] = 'pluginnamesummary';
+            $textstrings['qtype_gapselect'][] = 'group';
         }
 
         // Add All-or-Nothing MCQ question type strings if present.

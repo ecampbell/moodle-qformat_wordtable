@@ -116,6 +116,7 @@
     </xsl:choose>
 </xsl:variable>
 <xsl:variable name="grade_label" select="$moodle_labels/data[@name = 'moodle_grade']"/>
+<xsl:variable name="group_label" select="$moodle_labels/data[@name = 'qtype_gapselect_group']"/>
 <xsl:variable name="no_label" select="$moodle_labels/data[@name = 'moodle_no']"/>
 <xsl:variable name="yes_label" select="$moodle_labels/data[@name = 'moodle_yes']"/>
 <xsl:variable name="item_label" select="$moodle_labels/data[@name = 'grades_item']"/>
@@ -277,6 +278,9 @@
 <xsl:variable name="multichoiceset_showeachfeedback_label" select="$moodle_labels/data[@name = 'qtype_multichoiceset_showeachanswerfeedback']"/>
 <xsl:variable name="multichoiceset_instructions" select="$moodle_labels/data[@name = 'qtype_multichoiceset_pluginnamesummary']"/>
 
+<!-- Multichoice Set (All-or-Nothing Multichoice) question labels -->
+<xsl:variable name="missingword_instructions" select="$moodle_labels/data[@name = 'qtype_gapselect_pluginnamesummary']"/>
+
 <!-- Short Answer question labels -->
 <xsl:variable name="casesensitive_label">
     <xsl:choose>
@@ -364,6 +368,7 @@
         <xsl:when test="@type = 'cloze'"><xsl:text>CL</xsl:text></xsl:when>
         <xsl:when test="@type = 'description'"><xsl:text>DE</xsl:text></xsl:when>
         <xsl:when test="@type = 'essay'"><xsl:text>ES</xsl:text></xsl:when>
+        <xsl:when test="@type = 'gapselect'"><xsl:text>MW</xsl:text></xsl:when>
         <xsl:when test="@type = 'matching'"><xsl:text>MAT</xsl:text></xsl:when>
         <xsl:when test="@type = 'multichoice' and single = 'false'"><xsl:text>MA</xsl:text></xsl:when>
         <xsl:when test="@type = 'multichoice' and single = 'true'"><xsl:text>MC</xsl:text></xsl:when>
@@ -473,7 +478,10 @@
     <!-- Grade column heading, or blank if no grade (CL, DE, ES, MAT) -->
     <xsl:variable name="colheading4_label">
         <xsl:choose>
-        <xsl:when test="$qtype != 'DE' and $qtype != 'ES' and $qtype != 'MAT'">
+        <xsl:when test="$qtype = 'MW'">
+            <xsl:value-of select="$group_label"/>
+        </xsl:when>
+        <xsl:when test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'SA' or $qtype = 'TF' or $qtype = 'NUM'">
             <xsl:value-of select="$grade_label"/>
         </xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
@@ -552,6 +560,7 @@
         <xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$matching_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'MC'"><xsl:value-of select="$multichoice_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'MS'"><xsl:value-of select="$multichoiceset_instructions"/></xsl:when>
+        <xsl:when test="$qtype = 'MW'"><xsl:value-of select="$missingword_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'SA'"><xsl:value-of select="$shortanswer_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'TF'"><xsl:value-of select="$truefalse_instructions"/></xsl:when>
         <xsl:otherwise>
@@ -630,7 +639,7 @@
         <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$mcq_shuffleanswers_label"/></p></td>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$shuffleanswers_flag"/></p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$shuffleanswers_flag"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
@@ -639,7 +648,7 @@
         <xsl:if test="$qtype = 'MC' or $qtype = 'MA' or $qtype = 'MS'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$answernumbering_label"/></p></td>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$numbering_flag"/></p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$numbering_flag"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
@@ -648,35 +657,37 @@
         <xsl:if test="$qtype = 'ES' and $moodle_release_number &gt; '19'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responseformat_label"/></p></td>
-                    <td style="width: 1.0cm">
-                    <p class="Cell"><xsl:choose>
-                            <xsl:when test="responseformat = 'monospaced'">
-                                <xsl:value-of select="$format_mono_label"/>
-                            </xsl:when>
-                            <xsl:when test="responseformat = 'editorfilepicker'">
-                                <xsl:value-of select="$format_editorfilepicker_label"/>
-                            </xsl:when>
-                            <xsl:when test="responseformat = 'plain'">
-                                <xsl:value-of select="$format_plain_label"/>
-                            </xsl:when>
-                            <xsl:when test="responseformat = 'editor'">
-                                <xsl:value-of select="$format_html_label"/>
-                            </xsl:when>
-                            <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'markdown'">
-                                <xsl:value-of select="$format_markdown_label"/>
-                            </xsl:when>
-                            <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'moodle_auto_format'">
-                                <xsl:value-of select="$format_auto_label"/>
-                            </xsl:when>
-                            <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'plain_text'">
-                                <xsl:value-of select="$format_plain_label"/>
-                            </xsl:when>
-                            <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'html'">
-                                <xsl:value-of select="$format_html_label"/>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$format_editor_label"/></xsl:otherwise>
-                            </xsl:choose></p>
-                    </td>
+                <td style="width: 1.0cm">
+                    <p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="responseformat = 'monospaced'">
+                            <xsl:value-of select="$format_mono_label"/>
+                        </xsl:when>
+                        <xsl:when test="responseformat = 'editorfilepicker'">
+                            <xsl:value-of select="$format_editorfilepicker_label"/>
+                        </xsl:when>
+                        <xsl:when test="responseformat = 'plain'">
+                            <xsl:value-of select="$format_plain_label"/>
+                        </xsl:when>
+                        <xsl:when test="responseformat = 'editor'">
+                            <xsl:value-of select="$format_html_label"/>
+                        </xsl:when>
+                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'markdown'">
+                            <xsl:value-of select="$format_markdown_label"/>
+                        </xsl:when>
+                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'moodle_auto_format'">
+                            <xsl:value-of select="$format_auto_label"/>
+                        </xsl:when>
+                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'plain_text'">
+                            <xsl:value-of select="$format_plain_label"/>
+                        </xsl:when>
+                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'html'">
+                            <xsl:value-of select="$format_html_label"/>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:value-of select="$format_editor_label"/></xsl:otherwise>
+                        </xsl:choose>
+                    </p>
+                </td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
 
@@ -845,7 +856,7 @@
         <xsl:text>&#x0a;</xsl:text>
     </thead>
     <tbody>
-    <xsl:text>&#x0a;</xsl:text>
+        <xsl:text>&#x0a;</xsl:text>
 
         <!-- Handle the body, containing the options and feedback (for most questions) -->
 
@@ -908,7 +919,7 @@
         </xsl:when>
         <xsl:otherwise>
             <!-- Special cases done, so for other question types, loop through the answers -->
-            <xsl:apply-templates select="answer|subquestion">
+            <xsl:apply-templates select="answer|subquestion|selectoption">
                 <xsl:with-param name="qtype" select="$qtype"/>
                 <xsl:with-param name="numbering_flag" select="$numbering_flag"/>
             </xsl:apply-templates>
@@ -937,8 +948,8 @@
         <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
 
-        <!-- Correct and Incorrect feedback for MA, MAT and MC questions only -->
-        <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or ($qtype = 'MAT' and $moodle_release_number &gt; '19')">
+        <!-- Correct and Incorrect feedback for MA, MAT, MC and MW questions only -->
+        <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW'">
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$correctfeedback_label"/></p></th>
@@ -968,8 +979,8 @@
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
-        <!-- Partially correct feedback for MA (Multi-answer) and MAT questions only -->
-        <xsl:if test="$qtype = 'MA' or ($qtype = 'MAT' and $moodle_release_number &gt; '19')">
+        <!-- Partially correct feedback for MA (Multi-answer), MAT(ching) and Missing Word (gapselect) questions only -->
+        <xsl:if test="$qtype = 'MA' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW'">
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$pcorrectfeedback_label"/></p></th>
@@ -1545,6 +1556,16 @@
         <xsl:value-of select="'0'"/>
     </xsl:when>
     </xsl:choose>
+</xsl:template>
+
+<!-- Handle Missing Words-specific question elements -->
+<xsl:template match="selectoption">
+    <tr>
+        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+        <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
+        <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+        <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="group"/></p></td>
+    </tr>
 </xsl:template>
 
 <!-- Handle images associated with '@@PLUGINFILE@@' keyword by including them in temporary supplementary paragraphs in whatever component they occur in -->
