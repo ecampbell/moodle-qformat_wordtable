@@ -1052,7 +1052,7 @@
         </xsl:if>
 
         <!-- Correct and Incorrect feedback for MA, MAT, MC and MW questions only -->
-        <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW'">
+        <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW' or starts-with($qtype, 'DD')">
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$correctfeedback_label"/></p></th>
@@ -1083,7 +1083,7 @@
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
         <!-- Partially correct feedback for MA (Multi-answer), MAT(ching) and Missing Word (gapselect) questions only -->
-        <xsl:if test="$qtype = 'MA' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW'">
+        <xsl:if test="$qtype = 'MA' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW' or starts-with($qtype, 'DD')">
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$pcorrectfeedback_label"/></p></th>
