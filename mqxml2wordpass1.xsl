@@ -116,7 +116,6 @@
     </xsl:choose>
 </xsl:variable>
 <xsl:variable name="grade_label" select="$moodle_labels/data[@name = 'moodle_grade']"/>
-<xsl:variable name="group_label" select="$moodle_labels/data[@name = 'qtype_gapselect_group']"/>
 <xsl:variable name="no_label" select="$moodle_labels/data[@name = 'moodle_no']"/>
 <xsl:variable name="yes_label" select="$moodle_labels/data[@name = 'moodle_yes']"/>
 <xsl:variable name="item_label" select="$moodle_labels/data[@name = 'grades_item']"/>
@@ -280,6 +279,7 @@
 
 <!-- Multichoice Set (All-or-Nothing Multichoice) question labels -->
 <xsl:variable name="missingword_instructions" select="$moodle_labels/data[@name = 'qtype_gapselect_pluginnamesummary']"/>
+<xsl:variable name="group_label" select="$moodle_labels/data[@name = 'qtype_gapselect_group']"/>
 
 <!-- Short Answer question labels -->
 <xsl:variable name="casesensitive_label">
@@ -295,6 +295,34 @@
 <!-- True/False question labels -->
 <xsl:variable name="false_label" select="$moodle_labels/data[@name = 'qtype_truefalse_false']"/>
 <xsl:variable name="true_label" select="$moodle_labels/data[@name = 'qtype_truefalse_true']"/>
+
+<!-- Drag and Drop question labels -->
+<xsl:variable name="ddi_shuffleimages_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_shuffleimages']"/>
+<xsl:variable name="ddi_dropzoneheader_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_dropzoneheader']"/>
+<xsl:variable name="ddi_draggableitem_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_draggableitem']"/>
+<xsl:variable name="ddi_text_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_text']"/>
+<xsl:variable name="ddi_bgimage_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_bgimage']"/>
+<xsl:variable name="ddi_coords_label">
+    <xsl:value-of select="$moodle_labels/data[@name = 'qtype_ddimageortext_xleft']"/>
+    <xsl:text>, </xsl:text>
+    <xsl:value-of select="$moodle_labels/data[@name = 'qtype_ddimageortext_ytop']"/>
+</xsl:variable>
+<xsl:variable name="ddi_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_infinite']"/>
+<xsl:variable name="ddi_instructions" select="$moodle_labels/data[@name = 'qtype_ddimageortext_pluginnamesummary']"/>
+<xsl:variable name="ddi_shape_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_shape']"/>
+
+<xsl:variable name="ddm_circle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_circle']"/>
+<xsl:variable name="ddm_coords_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_coords']"/>
+<xsl:variable name="ddm_marker_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_marker']"/>
+<xsl:variable name="ddm_instructions" select="$moodle_labels/data[@name = 'qtype_ddmarker_pluginnamesummary']"/>
+<xsl:variable name="ddm_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_infinite']"/>
+<xsl:variable name="ddm_number_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_number']"/>
+<xsl:variable name="ddm_polygon_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_polygon']"/>
+<xsl:variable name="ddm_rectangle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_rectangle']"/>
+<xsl:variable name="ddm_shape_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape']"/>
+
+<xsl:variable name="ddt_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddwtos_infinite']"/>
+<xsl:variable name="ddt_instructions" select="$moodle_labels/data[@name = 'qtype_ddwtos_pluginnamesummary']"/>
 
 <!-- Wordtable-specific instruction strings -->
 <xsl:variable name="cloze_instructions" select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_instructions']"/>
@@ -376,6 +404,10 @@
         <xsl:when test="@type = 'numerical'"><xsl:text>NUM</xsl:text></xsl:when>
         <xsl:when test="@type = 'shortanswer'"><xsl:text>SA</xsl:text></xsl:when>
         <xsl:when test="@type = 'truefalse'"><xsl:text>TF</xsl:text></xsl:when>
+        <xsl:when test="@type = 'ddmarker'"><xsl:text>DDM</xsl:text></xsl:when>
+        <xsl:when test="@type = 'ddwtos'"><xsl:text>DDT</xsl:text></xsl:when>
+        <xsl:when test="@type = 'ddimageortext'"><xsl:text>DDI</xsl:text></xsl:when>
+        <xsl:when test="@type = 'truefalse'"><xsl:text>TF</xsl:text></xsl:when>
         <xsl:otherwise><xsl:value-of select="@type"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -437,6 +469,7 @@
     <xsl:variable name="colheading1_label">
         <xsl:choose>
         <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MAT' or $qtype = 'MS' or $qtype = 'MW' or $qtype = 'NUM' or starts-with($qtype, 'C')"><xsl:text>#</xsl:text></xsl:when>
+        <xsl:when test="starts-with($qtype, 'DD')"><xsl:text>#</xsl:text></xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -444,6 +477,7 @@
         <xsl:choose>
         <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'NUM' or starts-with($qtype, 'C')"><xsl:value-of select="'QFOptionReset'"/></xsl:when>
         <xsl:when test="$qtype = 'MAT' or $qtype = 'MW'"><xsl:value-of select="'ListNumberReset'"/></xsl:when>
+        <xsl:when test="starts-with($qtype, 'DD')"><xsl:value-of select="'ListNumberReset'"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="'Cell'"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -456,6 +490,7 @@
         <xsl:when test="$qtype = 'ES' and $moodle_release_number &gt; '24'"><xsl:value-of select="$responsetemplate_label"/></xsl:when>
         <xsl:when test="$qtype = 'ES'"><xsl:value-of select="$blank_cell"/></xsl:when>
         <xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$question_label"/></xsl:when>
+        <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_draggableitem_label"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$answers_label"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -471,6 +506,9 @@
         <xsl:when test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF' or $qtype = 'MS' or $qtype = 'NUM' or starts-with($qtype, 'C')">
             <xsl:value-of select="$feedback_label"/>
         </xsl:when>
+        <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_infinite_label"/></xsl:when>
+        <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$answer_label"/></xsl:when>
+        <xsl:when test="$qtype = 'DDT'"><xsl:value-of select="$ddt_infinite_label"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -483,6 +521,12 @@
         </xsl:when>
         <xsl:when test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'SA' or $qtype = 'TF' or $qtype = 'NUM'">
             <xsl:value-of select="$grade_label"/>
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDI'">
+            <xsl:value-of select="$group_label"/>
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDT'">
+            <xsl:value-of select="$group_label"/>
         </xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
@@ -554,6 +598,9 @@
     <xsl:variable name="instruction_text">
         <xsl:choose>
         <xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_instructions"/></xsl:when>
+        <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_instructions"/></xsl:when>
+        <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$ddm_instructions"/></xsl:when>
+        <xsl:when test="$qtype = 'DDT'"><xsl:value-of select="$ddt_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'DE'"><xsl:value-of select="$description_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'ES'"><xsl:value-of select="$essay_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'MA'"><xsl:value-of select="$multichoice_instructions"/></xsl:when>
@@ -619,12 +666,26 @@
         </tr>
         <xsl:text>&#x0a;</xsl:text>
 
+        <!-- Handle background image for DDI and DDM questions -->
+        <xsl:if test="$qtype = 'DDI' or $qtype = 'DDM'">
+            <tr>
+                <td colspan="4" style="width: 12.0cm">
+                    <p class="Cell">
+                        <img src="{concat($pluginfiles_string,file/@name)}"/>
+                    </p>
+                    <xsl:apply-templates select="file"/>
+                </td>
+                <!--<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>-->
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+        </xsl:if>
+
         <!-- Handle heading rows for various metadata specific to each question -->
         <!-- 2nd heading row: Default mark / Default grade / Question weighting, i.e. total marks available for question -->
         <xsl:if test="$qtype != 'DE'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$defaultmark_label"/></p></td>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$defaultmark_value"/></p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$defaultmark_value"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
@@ -643,6 +704,14 @@
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
+        <xsl:if test="$qtype = 'DDI'">
+            <tr>
+                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$ddi_shuffleimages_label"/></p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$shuffleanswers_flag"/></p></td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+        </xsl:if>
+
 
         <!-- Number the choices, and if so, how? May be alphabetic, numeric or roman -->
         <xsl:if test="$qtype = 'MC' or $qtype = 'MA' or $qtype = 'MS'">
@@ -917,9 +986,43 @@
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
         </xsl:when>
+        <xsl:when test="$qtype = 'DDI'">
+            <!-- Drag and Drop image questions -->
+            <xsl:apply-templates select="drag">
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="numbering_flag" select="$numbering_flag"/>
+            </xsl:apply-templates>
+            <tr>
+                <td style="width: 1.0cm"><p class="{$colheading1_style}" style="page-break-after:avoid">#</p></td>
+                <td style="{$col3_width}"><p class="TableHead"><xsl:value-of select="$ddi_dropzoneheader_label"/></p></td>
+                <td style="{$col2_width}"><p class="TableHead"><xsl:value-of select="$ddi_coords_label"/></p></td>
+                <td style="width: 1.0cm"><p class="TableHead"><xsl:value-of select="$ddi_draggableitem_label"/></p></td>
+            </tr>
+            <xsl:apply-templates select="drop" mode="ddimageortext">
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="numbering_flag" select="$numbering_flag"/>
+            </xsl:apply-templates>
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDM'">
+            <!-- Drag and Drop image questions -->
+            <xsl:apply-templates select="drag">
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="numbering_flag" select="$numbering_flag"/>
+            </xsl:apply-templates>
+            <tr>
+                <td style="width: 1.0cm"><p class="{$colheading1_style}" style="page-break-after:avoid">#</p></td>
+                <td style="{$col2_width}"><p class="TableHead"><xsl:value-of select="$ddm_shape_label"/></p></td>
+                <td style="{$col3_width}"><p class="TableHead"><xsl:value-of select="$ddm_coords_label"/></p></td>
+                <td style="width: 1.0cm"><p class="TableHead"><xsl:value-of select="$ddm_marker_label"/></p></td>
+            </tr>
+            <xsl:apply-templates select="drop" mode="ddmarker">
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="numbering_flag" select="$numbering_flag"/>
+            </xsl:apply-templates>
+        </xsl:when>
         <xsl:otherwise>
             <!-- Special cases done, so for other question types, loop through the answers -->
-            <xsl:apply-templates select="answer|subquestion|selectoption">
+            <xsl:apply-templates select="answer|subquestion|selectoption|dragbox">
                 <xsl:with-param name="qtype" select="$qtype"/>
                 <xsl:with-param name="numbering_flag" select="$numbering_flag"/>
             </xsl:apply-templates>
@@ -1568,6 +1671,96 @@
     </tr>
 </xsl:template>
 
+<!-- Handle Drag and Drop text question elements -->
+<xsl:template match="dragbox">
+    <tr>
+        <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
+        <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
+        <td style="{$col3_width}">
+            <p class="Cell">
+                <xsl:choose>
+                <xsl:when test="infinite">
+                    <xsl:value-of select="$yes_label"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$no_label"/>
+                </xsl:otherwise>
+                </xsl:choose>
+            </p>
+        </td>
+        <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="group"/></p></td>
+    </tr>
+</xsl:template>
+
+<!-- Handle Drag and Drop onto image question elements -->
+<xsl:template match="drag">
+    <tr>
+        <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
+        <td style="{$col2_width}">
+            <p class="Cell">
+                <!-- May be dealing with either an image or a text label -->
+                <xsl:choose>
+                <xsl:when test="file">
+                        <img src="{concat($pluginfiles_string,file/@name)}" alt="{normalize-space(text)}"/>
+                    <xsl:apply-templates select="file"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="normalize-space(text)"/>
+                </xsl:otherwise>
+                </xsl:choose>
+            </p>
+        </td>
+        <td style="{$col3_width}">
+            <p class="Cell">
+                <xsl:choose>
+                <xsl:when test="infinite">
+                    <xsl:value-of select="$yes_label"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$no_label"/>
+                </xsl:otherwise>
+                </xsl:choose>
+            </p>
+        </td>
+        <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="draggroup"/></p></td>
+    </tr>
+</xsl:template>
+
+<xsl:template match="drop" mode="ddmarker">
+    <tr>
+        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="no"/></p></td>
+        <td style="{$col2_width}">
+            <p class="Cell">
+                <xsl:variable name="this_shape">
+                    <xsl:choose>
+                    <xsl:when test="shape = 'circle'">
+                        <xsl:value-of select="$ddm_circle_label"/>
+                    </xsl:when>
+                    <xsl:when test="shape = 'rectangle'">
+                        <xsl:value-of select="$ddm_rectangle_label"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="$ddm_polygon_label"/>
+                    </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:value-of select="$this_shape"/>
+            </p>
+        </td>
+        <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="coords"/></p></td>
+        <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="choice"/></p></td>
+    </tr>
+</xsl:template>
+
+<xsl:template match="drop" mode="ddimageortext">
+    <tr>
+        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="no"/></p></td>
+        <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
+        <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="concat(xleft, ', ', ytop)"/></p></td>
+        <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="choice"/></p></td>
+    </tr>
+</xsl:template>
+
 <!-- Handle images associated with '@@PLUGINFILE@@' keyword by including them in temporary supplementary paragraphs in whatever component they occur in -->
 <xsl:template match="file">
     <xsl:variable name="image_file_suffix">
@@ -1576,6 +1769,10 @@
     <xsl:variable name="image_format">
         <xsl:value-of select="concat('data:image/', $image_file_suffix, ';', @encoding, ',')"/>
     </xsl:variable>
+    <xsl:variable name="alt_text">
+        <xsl:value-of select="concat('data:image/', $image_file_suffix, ';', @encoding, ',')"/>
+    </xsl:variable>
+
     <p class="ImageFile"><img src="{concat($image_format, .)}" title="{@name}"/></p>
 </xsl:template>
 

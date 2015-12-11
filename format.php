@@ -109,21 +109,23 @@ class qformat_wordtable extends qformat_xml {
             $filename = "{$CFG->tempdir}/questionimport/{$realfilename}";
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Word file = $realfilename; path = '$filename'", DEBUG_WORDTABLE);
+        $basefilename = basename($filename);
+        $baserealfilename = basename($realfilename);
         // Give XSLT as much memory as possible, to enable larger Word files to be imported.
         raise_memory_limit(MEMORY_HUGE);
 
         // Check that the file is in Word 2010 format, not HTML, XML, or Word 2003.
         if ((substr($realfilename, -3, 3) == 'doc')) {
-            echo $OUTPUT->notification(get_string('docnotsupported', 'qformat_wordtable', $realfilename));
+            echo $OUTPUT->notification(get_string('docnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         } else if ((substr($realfilename, -3, 3) == 'xml')) {
-            echo $OUTPUT->notification(get_string('xmlnotsupported', 'qformat_wordtable', $realfilename));
+            echo $OUTPUT->notification(get_string('xmlnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         } else if ((stripos($realfilename, 'htm'))) {
-            echo $OUTPUT->notification(get_string('htmlnotsupported', 'qformat_wordtable', $realfilename));
+            echo $OUTPUT->notification(get_string('htmlnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         } else if ((stripos(file_get_contents($filename, 0, null, 0, 100), 'html'))) {
-            echo $OUTPUT->notification(get_string('htmldocnotsupported', 'qformat_wordtable', $realfilename));
+            echo $OUTPUT->notification(get_string('htmldocnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         }
 
@@ -199,7 +201,7 @@ class qformat_wordtable extends qformat_xml {
                     } else {
                         // Look for required XML files.
                         // Read and wrap XML files, remove the XML declaration, and add them to the XML string.
-                        $xmlfiledata = str_replace($xmldeclaration, "", zip_entry_read($zipentry, $zefilesize));
+                        $xmlfiledata = preg_replace('/<\?xml version="1.0" ([^>]*)>/', "", zip_entry_read($zipentry, $zefilesize));
                         switch ($zefilename) {
                             case "word/document.xml":
                                 $wordmldata .= "<wordmlContainer>" . $xmlfiledata . "</wordmlContainer>\n";
@@ -232,7 +234,7 @@ class qformat_wordtable extends qformat_xml {
                         }
                     }
                 } else { // Can't read the file from the Word .docx file.
-                    echo $OUTPUT->notification(get_string('cannotreadzippedfile', 'qformat_wordtable', $filename));
+                    echo $OUTPUT->notification(get_string('cannotreadzippedfile', 'qformat_wordtable', $basefilename));
                     zip_close($zfh);
                     return false;
                 }
@@ -241,7 +243,7 @@ class qformat_wordtable extends qformat_xml {
             }  // End while loop.
             zip_close($zfh);
         } else { // Can't open the Word .docx file for reading.
-            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $filename));
+            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $basefilename));
             $this->debug_unlink($filename);
             return false;
         }
@@ -253,14 +255,14 @@ class qformat_wordtable extends qformat_xml {
         // Create a temporary file to store the merged WordML XML content to transform.
         if (!($tempwordmlfilename = tempnam($CFG->dataroot . '/temp/', "w2q-"))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Can't open temporary XML file ($tempwordmlfilename)", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $tempwordmlfilename));
+            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', basename($tempwordmlfilename)));
             return false;
         }
 
         // Write the WordML contents to be imported.
         if (($nbytes = file_put_contents($tempwordmlfilename, $wordmldata)) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XML data to '$tempwordmlfilename'", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $tempwordmlfilename));
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempwordmlfilename)));
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": XML data saved to '$tempwordmlfilename'", DEBUG_WORDTABLE);
@@ -284,7 +286,7 @@ class qformat_wordtable extends qformat_xml {
         $tempxhtmlfilename = $CFG->dataroot . '/temp/' . basename($tempwordmlfilename, ".tmp") . ".if1";
         if (($nbytes = file_put_contents($tempxhtmlfilename, $xsltoutput )) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to '$tempxhtmlfilename'", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $tempxhtmlfilename));
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempxhtmlfilename)));
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Pass 1 output XHTML data saved to '$tempxhtmlfilename'", DEBUG_WORDTABLE);
@@ -308,7 +310,7 @@ class qformat_wordtable extends qformat_xml {
         $xhtmlfragment = "<pass3Container>\n" . $xsltoutput . $this->get_text_labels() . "\n</pass3Container>";
         if (($nbytes = file_put_contents($tempxhtmlfilename, $xhtmlfragment)) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to '$tempxhtmlfilename'", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $tempxhtmlfilename));
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempxhtmlfilename)));
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Pass 2 output XHTML data saved to '$tempxhtmlfilename'", DEBUG_WORDTABLE);
@@ -339,7 +341,7 @@ class qformat_wordtable extends qformat_xml {
         // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, including the HTML template too.
         if (($nbytes = file_put_contents($tempmqxmlfilename, $xsltoutput)) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to '$tempmqxmlfilename'", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $tempmqxmlfilename));
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempmqxmlfilename)));
             return false;
         }
 
@@ -353,7 +355,7 @@ class qformat_wordtable extends qformat_xml {
         // Now over-write the original Word file with the XML file, so that default XML file handling will work.
         if (($fp = fopen($filename, "wb"))) {
             if (($nbytes = fwrite($fp, $xsltoutput)) == 0) {
-                echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $filename));
+                echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $basefilename));
                 return false;
             }
             fclose($fp);
@@ -420,7 +422,7 @@ class qformat_wordtable extends qformat_xml {
         // Create a temporary file to store the XML content to transform.
         if (!($tempxmlfilename = tempnam($CFG->dataroot . '/temp/', "q2w-"))) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Cannot open temporary file '$tempxmlfilename'", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', $tempxmlfilename));
+            echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', basename($tempxmlfilename)));
             return false;
         }
 
@@ -433,7 +435,7 @@ class qformat_wordtable extends qformat_xml {
         $xmloutput = "<container>\n<quiz>" . $cleancontent . "</quiz>\n" . $this->get_text_labels() . "\n</container>";
         if (($nbytes = file_put_contents($tempxmlfilename, $xmloutput)) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed writing XML to temporary file '$tempxmlfilename'", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $tempxmlfilename));
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempxmlfilename)));
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": XML data saved to '$tempxmlfilename'", DEBUG_WORDTABLE);
@@ -471,7 +473,7 @@ class qformat_wordtable extends qformat_xml {
                      "\n</htmltemplate>\n" . $this->get_text_labels() . "\n</container>";
         if (($nbytes = file_put_contents($tempxhtmlfilename, $xmloutput)) == 0) {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": Failed to save XHTML data to '$tempxhtmlfilename'", DEBUG_WORDTABLE);
-            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', $tempxhtmlfilename));
+            echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempxhtmlfilename)));
             return false;
         }
         debugging(__FUNCTION__ . ":" . __LINE__ . ": Intermediate XHTML data saved to '$tempxhtmlfilename'", DEBUG_WORDTABLE);
@@ -576,12 +578,6 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['qtype_essay'][] = 'responseisrequired';
             $textstrings['qtype_essay'][] = 'responsenotrequired';
         }
-        if ($CFG->release >= '2.9') {
-            // Add support for Missing Words question type (not Missing Word format).
-            $textstrings['qtype_gapselect'][] = 'pluginname';
-            $textstrings['qtype_gapselect'][] = 'pluginnamesummary';
-            $textstrings['qtype_gapselect'][] = 'group';
-        }
 
         // Add All-or-Nothing MCQ question type strings if present.
         $qtype = question_bank::get_qtype('multichoiceset', false);
@@ -589,6 +585,53 @@ class qformat_wordtable extends qformat_xml {
             debugging(__FUNCTION__ . ":" . __LINE__ . ": multichoiceset exists", DEBUG_WORDTABLE);
             $textstrings['qtype_multichoiceset'][] = 'pluginnamesummary';
             $textstrings['qtype_multichoiceset'][] = 'showeachanswerfeedback';
+        }
+
+        // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
+        $qtype = question_bank::get_qtype('gapselect', false);
+        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
+            $textstrings['qtype_gapselect'][] = 'pluginnamesummary';
+            $textstrings['qtype_gapselect'][] = 'group';
+        }
+
+        // Add 'Drag and drop onto image' question type, added to core in 2.9, downloadable before then.
+        $qtype = question_bank::get_qtype('ddimageortext', false);
+        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
+            $textstrings['qtype_ddimageortext'][] = 'pluginnamesummary';
+            $textstrings['qtype_ddimageortext'][] = 'bgimage';
+            $textstrings['qtype_ddimageortext'][] = 'dropbackground';
+            $textstrings['qtype_ddimageortext'][] = 'dropzoneheader';
+            $textstrings['qtype_ddimageortext'][] = 'draggableitem';
+            $textstrings['qtype_ddimageortext'][] = 'infinite';
+            $textstrings['qtype_ddimageortext'][] = 'label';
+            $textstrings['qtype_ddimageortext'][] = 'shuffleimages';
+            $textstrings['qtype_ddimageortext'][] = 'xleft';
+            $textstrings['qtype_ddimageortext'][] = 'ytop';
+            
+        }
+
+        // Add 'Drag and drop markers' question type, added to core in 2.9, downloadable before then.
+        $qtype = question_bank::get_qtype('ddmarker', false);
+        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
+            $textstrings['qtype_ddmarker'][] = 'pluginnamesummary';
+            $textstrings['qtype_ddmarker'][] = 'bgimage';
+            $textstrings['qtype_ddmarker'][] = 'coords';
+            $textstrings['qtype_ddmarker'][] = 'dropbackground';
+            $textstrings['qtype_ddmarker'][] = 'dropzoneheader';
+            $textstrings['qtype_ddmarker'][] = 'infinite';
+            $textstrings['qtype_ddmarker'][] = 'marker';
+            $textstrings['qtype_ddmarker'][] = 'noofdrags';
+            $textstrings['qtype_ddmarker'][] = 'shape_circle';
+            $textstrings['qtype_ddmarker'][] = 'shape_polygon';
+            $textstrings['qtype_ddmarker'][] = 'shape_rectangle';
+            $textstrings['qtype_ddmarker'][] = 'shape';
+        }
+
+        // Add 'Drag and drop into text' question type, added to core in 2.9, downloadable before then.
+        $qtype = question_bank::get_qtype('ddwtos', false);
+        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
+            $textstrings['qtype_ddwtos'][] = 'pluginnamesummary';
+            $textstrings['qtype_ddwtos'][] = 'infinite';
         }
 
         $expout = "<moodlelabels>\n";
