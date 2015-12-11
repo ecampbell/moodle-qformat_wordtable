@@ -607,7 +607,6 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['qtype_ddimageortext'][] = 'shuffleimages';
             $textstrings['qtype_ddimageortext'][] = 'xleft';
             $textstrings['qtype_ddimageortext'][] = 'ytop';
-            
         }
 
         // Add 'Drag and drop markers' question type, added to core in 2.9, downloadable before then.
