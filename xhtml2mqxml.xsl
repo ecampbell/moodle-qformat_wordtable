@@ -177,6 +177,34 @@
 <!-- True/False question labels -->
 <xsl:variable name="true_label" select="$moodle_labels/data[@name = 'qtype_truefalse_true']"/>
 
+<!-- Drag and Drop question labels -->
+<xsl:variable name="ddi_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_shuffleimages']"/>
+<xsl:variable name="ddi_dropzoneheader_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_dropzoneheader']"/>
+<xsl:variable name="ddi_draggableitem_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_draggableitem']"/>
+<xsl:variable name="ddi_text_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_text']"/>
+<xsl:variable name="ddi_bgimage_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_bgimage']"/>
+<xsl:variable name="ddi_coords_label">
+    <xsl:value-of select="$moodle_labels/data[@name = 'qtype_ddimageortext_xleft']"/>
+    <xsl:text>, </xsl:text>
+    <xsl:value-of select="$moodle_labels/data[@name = 'qtype_ddimageortext_ytop']"/>
+</xsl:variable>
+<xsl:variable name="ddi_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_infinite']"/>
+<xsl:variable name="ddi_instructions" select="$moodle_labels/data[@name = 'qtype_ddimageortext_pluginnamesummary']"/>
+<xsl:variable name="ddi_shape_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_shape']"/>
+
+<xsl:variable name="ddm_circle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_circle']"/>
+<xsl:variable name="ddm_coords_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_coords']"/>
+<xsl:variable name="ddm_marker_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_marker']"/>
+<xsl:variable name="ddm_instructions" select="$moodle_labels/data[@name = 'qtype_ddmarker_pluginnamesummary']"/>
+<xsl:variable name="ddm_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_infinite']"/>
+<xsl:variable name="ddm_number_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_number']"/>
+<xsl:variable name="ddm_polygon_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_polygon']"/>
+<xsl:variable name="ddm_rectangle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_rectangle']"/>
+<xsl:variable name="ddm_shape_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape']"/>
+
+<xsl:variable name="ddt_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddwtos_infinite']"/>
+<xsl:variable name="ddt_instructions" select="$moodle_labels/data[@name = 'qtype_ddwtos_pluginnamesummary']"/>
+
 
 <!-- Template Matches -->
 <xsl:template match="/">
@@ -464,7 +492,86 @@
                     <xsl:with-param name="qtype" select="$qtype"/>
                 </xsl:call-template>
             </xsl:for-each>
-            <!-- End Multi-answer -->
+            <!-- End Missing Word -->
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDI'">
+            <xsl:attribute name="type"><xsl:value-of select="'ddimageortext'"/></xsl:attribute>
+            <xsl:call-template name="itemStem">
+                <xsl:with-param name="table_root" select="$table_root"/>
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="category" select="$category"/>
+                <xsl:with-param name="nColumns" select="$nColumns"/>
+            </xsl:call-template>
+
+            <!-- Identify the end of the draggables, to avoid treating drop zone items as draggables -->
+            <xsl:variable name="dropzone_heading_row" select="$table_root/x:tbody/x:tr[contains(x:th[1], '#')]"/>
+            <xsl:variable name="draggable_rows" select="count($dropzone_heading_row/preceding-sibling::x:tr)"/>
+            <xsl:comment><xsl:value-of select="concat('draggable_rows: ', $draggable_rows)"/></xsl:comment>
+
+            <!-- Process the draggable items -->
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &lt;= $draggable_rows]">
+                <xsl:call-template name="process_row">
+                    <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
+                    <xsl:with-param name="qtype" select="$qtype"/>
+                </xsl:call-template>
+            </xsl:for-each>
+
+            <!-- Process the dropzone items -->
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &gt; $draggable_rows]">
+                <xsl:call-template name="process_dropzone_row">
+                    <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
+                    <xsl:with-param name="qtype" select="$qtype"/>
+                </xsl:call-template>
+            </xsl:for-each>
+            <!-- End Drag and Drop onto image -->
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDM'">
+            <xsl:attribute name="type"><xsl:value-of select="'ddmarker'"/></xsl:attribute>
+            <xsl:call-template name="itemStem">
+                <xsl:with-param name="table_root" select="$table_root"/>
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="category" select="$category"/>
+                <xsl:with-param name="nColumns" select="$nColumns"/>
+            </xsl:call-template>
+
+            <!-- Identify the end of the draggables, to avoid treating drop zone items as draggables -->
+            <xsl:variable name="dropzone_heading_row" select="$table_root/x:tbody/x:tr[contains(x:th[1], '#')]"/>
+            <xsl:variable name="draggable_rows" select="count($dropzone_heading_row/preceding-sibling::x:tr)"/>
+            <xsl:comment><xsl:value-of select="concat('draggable_rows: ', $draggable_rows)"/></xsl:comment>
+
+            <!-- Process the draggable items -->
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &lt;= $draggable_rows]">
+                <xsl:call-template name="process_row">
+                    <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
+                    <xsl:with-param name="qtype" select="$qtype"/>
+                </xsl:call-template>
+            </xsl:for-each>
+            <!-- Process the dropzone items -->
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &gt; $draggable_rows]">
+                <xsl:call-template name="process_dropzone_row">
+                    <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
+                    <xsl:with-param name="qtype" select="$qtype"/>
+                </xsl:call-template>
+            </xsl:for-each>
+            <!-- End Drag and Drop onto marker -->
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDT'">
+            <xsl:attribute name="type"><xsl:value-of select="'ddwtos'"/></xsl:attribute>
+            <xsl:call-template name="itemStem">
+                <xsl:with-param name="table_root" select="$table_root"/>
+                <xsl:with-param name="qtype" select="$qtype"/>
+                <xsl:with-param name="category" select="$category"/>
+                <xsl:with-param name="nColumns" select="$nColumns"/>
+            </xsl:call-template>
+
+            <!-- Process the words and groups -->
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns]">
+                <xsl:call-template name="process_row">
+                    <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
+                    <xsl:with-param name="qtype" select="$qtype"/>
+                </xsl:call-template>
+            </xsl:for-each>
+            <!-- End Drag and Drop Words to Sentence -->
         </xsl:when>
         </xsl:choose>
 
@@ -615,6 +722,9 @@
         </xsl:when>
         <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
             <xsl:value-of select="$mcq_shuffleanswers_label"/>
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDI'">
+            <xsl:value-of select="$ddi_shuffleanswers_label"/>
         </xsl:when>
         <xsl:otherwise> <!-- Make sure the label isn't match if the question type does not contain a shuffle flag -->
             <xsl:value-of select="'NOMATCH'"/>
@@ -902,7 +1012,7 @@
     </xsl:choose>
 
     <!-- Handle the Correct/Incorrect/Partially Correct feedback -->
-    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'MW' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
+    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'MW' or starts-with($qtype, 'DD') or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
         <xsl:variable name="cfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Correct') or starts-with(normalize-space(x:th), $correctfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="ifb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Incorrect') or starts-with(normalize-space(x:th), $incorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="pcfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Partial') or starts-with(normalize-space(x:th), $pcorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
@@ -953,11 +1063,16 @@
         <xsl:if test="$showNumCorrect_value = 'true'">
             <shownumcorrect/>
         </xsl:if>
+
+        <xsl:if test="$qtype = 'DDI' or $qtype = 'DDM'">
+            <xsl:apply-templates select="$table_root/x:thead/x:tr[2]/x:th" mode="moodle2pluginfile"/>
+        </xsl:if>
+
     </xsl:if>
 
 </xsl:template>
 
-<!-- Answer rows for MC, MA, MS, MW, TF, and SA -->
+<!-- Answer rows for MC, MA, MS, MW, TF, and SA; DDT -->
 <xsl:template name="process_row">
     <xsl:param name="table_row"/>
     <xsl:param name="qtype"/>
@@ -1010,10 +1125,10 @@
 
     <xsl:variable name="answer_format">
         <xsl:choose>
-        <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
+        <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'DDI' or $qtype = 'DDT'">
             <xsl:text>html</xsl:text>
         </xsl:when>
-        <xsl:when test="$qtype = 'MW' or $qtype = 'SA' or $qtype = 'TF'">
+        <xsl:when test="$qtype = 'MW' or $qtype = 'SA' or $qtype = 'TF' or $qtype = 'DDM'">
             <xsl:text></xsl:text>
         </xsl:when>
         <xsl:otherwise><xsl:text>moodle_auto_format</xsl:text></xsl:otherwise>
@@ -1033,6 +1148,75 @@
             <!-- Fraction value contains the group number in MW questions -->
             <group><xsl:value-of select="$fraction_value"/></group>
         </selectoption>
+    </xsl:when>
+    <xsl:when test="$qtype = 'DDI'">
+        <!-- Drag and Drop image or text onto image -->
+        <xsl:variable name="infinite_flag_value">
+            <xsl:choose>
+            <xsl:when test="contains(x:td[position() = $specific_feedback_colnum], '&#x9;')">
+                <xsl:value-of select="substring-after(x:td[position() = $specific_feedback_colnum], '&#x9;')"/>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="x:td[position() = $specific_feedback_colnum]"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
+        <drag>
+            <no><xsl:value-of select="position()"/></no>
+            <xsl:choose>
+            <xsl:when test="x:td[position() = $option_colnum]//x:img">
+                <text>
+                    <xsl:value-of select="x:td[position() = $option_colnum]//x:img/@longdesc"/>
+                </text>
+                <xsl:apply-templates select="x:td[position() = $option_colnum]" mode="moodle2pluginfile"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <text><xsl:value-of select="normalize-space($plain_text)"/></text>
+            </xsl:otherwise>
+            </xsl:choose>
+            <!-- Fraction value contains the group number in DDT questions -->
+            <draggroup><xsl:value-of select="$fraction_value"/></draggroup>
+            <xsl:if test="contains(translate($infinite_flag_value, $ucase, $lcase), $yes_label)">
+                <infinite/>
+            </xsl:if>
+        </drag>
+    </xsl:when>
+    <xsl:when test="$qtype = 'DDM'">
+        <!-- Drag and Drop Markers onto image -->
+        <xsl:variable name="infinite_flag_value">
+            <xsl:choose>
+            <xsl:when test="contains(x:td[position() = $specific_feedback_colnum], '&#x9;')">
+                <xsl:value-of select="substring-after(x:td[position() = $specific_feedback_colnum], '&#x9;')"/>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="x:td[position() = $specific_feedback_colnum]"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <drag>
+            <text><xsl:value-of select="normalize-space($plain_text)"/></text>
+            <!-- Fraction value contains the group number in DDT questions -->
+            <group><xsl:value-of select="$fraction_value"/></group>
+            <xsl:if test="contains($infinite_flag_value, $yes_label)">
+                <infinite/>
+            </xsl:if>
+        </drag>
+    </xsl:when>
+    <xsl:when test="$qtype = 'DDT'">
+        <!-- Drag and Drop Word to Sentence -->
+        <xsl:variable name="infinite_flag_value">
+            <xsl:choose>
+            <xsl:when test="contains(x:td[position() = $specific_feedback_colnum], '&#x9;')">
+                <xsl:value-of select="substring-after(x:td[position() = $specific_feedback_colnum], '&#x9;')"/>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="x:td[position() = $specific_feedback_colnum]"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <dragbox>
+            <text><xsl:value-of select="normalize-space($plain_text)"/></text>
+            <!-- Fraction value contains the group number in DDT questions -->
+            <group><xsl:value-of select="$fraction_value"/></group>
+            <xsl:if test="contains($infinite_flag_value, $yes_label)">
+                <infinite/>
+            </xsl:if>
+        </dragbox>
     </xsl:when>
     <xsl:otherwise>
         <answer fraction="{$fraction_value}">
@@ -1077,6 +1261,59 @@
     </xsl:choose>
 </xsl:template>
 
+<!-- Drop Zone rows for DDI and DDM -->
+<xsl:template name="process_dropzone_row">
+    <xsl:param name="table_row"/>
+    <xsl:param name="qtype"/>
+
+    <!-- Get 2nd column containing shape (DDM) or zone label (DDI) -->
+    <xsl:variable name="plain_text">
+        <xsl:choose>
+        <xsl:when test="contains(x:td[position() = $option_colnum], '&#x9;')">
+            <xsl:value-of select="substring-after(x:td[position() = $option_colnum], '&#x9;')"/>
+        </xsl:when>
+        <xsl:otherwise><xsl:value-of select="x:td[position() = $option_colnum]"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+
+    <!-- Get 3rd column containing coordinates -->
+    <xsl:variable name="coordinates" select="x:td[position() = $specific_feedback_colnum]"/>
+
+    <!-- Get 4th column containing reference to draggable item -->
+    <xsl:variable name="drag_item_ref" select="normalize-space(x:td[position() = $nColumns])"/>
+
+    <xsl:choose>
+    <xsl:when test="$qtype = 'DDI'">
+        <drop>
+            <text><xsl:value-of select="normalize-space($plain_text)"/></text>
+            <no><xsl:value-of select="position()"/></no>
+            <choice><xsl:value-of select="$drag_item_ref"/></choice>
+            <xleft><xsl:value-of select="substring-before($coordinates, ',')"/></xleft>
+            <ytop><xsl:value-of select="substring-after($coordinates, ', ')"/></ytop>
+        </drop>
+    </xsl:when>
+    <xsl:when test="$qtype = 'DDM'">
+        <drop>
+            <no><xsl:value-of select="position()"/></no>
+            <shape>
+                <xsl:choose>
+                <xsl:when test="translate($plain_text, $ucase, $lcase) = translate($ddm_circle_label, $ucase, $lcase)">
+                    <xsl:text>circle</xsl:text>
+                </xsl:when>
+                <xsl:when test="translate($plain_text, $ucase, $lcase) = translate($ddm_polygon_label, $ucase, $lcase)">
+                    <xsl:text>polygon</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>rectangle</xsl:text>
+                </xsl:otherwise>
+                </xsl:choose>
+            </shape>
+            <coords><xsl:value-of select="$coordinates"/></coords>
+            <choice><xsl:value-of select="$drag_item_ref"/></choice>
+        </drop>
+    </xsl:when>
+    </xsl:choose>
+</xsl:template>
 
 <!-- Omit language-only span elements (e.g. <span @lang="en-ie">) to keep things tidy -->
 <xsl:template match="x:span[@lang and count(@*) = 1] | x:a[starts-with(@name, 'Heading')]" priority="2">
