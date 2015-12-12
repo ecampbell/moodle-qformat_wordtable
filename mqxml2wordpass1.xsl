@@ -316,7 +316,7 @@
 <xsl:variable name="ddm_marker_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_marker']"/>
 <xsl:variable name="ddm_instructions" select="$moodle_labels/data[@name = 'qtype_ddmarker_pluginnamesummary']"/>
 <xsl:variable name="ddm_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_infinite']"/>
-<xsl:variable name="ddm_number_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_number']"/>
+<xsl:variable name="ddm_noofdrags_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_noofdrags']"/>
 <xsl:variable name="ddm_polygon_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_polygon']"/>
 <xsl:variable name="ddm_rectangle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_rectangle']"/>
 <xsl:variable name="ddm_shape_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape']"/>
@@ -446,6 +446,12 @@
         <xsl:choose>
         <!-- shuffleanswers element might be duplicated in XML, or contain either 'true' or '1', so allow for these possibilities -->
         <xsl:when test="shuffleanswers[1] = 'true' or shuffleanswers[1] = '1'">
+            <xsl:value-of select="$yes_label"/> <!-- Explicit true used in MC -->
+        </xsl:when>
+        <xsl:when test="shuffleanswers[1] = 'false' or shuffleanswers[1] = '0'">
+            <xsl:value-of select="$no_label"/> <!-- Explicit false used in MAT -->
+        </xsl:when>
+        <xsl:when test="shuffleanswers"> <!-- Empty element used in DDM -->
             <xsl:value-of select="$yes_label"/>
         </xsl:when>
         <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
@@ -491,6 +497,7 @@
         <xsl:when test="$qtype = 'ES'"><xsl:value-of select="$blank_cell"/></xsl:when>
         <xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$question_label"/></xsl:when>
         <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_draggableitem_label"/></xsl:when>
+        <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$ddm_marker_label"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$answers_label"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -507,7 +514,7 @@
             <xsl:value-of select="$feedback_label"/>
         </xsl:when>
         <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_infinite_label"/></xsl:when>
-        <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$answer_label"/></xsl:when>
+        <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$ddm_noofdrags_label"/></xsl:when>
         <xsl:when test="$qtype = 'DDT'"><xsl:value-of select="$ddt_infinite_label"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
@@ -704,7 +711,7 @@
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
-        <xsl:if test="$qtype = 'DDI'">
+        <xsl:if test="$qtype = 'DDI' or $qtype = 'DDM'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$ddi_shuffleimages_label"/></p></td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$shuffleanswers_flag"/></p></td>
@@ -1004,8 +1011,8 @@
             </xsl:apply-templates>
         </xsl:when>
         <xsl:when test="$qtype = 'DDM'">
-            <!-- Drag and Drop image questions -->
-            <xsl:apply-templates select="drag">
+            <!-- Drag and Drop marker onto image questions -->
+            <xsl:apply-templates select="drag" mode="ddmarker">
                 <xsl:with-param name="qtype" select="$qtype"/>
                 <xsl:with-param name="numbering_flag" select="$numbering_flag"/>
             </xsl:apply-templates>
@@ -1723,6 +1730,27 @@
             </p>
         </td>
         <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="draggroup"/></p></td>
+    </tr>
+</xsl:template>
+
+<!-- Markers area of Drag and Drop marker -->
+<xsl:template match="drag" mode="ddmarker">
+    <tr>
+        <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
+        <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
+        <td style="{$col3_width}">
+            <p class="Cell">
+                <xsl:choose>
+                <xsl:when test="infinite">
+                    <xsl:value-of select="$ddm_infinite_label"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="noofdrags"/>
+                </xsl:otherwise>
+                </xsl:choose>
+            </p>
+        </td>
+        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
     </tr>
 </xsl:template>
 
