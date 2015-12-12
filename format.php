@@ -594,7 +594,7 @@ class qformat_wordtable extends qformat_xml {
         }
         // Add 'Drag and drop markers' question type, added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('ddmarker', false))) {
-            $textstrings['qtype_ddmarker'] = array('pluginnamesummary', 'bgimage', 'coords', 'dropbackground', 'dropzoneheader', 
+            $textstrings['qtype_ddmarker'] = array('pluginnamesummary', 'bgimage', 'coords', 'dropbackground', 'dropzoneheader',
                     'infinite', 'marker', 'noofdrags', 'shape_circle', 'shape_polygon', 'shape_rectangle', 'shape');
         }
         // Add 'Drag and drop into text' question type, added to core in 2.9, downloadable before then.
