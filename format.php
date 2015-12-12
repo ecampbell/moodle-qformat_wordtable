@@ -580,57 +580,26 @@ class qformat_wordtable extends qformat_xml {
         }
 
         // Add All-or-Nothing MCQ question type strings if present.
-        $qtype = question_bank::get_qtype('multichoiceset', false);
-        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
-            debugging(__FUNCTION__ . ":" . __LINE__ . ": multichoiceset exists", DEBUG_WORDTABLE);
-            $textstrings['qtype_multichoiceset'][] = 'pluginnamesummary';
-            $textstrings['qtype_multichoiceset'][] = 'showeachanswerfeedback';
+        if (is_object(question_bank::get_qtype('multichoiceset', false))) {
+            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
         }
-
         // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
-        $qtype = question_bank::get_qtype('gapselect', false);
-        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
-            $textstrings['qtype_gapselect'][] = 'pluginnamesummary';
-            $textstrings['qtype_gapselect'][] = 'group';
+        if (is_object(question_bank::get_qtype('gapselect', false))) {
+            $textstrings['qtype_gapselect'] = array('pluginnamesummary', 'group');
         }
-
         // Add 'Drag and drop onto image' question type, added to core in 2.9, downloadable before then.
-        $qtype = question_bank::get_qtype('ddimageortext', false);
-        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
-            $textstrings['qtype_ddimageortext'][] = 'pluginnamesummary';
-            $textstrings['qtype_ddimageortext'][] = 'bgimage';
-            $textstrings['qtype_ddimageortext'][] = 'dropbackground';
-            $textstrings['qtype_ddimageortext'][] = 'dropzoneheader';
-            $textstrings['qtype_ddimageortext'][] = 'draggableitem';
-            $textstrings['qtype_ddimageortext'][] = 'infinite';
-            $textstrings['qtype_ddimageortext'][] = 'label';
-            $textstrings['qtype_ddimageortext'][] = 'shuffleimages';
-            $textstrings['qtype_ddimageortext'][] = 'xleft';
-            $textstrings['qtype_ddimageortext'][] = 'ytop';
+        if (is_object(question_bank::get_qtype('ddimageortext', false))) {
+            $textstrings['qtype_ddimageortext'] = array('pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
+                    'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop');
         }
-
         // Add 'Drag and drop markers' question type, added to core in 2.9, downloadable before then.
-        $qtype = question_bank::get_qtype('ddmarker', false);
-        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
-            $textstrings['qtype_ddmarker'][] = 'pluginnamesummary';
-            $textstrings['qtype_ddmarker'][] = 'bgimage';
-            $textstrings['qtype_ddmarker'][] = 'coords';
-            $textstrings['qtype_ddmarker'][] = 'dropbackground';
-            $textstrings['qtype_ddmarker'][] = 'dropzoneheader';
-            $textstrings['qtype_ddmarker'][] = 'infinite';
-            $textstrings['qtype_ddmarker'][] = 'marker';
-            $textstrings['qtype_ddmarker'][] = 'noofdrags';
-            $textstrings['qtype_ddmarker'][] = 'shape_circle';
-            $textstrings['qtype_ddmarker'][] = 'shape_polygon';
-            $textstrings['qtype_ddmarker'][] = 'shape_rectangle';
-            $textstrings['qtype_ddmarker'][] = 'shape';
+        if (is_object(question_bank::get_qtype('ddmarker', false))) {
+            $textstrings['qtype_ddmarker'] = array('pluginnamesummary', 'bgimage', 'coords', 'dropbackground', 'dropzoneheader', 
+                    'infinite', 'marker', 'noofdrags', 'shape_circle', 'shape_polygon', 'shape_rectangle', 'shape');
         }
-
         // Add 'Drag and drop into text' question type, added to core in 2.9, downloadable before then.
-        $qtype = question_bank::get_qtype('ddwtos', false);
-        if (is_object($qtype) && method_exists($qtype, 'import_from_wordtable')) {
-            $textstrings['qtype_ddwtos'][] = 'pluginnamesummary';
-            $textstrings['qtype_ddwtos'][] = 'infinite';
+        if (is_object(question_bank::get_qtype('ddwtos', false))) {
+            $textstrings['qtype_ddwtos'] = array('pluginnamesummary', 'infinite');
         }
 
         $expout = "<moodlelabels>\n";
