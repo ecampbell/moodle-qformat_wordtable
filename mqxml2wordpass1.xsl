@@ -312,6 +312,7 @@
 <xsl:variable name="ddi_shape_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_shape']"/>
 
 <xsl:variable name="ddm_circle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_circle']"/>
+<xsl:variable name="ddm_hint_clearwrongparts_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_clearwrongparts']"/>
 <xsl:variable name="ddm_coords_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_coords']"/>
 <xsl:variable name="ddm_marker_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_marker']"/>
 <xsl:variable name="ddm_instructions" select="$moodle_labels/data[@name = 'qtype_ddmarker_pluginnamesummary']"/>
@@ -320,6 +321,8 @@
 <xsl:variable name="ddm_polygon_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_polygon']"/>
 <xsl:variable name="ddm_rectangle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_rectangle']"/>
 <xsl:variable name="ddm_shape_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape']"/>
+<xsl:variable name="ddm_showmisplaced_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_showmisplaced']"/>
+<xsl:variable name="ddm_stateincorrectlyplaced_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_stateincorrectlyplaced']"/>
 
 <xsl:variable name="ddt_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddwtos_infinite']"/>
 <xsl:variable name="ddt_instructions" select="$moodle_labels/data[@name = 'qtype_ddwtos_pluginnamesummary']"/>
@@ -404,9 +407,9 @@
         <xsl:when test="@type = 'numerical'"><xsl:text>NUM</xsl:text></xsl:when>
         <xsl:when test="@type = 'shortanswer'"><xsl:text>SA</xsl:text></xsl:when>
         <xsl:when test="@type = 'truefalse'"><xsl:text>TF</xsl:text></xsl:when>
+        <xsl:when test="@type = 'ddimageortext'"><xsl:text>DDI</xsl:text></xsl:when>
         <xsl:when test="@type = 'ddmarker'"><xsl:text>DDM</xsl:text></xsl:when>
         <xsl:when test="@type = 'ddwtos'"><xsl:text>DDT</xsl:text></xsl:when>
-        <xsl:when test="@type = 'ddimageortext'"><xsl:text>DDI</xsl:text></xsl:when>
         <xsl:when test="@type = 'truefalse'"><xsl:text>TF</xsl:text></xsl:when>
         <xsl:otherwise><xsl:value-of select="@type"/></xsl:otherwise>
         </xsl:choose>
@@ -458,6 +461,16 @@
         </xsl:choose>
     </xsl:variable>
 
+    <xsl:variable name="showmisplaced_flag">
+        <xsl:choose>
+        <!-- shuffleanswers element might be duplicated in XML, or contain either 'true' or '1', so allow for these possibilities -->
+        <xsl:when test="showmisplaced">
+            <xsl:value-of select="$yes_label"/> <!-- Explicit true used in MC -->
+        </xsl:when>
+        <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+
     <!-- Simplify the penalty value to keep it short, to fit it in the 4th column -->
     <xsl:variable name="penalty_value">
         <xsl:choose>
@@ -475,7 +488,7 @@
     <xsl:variable name="colheading1_label">
         <xsl:choose>
         <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MAT' or $qtype = 'MS' or $qtype = 'MW' or $qtype = 'NUM' or starts-with($qtype, 'C')"><xsl:text>#</xsl:text></xsl:when>
-        <xsl:when test="starts-with($qtype, 'DD')"><xsl:text>#</xsl:text></xsl:when>
+        <xsl:when test="$qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT'"><xsl:text>#</xsl:text></xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -700,19 +713,37 @@
         </xsl:if>
         <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
             <tr>
-                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$mcq_shuffleanswers_label"/></p></td>
+                <td colspan="3" style="width: 12.0cm">
+                    <p class="TableRowHead" style="text-align: right">
+                        <xsl:value-of select="$mcq_shuffleanswers_label"/>
+                    </p>
+                </td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$shuffleanswers_flag"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
         <xsl:if test="$qtype = 'DDI' or $qtype = 'DDM'">
             <tr>
-                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$ddi_shuffleimages_label"/></p></td>
+                <td colspan="3" style="width: 12.0cm">
+                    <p class="TableRowHead" style="text-align: right">
+                        <xsl:value-of select="$ddi_shuffleimages_label"/>
+                    </p>
+                </td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$shuffleanswers_flag"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
-
+        <xsl:if test="$qtype = 'DDM'">
+            <tr>
+                <td colspan="3" style="width: 12.0cm">
+                    <p class="TableRowHead" style="text-align: right">
+                        <xsl:value-of select="$ddm_showmisplaced_label"/>
+                    </p>
+                </td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$showmisplaced_flag"/></p></td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+        </xsl:if>
 
         <!-- Number the choices, and if so, how? May be alphabetic, numeric or roman -->
         <xsl:if test="$qtype = 'MC' or $qtype = 'MA' or $qtype = 'MS'">
@@ -881,7 +912,7 @@
         </xsl:if>
 
         <!-- Show number of correct responses when finished (Moodle 2.x only) -->
-        <xsl:if test="($qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MS') and $moodle_release_number &gt; '19'">
+        <xsl:if test="($qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MS' or $qtype = 'MW' or $qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT') and $moodle_release_number &gt; '19'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">
                     <xsl:choose>
@@ -1133,7 +1164,18 @@
                     <xsl:text>&#x0a;</xsl:text>
                     <tr>
                         <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                        <th style="{$col2_width}">
+                            <p class="TableRowHead">
+                                <xsl:choose>
+                                <xsl:when test="$qtype = 'DDM'">
+                                    <xsl:value-of select="concat($ddm_hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
+                                </xsl:otherwise>
+                                </xsl:choose>
+                            </p>
+                        </th>
                         <td style="{$col3_width}"><p class="Cell">
                             <xsl:choose>
                             <xsl:when test="clearwrong">
@@ -1149,6 +1191,23 @@
                         <tr>
                             <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                             <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                            <td style="{$col3_width}"><p class="Cell">
+                                <xsl:choose>
+                                <xsl:when test="options and options = '1'">
+                                    <xsl:value-of select="$yes_label"/>
+                                </xsl:when>
+                                <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                                </xsl:choose>
+                            </p></td>
+                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                        </tr>
+                        <xsl:text>&#x0a;</xsl:text>
+                    </xsl:if>
+                    <xsl:text>&#x0a;</xsl:text>
+                    <xsl:if test="$qtype = 'DDM'">
+                        <tr>
+                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                            <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($ddm_stateincorrectlyplaced_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
                             <td style="{$col3_width}"><p class="Cell">
                                 <xsl:choose>
                                 <xsl:when test="options and options = '1'">
@@ -1732,8 +1791,8 @@
     <tr>
         <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
         <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
-        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-        <td style="{$col3_width}">
+        <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+        <td style="width: 1.0cm">
             <p class="Cell">
                 <xsl:choose>
                 <xsl:when test="infinite"><xsl:value-of select="'0'"/></xsl:when>

@@ -585,7 +585,7 @@ class qformat_wordtable extends qformat_xml {
         }
         // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('gapselect', false))) {
-            $textstrings['qtype_gapselect'] = array('pluginnamesummary', 'group');
+            $textstrings['qtype_gapselect'] = array('pluginnamesummary', 'group', 'shuffle');
         }
         // Add 'Drag and drop onto image' question type, added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('ddimageortext', false))) {
@@ -594,8 +594,9 @@ class qformat_wordtable extends qformat_xml {
         }
         // Add 'Drag and drop markers' question type, added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('ddmarker', false))) {
-            $textstrings['qtype_ddmarker'] = array('pluginnamesummary', 'bgimage', 'coords', 'dropbackground', 'dropzoneheader',
-                    'infinite', 'marker', 'noofdrags', 'shape_circle', 'shape_polygon', 'shape_rectangle', 'shape');
+            $textstrings['qtype_ddmarker'] = array('pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
+                'dropbackground', 'dropzoneheader', 'infinite', 'marker', 'noofdrags', 'shape_circle',
+                'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced');
         }
         // Add 'Drag and drop into text' question type, added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('ddwtos', false))) {

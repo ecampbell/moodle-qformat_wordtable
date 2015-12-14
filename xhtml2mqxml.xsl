@@ -123,7 +123,7 @@
 <xsl:variable name="hintn_label" select="$moodle_labels/data[@name = 'question_hintn']"/>
 
 <xsl:variable name="mcq_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_multichoice_shuffleanswers']"/>
-<xsl:variable name="mat_shuffle_label" select="$moodle_labels/data[@name = 'quiz_shuffle']"/>
+<xsl:variable name="quiz_shuffle_label" select="$moodle_labels/data[@name = 'quiz_shuffle']"/>
 <xsl:variable name="answernumbering_label" select="$moodle_labels/data[@name = 'qtype_multichoice_answernumbering']"/>
 
 <!-- Generic feedback labels -->
@@ -177,6 +177,10 @@
 <!-- True/False question labels -->
 <xsl:variable name="true_label" select="$moodle_labels/data[@name = 'qtype_truefalse_true']"/>
 
+<!-- Gapselect (Select missing word) question labels -->
+<xsl:variable name="gapselect_shuffle_label" select="$moodle_labels/data[@name = 'qtype_gapselect_shuffle']"/>
+<xsl:variable name="gapselect_instructions" select="$moodle_labels/data[@name = 'qtype_gapselect_pluginnamesummary']"/>
+
 <!-- Drag and Drop question labels -->
 <xsl:variable name="ddi_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_shuffleimages']"/>
 <xsl:variable name="ddi_dropzoneheader_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_dropzoneheader']"/>
@@ -193,6 +197,7 @@
 <xsl:variable name="ddi_shape_label" select="$moodle_labels/data[@name = 'qtype_ddimageortext_shape']"/>
 
 <xsl:variable name="ddm_circle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_circle']"/>
+<xsl:variable name="ddm_hint_clearwrongparts_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_clearwrongparts']"/>
 <xsl:variable name="ddm_coords_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_coords']"/>
 <xsl:variable name="ddm_marker_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_marker']"/>
 <xsl:variable name="ddm_instructions" select="$moodle_labels/data[@name = 'qtype_ddmarker_pluginnamesummary']"/>
@@ -201,8 +206,12 @@
 <xsl:variable name="ddm_polygon_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_polygon']"/>
 <xsl:variable name="ddm_rectangle_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape_rectangle']"/>
 <xsl:variable name="ddm_shape_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shape']"/>
+<xsl:variable name="ddm_showmisplaced_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_showmisplaced']"/>
+<xsl:variable name="ddm_shuffleimages_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_shuffleimages']"/>
+<xsl:variable name="ddm_hint_stateincorrectlyplaced_label" select="$moodle_labels/data[@name = 'qtype_ddmarker_stateincorrectlyplaced']"/>
 
 <xsl:variable name="ddt_infinite_label" select="$moodle_labels/data[@name = 'qtype_ddwtos_infinite']"/>
+<xsl:variable name="ddt_shuffle_label" select="$moodle_labels/data[@name = 'qtype_ddwtos_shuffle']"/>
 <xsl:variable name="ddt_instructions" select="$moodle_labels/data[@name = 'qtype_ddwtos_pluginnamesummary']"/>
 
 
@@ -504,20 +513,22 @@
             </xsl:call-template>
 
             <!-- Identify the end of the draggables, to avoid treating drop zone items as draggables -->
-            <xsl:variable name="dropzone_heading_row" select="$table_root/x:tbody/x:tr[contains(x:th[1], '#')]"/>
+            <xsl:variable name="dropzone_heading_row" select="$table_root/x:tbody/x:tr[contains(x:td[1], '#')]"/>
             <xsl:variable name="draggable_rows" select="count($dropzone_heading_row/preceding-sibling::x:tr)"/>
             <xsl:comment><xsl:value-of select="concat('draggable_rows: ', $draggable_rows)"/></xsl:comment>
 
             <!-- Process the draggable items -->
+            <xsl:text>&#x0a;</xsl:text>
             <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &lt;= $draggable_rows]">
                 <xsl:call-template name="process_row">
                     <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
                     <xsl:with-param name="qtype" select="$qtype"/>
                 </xsl:call-template>
             </xsl:for-each>
+            <xsl:text>&#x0a;</xsl:text>
 
             <!-- Process the dropzone items -->
-            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &gt; $draggable_rows]">
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &gt; $draggable_rows + 1]">
                 <xsl:call-template name="process_dropzone_row">
                     <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
                     <xsl:with-param name="qtype" select="$qtype"/>
@@ -535,19 +546,22 @@
             </xsl:call-template>
 
             <!-- Identify the end of the draggables, to avoid treating drop zone items as draggables -->
-            <xsl:variable name="dropzone_heading_row" select="$table_root/x:tbody/x:tr[contains(x:th[1], '#')]"/>
+            <xsl:variable name="dropzone_heading_row" select="$table_root/x:tbody/x:tr[contains(x:td[1], '#')]"/>
             <xsl:variable name="draggable_rows" select="count($dropzone_heading_row/preceding-sibling::x:tr)"/>
             <xsl:comment><xsl:value-of select="concat('draggable_rows: ', $draggable_rows)"/></xsl:comment>
 
             <!-- Process the draggable items -->
+            <xsl:text>&#x0a;</xsl:text>
             <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &lt;= $draggable_rows]">
                 <xsl:call-template name="process_row">
                     <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
                     <xsl:with-param name="qtype" select="$qtype"/>
                 </xsl:call-template>
             </xsl:for-each>
+            <xsl:text>&#x0a;</xsl:text>
+
             <!-- Process the dropzone items -->
-            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &gt; $draggable_rows]">
+            <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns and position() &gt; $draggable_rows + 1]">
                 <xsl:call-template name="process_dropzone_row">
                     <xsl:with-param name="table_row" select="$table_root/x:tbody/x:tr"/>
                     <xsl:with-param name="qtype" select="$qtype"/>
@@ -575,7 +589,7 @@
         </xsl:when>
         </xsl:choose>
 
-        <!-- Handle any hints that are included, three rows for each successive hint -->
+        <!-- Handle any hints that are included, 3 or 4 (MS, DDM) rows for each successive hint -->
         <xsl:if test="$moodleReleaseNumber &gt; '19'">
             <xsl:variable name="hintn_prefix" select="normalize-space(substring-before($hintn_label, '{no}'))"/>
             <xsl:for-each select="$table_root/x:tbody/x:tr[starts-with(x:th, $hintn_prefix)]">
@@ -592,6 +606,7 @@
                         <xsl:variable name="hint_sncf_cell_norm" select="normalize-space($hint_sncf_cell)"/>
                         <xsl:variable name="hint_sncf_cell_lc" select="translate($hint_sncf_cell_norm, $ucase, $lcase)"/>
                         <xsl:variable name="current_hint_shownumcorrect_flag">
+
                             <xsl:if test="starts-with($hint_sncf_cell_lc, translate($hint_shownumcorrect_label, $ucase, $lcase))">
                                 <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[1]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
                             </xsl:if>
@@ -605,9 +620,20 @@
                             <shownumcorrect/>
                         </xsl:if>
 
-                            <!-- Get the 2nd row following the hint, check that it has the correct label, defining the handling of the hint (clear wrong parts) -->
+                        <!-- Get the 2nd row following the hint, check that it has the correct label, defining the handling of the hint (clear wrong parts or move incorrect markers (DDM)) -->
+                        <xsl:variable name="clearwrongparts_label">
+                            <xsl:choose>
+                            <xsl:when test="$qtype = 'DDM'">
+                                <xsl:value-of select="$ddm_hint_clearwrongparts_label"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="$hint_clearwrongparts_label"/>
+                            </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:variable>
+
                         <xsl:variable name="current_hint_clearwrongparts_flag">
-                            <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[2]/x:th), $ucase, $lcase), translate($hint_clearwrongparts_label, $ucase, $lcase))">
+                            <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[2]/x:th), $ucase, $lcase), translate($clearwrongparts_label, $ucase, $lcase))">
                                 <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[2]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
                             </xsl:if>
                         </xsl:variable>
@@ -618,18 +644,29 @@
                             <clearwrong/>
                         </xsl:if>
 
-                        <!-- Get the 3rd row following the hint, check if it has a MS-specific label, defining the handling of the hint (show response feedback) -->
-                        <xsl:if test="$qtype = 'MS'">
-                            <xsl:variable name="current_hint_showeachanswerfeedback_flag">
-                                <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[3]/x:th), $ucase, $lcase), translate($multichoiceset_showeachanswerfeedback_label, $ucase, $lcase))">
+                        <!-- Get the 3rd row following the hint, check if it has a MS/DDM-specific label -->
+                        <!--DDM: State which markers are incorrectly placed; MS: Show the feedback for the selected responses-->
+                        <xsl:if test="$qtype = 'MS' or $qtype = 'DDM'">
+                            <xsl:variable name="current_hint_options_label">
+                                <xsl:choose>
+                                <xsl:when test="$qtype = 'DDM'">
+                                    <xsl:value-of select="$ddm_hint_stateincorrectlyplaced_label"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="$multichoiceset_showeachanswerfeedback_label"/>
+                                </xsl:otherwise>
+                                </xsl:choose>
+                            </xsl:variable>
+                            <xsl:variable name="current_hint_options_flag">
+                                <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[3]/x:th), $ucase, $lcase), translate($current_hint_options_label, $ucase, $lcase))">
                                     <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[3]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
                                 </xsl:if>
                             </xsl:variable>
                             <xsl:call-template name="debugComment">
-                                <xsl:with-param name="comment_text" select="concat('multichoiceset_showeachanswerfeedback_label: ', $multichoiceset_showeachanswerfeedback_label, '; Show Response: ', $current_hint_showeachanswerfeedback_flag)"/>
+                                <xsl:with-param name="comment_text" select="concat('current_hint_options_label: ', $current_hint_options_label, '; current_hint_options_flag: ', $current_hint_options_flag)"/>
                                 <xsl:with-param name="condition" select="$debug_flag &gt;= '1'"/>
                             </xsl:call-template>
-                            <xsl:if test="contains($current_hint_showeachanswerfeedback_flag, $yes_label)">
+                            <xsl:if test="contains($current_hint_options_flag, $yes_label)">
                                 <options>1</options>
                             </xsl:if>
                         </xsl:if>
@@ -718,13 +755,19 @@
     <xsl:variable name="shuffle_label">
         <xsl:choose>
         <xsl:when test="$qtype = 'MAT'">
-            <xsl:value-of select="$mat_shuffle_label"/>
+            <xsl:value-of select="$quiz_shuffle_label"/>
         </xsl:when>
         <xsl:when test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS'">
             <xsl:value-of select="$mcq_shuffleanswers_label"/>
         </xsl:when>
-        <xsl:when test="$qtype = 'DDI'">
+        <xsl:when test="$qtype = 'MW'">
+            <xsl:value-of select="$gapselect_shuffle_label"/>
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDI' or $qtype = 'DDM'">
             <xsl:value-of select="$ddi_shuffleanswers_label"/>
+        </xsl:when>
+        <xsl:when test="$qtype = 'DDT'">
+            <xsl:value-of select="$quiz_shuffle_label"/>
         </xsl:when>
         <xsl:otherwise> <!-- Make sure the label isn't match if the question type does not contain a shuffle flag -->
             <xsl:value-of select="'NOMATCH'"/>
@@ -812,6 +855,12 @@
         <xsl:with-param name="comment_text" select="concat('$cloze_distractor_answer_string:', $cloze_distractor_answer_string)"/>
         <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
     </xsl:call-template>
+
+    <!-- DDM: Show misplaced items? -->
+    <xsl:variable name="showmisplaced_flag" select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $ddm_showmisplaced_label)]/x:th[position() = $flag_value_colnum])"/>
+    <xsl:if test="translate($showmisplaced_flag, $ucase, $lcase) = $yes_label">
+        <shomisplaced/>
+    </xsl:if>
 
     <!-- Multiple try handling -->
     <!-- Penalty factor / Penalty for each incorrect try -->
@@ -1006,42 +1055,47 @@
     <xsl:when test="$qtype = 'MAT'">
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
     </xsl:when>
-    <xsl:when test="$qtype = 'MW'">
-        <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
+    <xsl:when test="($qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT' or $qtype = 'MW') and $shuffleAnswers_value = 'true'">
+
+        <shuffleanswers/>
     </xsl:when>
     </xsl:choose>
 
     <!-- Handle the Correct/Incorrect/Partially Correct feedback -->
-    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'MW' or starts-with($qtype, 'DD') or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
+    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT' or $qtype = 'MW' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
         <xsl:variable name="cfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Correct') or starts-with(normalize-space(x:th), $correctfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="ifb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Incorrect') or starts-with(normalize-space(x:th), $incorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="pcfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Partial') or starts-with(normalize-space(x:th), $pcorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
+
         <!-- Show number of correct responses when finished? -->
         <xsl:variable name="showNumCorrect_flag">
             <xsl:choose>
             <xsl:when test="$qtype = 'MS'">
-                <xsl:value-of select="normalize-space(translate($table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $hint_shownumcorrect_label)]/x:td[position() = $generic_feedback_colnum]/*, $ucase, $lcase))"/>
+                <xsl:value-of select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $hint_shownumcorrect_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="normalize-space(translate($table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $showNumCorrect_label)]/x:td[position() = $generic_feedback_colnum]/*, $ucase, $lcase))"/>
+                <xsl:value-of select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $showNumCorrect_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
             </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
 
         <xsl:variable name="showNumCorrect_value">
             <xsl:choose>
-            <xsl:when test="($qtype = 'MA' or $qtype = 'MS') and starts-with($showNumCorrect_flag, $yes_label)">
+            <xsl:when test="($qtype = 'MA' or $qtype = 'MS' or $qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT' or $qtype = 'MW') and starts-with($showNumCorrect_flag, $yes_label)">
                 <xsl:text>true</xsl:text>
             </xsl:when>
             <xsl:otherwise><xsl:text>false</xsl:text></xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
         <!--
-            <xsl:comment>
-                <xsl:value-of select="concat('showNumCorrect_flag: ', $showNumCorrect_flag, '; showNumCorrect_value: ', $showNumCorrect_value)"/>
-                <xsl:value-of select="concat('&#x0a;showNumCorrect_label: ', $showNumCorrect_label, '; flag: ', $table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $showNumCorrect_label)]/x:td[2])"/>
-            </xsl:comment>
-     -->
+        <xsl:text>&#x0a;</xsl:text>
+        <xsl:comment>
+            <xsl:value-of select="concat('showNumCorrect_flag: ', $showNumCorrect_flag, '; showNumCorrect_value: ', $showNumCorrect_value)"/>
+            <xsl:value-of select="concat('&#x0a;showNumCorrect_label: ', $showNumCorrect_label, 
+                ';&#x0a;flag: ', $table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $showNumCorrect_label)]/x:th[2])"/>
+        </xsl:comment>
+        <xsl:text>&#x0a;</xsl:text>
+        -->
 
         <correctfeedback format="html">
             <xsl:call-template name="rich_text_content">
@@ -1072,7 +1126,7 @@
 
 </xsl:template>
 
-<!-- Answer rows for MC, MA, MS, MW, TF, and SA; DDT -->
+<!-- Answer rows for MC, MA, MS, MW, TF, and SA; DDI, DDM, DDT -->
 <xsl:template name="process_row">
     <xsl:param name="table_row"/>
     <xsl:param name="qtype"/>
@@ -1182,21 +1236,20 @@
     </xsl:when>
     <xsl:when test="$qtype = 'DDM'">
         <!-- Drag and Drop Markers onto image -->
-        <xsl:variable name="infinite_flag_value">
-            <xsl:choose>
-            <xsl:when test="contains(x:td[position() = $specific_feedback_colnum], '&#x9;')">
-                <xsl:value-of select="substring-after(x:td[position() = $specific_feedback_colnum], '&#x9;')"/>
-            </xsl:when>
-            <xsl:otherwise><xsl:value-of select="x:td[position() = $specific_feedback_colnum]"/></xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
         <drag>
+            <no><xsl:value-of select="position()"/></no>
             <text><xsl:value-of select="normalize-space($plain_text)"/></text>
-            <!-- Fraction value contains the group number in DDT questions -->
-            <group><xsl:value-of select="$fraction_value"/></group>
-            <xsl:if test="contains($infinite_flag_value, $yes_label)">
+            <!-- Fraction value contains the allowed number of drags in DDM questions -->
+            <xsl:choose>
+            <xsl:when test="$fraction_value = '0'">
+                <!-- If the number of drags is 0, then it can be used an infinite number of times -->
+                <noofdrags>1</noofdrags>
                 <infinite/>
-            </xsl:if>
+            </xsl:when>
+            <xsl:otherwise>
+                <noofdrags><xsl:value-of select="$fraction_value"/></noofdrags>
+            </xsl:otherwise>
+            </xsl:choose>
         </drag>
     </xsl:when>
     <xsl:when test="$qtype = 'DDT'">
@@ -1213,7 +1266,7 @@
             <text><xsl:value-of select="normalize-space($plain_text)"/></text>
             <!-- Fraction value contains the group number in DDT questions -->
             <group><xsl:value-of select="$fraction_value"/></group>
-            <xsl:if test="contains($infinite_flag_value, $yes_label)">
+            <xsl:if test="contains(translate($infinite_flag_value, $ucase, $lcase), $yes_label)">
                 <infinite/>
             </xsl:if>
         </dragbox>

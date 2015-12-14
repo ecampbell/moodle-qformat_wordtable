@@ -6,8 +6,14 @@ The Word file can then be used to quickly review large numbers of questions
 Moodle2Word also supports importing questions from structured tables in Word directly into the Moodle question bank.
 The tables support all the question components (stem, answer options, option-specific and general feedback, 
 hints, tags and question meta-data such as penalties grades and other options), as well as embedded images. 
+
 All the main question types except Numerical and Calculated questions are fully supported.
 Numerical and Calculated questions are exported, but cannot be imported.
+
+Some OU question types added to core in Moodle 3.0 are also supported: Drag and drop onto image, 
+Drag and drop markers, Drag and drop into text and Select missing words.
+All-or-Nothing Multiple Choice is also supported. These additional question types all require that
+custom versions of the questions be installed to replace the defaults, however.
 
 The Cloze question syntax is particularly useful, as it does not require any knowledge of the
 arcane Moodle syntax; instead, use bold for drop-down menu items, and italic for fill-in text fields.

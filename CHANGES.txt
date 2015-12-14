@@ -1,29 +1,31 @@
 # Change log
 
 Date          Version   Comment
-2015/12/01    3.5.0     Support 'Select missing words' question type, general code clean-up
-2015/09/30    3.4.3     Support RTL equations in MathML conversion
-2015/09/24    3.4.2     Minimise empty attributes in Pass 1 of conversion
-2015/09/21    3.4.1     Handle unusual WordML markup (w:dir) in RTL (e.g. Arabic) text
-2015/09/21    3.4.0     Convert Microsoft Equation Editor equations into MathML for display by MathJax
-2015/09/16    3.3.2     Improve code formatting to comply better with Moodle guidelines
-2015/09/16    3.3.1     Support target attribute in hyperlinks to allow links to open in new window
-2015/09/01    3.3.0     Improve reliability of the question exports if question text content is badly formatted
-2015/08/19    3.2.2     Grab extra memory to allow very large Word files to be exported, handle HTML markup in exports better
+2015/12/14    3.5.0     Support OU question types 'Drag and drop onto image,' 'Drag and drop markers',
+                        'Drag and drop into text' and 'Select missing words',
+                        clean code to pass Travis codechecker.
+2015/09/30    3.4.3     Support RTL equations in MathML conversion.
+2015/09/24    3.4.2     Minimise empty attributes in Pass 1 of conversion.
+2015/09/21    3.4.1     Handle unusual WordML markup (w:dir) in RTL (e.g. Arabic) text.
+2015/09/21    3.4.0     Convert Microsoft Equation Editor equations into MathML for display by MathJax.
+2015/09/16    3.3.2     Improve code formatting to comply better with Moodle guidelines.
+2015/09/16    3.3.1     Support target attribute in hyperlinks to allow links to open in new window.
+2015/09/01    3.3.0     Improve reliability of the question exports if question text content is badly formatted.
+2015/08/19    3.2.2     Grab extra memory to allow very large Word files to be exported, handle HTML markup in exports better.
 2015/08/04    3.2.1     Grab extra memory to allow very large Word files to be imported,
-                        fix Essay and All-or-Nothing question type issues
-2015/08/01    3.2.0     Support All-or-Nothing Multiple Choice import and export
-2015/07/27    3.1.11    Support question export for all built-in question types
-2015/07/25    3.1.10    Support question import in Lessons
-2015/07/17    3.1.9     Minor change to delete old and unused configuration values from config_plugins table
-2015/07/15    3.1.8     Improve export formatting to handle paragraph attributes better (alignment, etc.)
-2015/07/13    3.1.7     On import, retain the size of images as defined within Word, and retain text alignment
-2015/07/04    3.1.6     Support the new 'Require text' field added to Essay questions in Moodle 2.9
-2015/07/03    3.1.5     Improve export of far-eastern languages like Chinese and Japanese
-2015/04/02    3.1.4     Fix text direction in non-Arabic Word templates, handle strikethrough better
-2015/03/11    3.1.3     Fix image handling, including external images not embedded in Word file, and hyperlinked images
-2015/03/03    3.1.2     Fix for Moodle 2.7/2.8 to improve handling of attachments in essay questions
-2015/03/03    3.1.1     Fix for Moodle 2.7/2.8 to enable question import, by deleting superfluous namespace attributes
+                        fix Essay and All-or-Nothing question type issues.
+2015/08/01    3.2.0     Support All-or-Nothing Multiple Choice import and export.
+2015/07/27    3.1.11    Support question export for all built-in question types.
+2015/07/25    3.1.10    Support question import in Lessons.
+2015/07/17    3.1.9     Minor change to delete old and unused configuration values from config_plugins table.
+2015/07/15    3.1.8     Improve export formatting to handle paragraph attributes better (alignment, etc.).
+2015/07/13    3.1.7     On import, retain the size of images as defined within Word, and retain text alignment.
+2015/07/04    3.1.6     Support the new 'Require text' field added to Essay questions in Moodle 2.9.
+2015/07/03    3.1.5     Improve export of far-eastern languages like Chinese and Japanese.
+2015/04/02    3.1.4     Fix text direction in non-Arabic Word templates, handle strikethrough better.
+2015/03/11    3.1.3     Fix image handling, including external images not embedded in Word file, and hyperlinked images.
+2015/03/03    3.1.2     Fix for Moodle 2.7/2.8 to improve handling of attachments in essay questions.
+2015/03/03    3.1.1     Fix for Moodle 2.7/2.8 to enable question import, by deleting superfluous namespace attributes.
 2015/03/02    3.1.0     Keep original uploaded Word file in debug mode. Fix handling of Cloze questions.
                         Handle hyperlinks and other character formatting properly, support questions created 
                         in Word language versions other than English, fix Cloze questions.
@@ -34,7 +36,7 @@ Date          Version   Comment
 2014/10/08    2.10.1    Fix bug in handling of image filenames containing spaces.
 2014/08/12    2.10      Support case-sensitivity and selection style and orientation in Cloze SA and MC subquestions.
                         Support specification of default mark in Cloze questions. Fix merging of paragraphs.
-2014/07/10    2.9.2     Fix syntax error in db/install.php
+2014/07/10    2.9.2     Fix syntax error in db/install.php.
 2014/07/10    2.9.1     Fix error in registration process set-up, which prevented registration to set 10-question limit.
 
 2014/06/17    2.9       Use default username and password for importing Word files to make Registration optional.
