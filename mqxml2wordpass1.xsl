@@ -514,7 +514,6 @@
             <xsl:value-of select="$feedback_label"/>
         </xsl:when>
         <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_infinite_label"/></xsl:when>
-        <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$ddm_noofdrags_label"/></xsl:when>
         <xsl:when test="$qtype = 'DDT'"><xsl:value-of select="$ddt_infinite_label"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
@@ -523,18 +522,13 @@
     <!-- Grade column heading, or blank if no grade (CL, DE, ES, MAT) -->
     <xsl:variable name="colheading4_label">
         <xsl:choose>
-        <xsl:when test="$qtype = 'MW'">
-            <xsl:value-of select="$group_label"/>
-        </xsl:when>
+        <xsl:when test="$qtype = 'MW'"><xsl:value-of select="$group_label"/></xsl:when>
         <xsl:when test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'SA' or $qtype = 'TF' or $qtype = 'NUM'">
             <xsl:value-of select="$grade_label"/>
         </xsl:when>
-        <xsl:when test="$qtype = 'DDI'">
-            <xsl:value-of select="$group_label"/>
-        </xsl:when>
-        <xsl:when test="$qtype = 'DDT'">
-            <xsl:value-of select="$group_label"/>
-        </xsl:when>
+        <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$group_label"/></xsl:when>
+        <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$ddm_noofdrags_label"/></xsl:when>
+        <xsl:when test="$qtype = 'DDT'"><xsl:value-of select="$group_label"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -1738,19 +1732,15 @@
     <tr>
         <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
         <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
+        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
         <td style="{$col3_width}">
             <p class="Cell">
                 <xsl:choose>
-                <xsl:when test="infinite">
-                    <xsl:value-of select="$ddm_infinite_label"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="noofdrags"/>
-                </xsl:otherwise>
+                <xsl:when test="infinite"><xsl:value-of select="'0'"/></xsl:when>
+                <xsl:otherwise><xsl:value-of select="noofdrags"/></xsl:otherwise>
                 </xsl:choose>
             </p>
         </td>
-        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
     </tr>
 </xsl:template>
 
