@@ -699,7 +699,7 @@ class qformat_wordtable extends qformat_xml {
         debugging(__FUNCTION__ . "(cdatastring = \"" . substr($cdatastring, 0, 100) . "\")", DEBUG_WORDTABLE);
         // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML.
         $doc = new DOMDocument();
-        $doc->loadHTML('<html><body>' . $cdatastring . '</body></html>');
+        $doc->loadHTML('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><html><body>' . $cdatastring . '</body></html>');
         $doc->getElementsByTagName('html')->item(0)->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
         $xml = $doc->saveXML();
         // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": xml: |" . str_replace("\n", "", $xml) . "|", DEBUG_WORDTABLE);
