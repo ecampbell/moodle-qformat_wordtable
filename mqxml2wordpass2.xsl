@@ -161,7 +161,7 @@
             </xsl:for-each>
             <!-- Get images imported from Word2XML conversion process as embedded base64 images -->
             <xsl:for-each select="$data//htm:img[starts-with(@src, $embeddedimagedata_string)]">
-                <xsl:if test="not(ancestor::htm:p/@class = 'ImageFile')">
+                <xsl:if test="not(ancestor::htm:div/@class = 'ImageFile')">
                     <xsl:apply-templates select="." mode="ImageTable"/>
                 </xsl:if>
             </xsl:for-each>
@@ -267,7 +267,20 @@
 <!-- Handle a hyperlinked img element -->
 <xsl:template match="htm:img" mode="linkedImage">
     <!-- Place the hyperlink anchor inside the bookmark anchor -->
-    <xsl:variable name="bookmark_name" select="concat('MQIMAGE_', generate-id())"/>
+    <xsl:variable name="bookmark_name">
+        <xsl:choose>
+        <xsl:when test="@id">
+            <xsl:value-of select="concat('MQIMAGE_', @id)"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="'MQIMAGE_Q'"/>
+            <xsl:number value="count(preceding::question) + 1" format="0001"/>
+            <xsl:value-of select="'_EID'"/>
+            <xsl:number value="count(preceding::htm:img) + 1" format="0001"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+
     <a name="{$bookmark_name}" style="color:red;"/>
     <a href="{../@href}">
         <span style="{concat('mso-bookmark:', $bookmark_name)}">x</span>
@@ -276,11 +289,25 @@
 
 <!-- Handle the img element within the main component text by replacing it with a bookmark as a placeholder -->
 <xsl:template match="htm:img" priority="2">
+    <xsl:variable name="bookmark_name">
+        <xsl:choose>
+        <xsl:when test="@id">
+            <xsl:value-of select="concat('MQIMAGE_', @id)"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="'MQIMAGE_Q'"/>
+            <xsl:number value="count(preceding::question) + 1" format="0001"/>
+            <xsl:value-of select="'_EID'"/>
+            <xsl:number value="count(preceding::htm:img) + 1" format="0001"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+
     <xsl:choose>
     <xsl:when test="contains(@src, $pluginfiles_string) or contains(@src, $embeddedimagedata_string)">
         <!-- Generated from Moodle 2.x, so images are handled neatly, using a reference to the data -->
         <!-- If imported from Word2MQXML, images are base64-encoded into the @src attribute -->
-        <a name="{concat('MQIMAGE_', generate-id())}" style="color:red;">x</a>
+        <a name="{$bookmark_name}" style="color:red;">x</a>
     </xsl:when>
     <xsl:otherwise>
         <img>
@@ -292,7 +319,19 @@
 
 <!-- Create a row in the embedded image table with all image metadata -->
 <xsl:template match="htm:img" mode="ImageTable">
-    <xsl:variable name="image_id" select="generate-id()"/>
+    <xsl:variable name="image_id">
+        <xsl:choose>
+        <xsl:when test="@id and @id != ''">
+            <xsl:value-of select="@id"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="'Q'"/>
+            <xsl:number value="count(preceding::question) + 1" format="0001"/>
+            <xsl:value-of select="'_EID'"/>
+            <xsl:number value="count(preceding::htm:img) + 1" format="0001"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
     <!-- Get image name. If 'PLUGINFILES' not present, the image is embedded in the text, i.e. <img src="data:image/gif;base64,{base64 data}"/> -->
     <xsl:variable name="raw_image_file_name" select="substring-after(@src, $pluginfiles_string)"/>
     <xsl:variable name="image_file_name">
@@ -313,7 +352,7 @@
         <xsl:when test="contains(@src, $pluginfiles_string)">
             <!-- Image exported from Moodle 2.x, i.e. 
                  <img src="@@PLUGINFILE@@/filename.gif"/> <file name="filename.gif" encoding="base64">{base64 data}</file> -->
-            <xsl:value-of select="substring-after(ancestor::htm:td//htm:p[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ',')"/>
+            <xsl:value-of select="substring-after(ancestor::htm:td//htm:div[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ',')"/>
         </xsl:when>
         <xsl:when test="contains(@src, $embeddedimagedata_string)">
             <!-- Image embedded in text as it was imported using Word2MQXML, i.e. <img src="data:image/gif;base64,{base64 data}"/> -->
@@ -327,7 +366,7 @@
         <xsl:when test="contains(@src, $pluginfiles_string)">
             <!-- Image exported from Moodle 2.x, i.e. 
                  <img src="@@PLUGINFILE@@/filename.gif"/> <file name="filename.gif" encoding="base64">{base64 data}</file> -->
-            <xsl:value-of select="substring-after(substring-before(ancestor::htm:td//htm:p[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ';'), 'data:image/')"/>
+            <xsl:value-of select="substring-after(substring-before(ancestor::htm:td//htm:div[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ';'), 'data:image/')"/>
         </xsl:when>
         <xsl:when test="contains(@src, $embeddedimagedata_string)">
             <!-- Image embedded in text as it was imported using Word2MQXML, i.e. <img src="data:image/gif;base64,{base64 data}"/> -->
@@ -339,7 +378,7 @@
     <xsl:variable name="image_encoding">
         <xsl:choose>
         <xsl:when test="contains(@src, $pluginfiles_string)">
-            <xsl:value-of select="substring-after(substring-before(ancestor::htm:td//htm:p[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ','), ';')"/>
+            <xsl:value-of select="substring-after(substring-before(ancestor::htm:td//htm:div[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ','), ';')"/>
         </xsl:when>
         <xsl:otherwise> <!-- Always Base 64 -->
             <xsl:value-of select="'base64'"/>
@@ -377,8 +416,8 @@
         </xsl:choose>
     </xsl:variable>
 
-    <xsl:variable name="image_name" select="ancestor::htm:td//htm:p[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@title"/>
-    <xsl:variable name="image_data" select="ancestor::htm:td//htm:p[@class = 'ImageFile']/htm:img/@src"/>
+    <xsl:variable name="image_name" select="ancestor::htm:td//htm:div[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@title"/>
+    <xsl:variable name="image_data" select="ancestor::htm:td//htm:div[@class = 'ImageFile']/htm:img/@src"/>
     <xsl:variable name="image_format" select="substring-before(substring-after('data:image/', $image_data), ';')"/>
     <xsl:variable name="image_encoding" select="substring-after(substring-before(',', $image_data), ';')"/>
 
@@ -386,7 +425,7 @@
 </xsl:template>
 
 <!-- Delete the supplementary paragraphs containing images within each question component, as they are no longer needed -->
-<xsl:template match="htm:p[@class = 'ImageFile']"/>
+<xsl:template match="htm:div[@class = 'ImageFile']"/>
 
 <!-- Preserve comments for style definitions -->
 <xsl:template match="comment()">

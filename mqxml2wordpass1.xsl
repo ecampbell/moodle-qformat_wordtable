@@ -40,7 +40,7 @@
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 <xsl:param name="debug_flag" select="'0'"/>      <!-- Debugging on or off -->
 
-<xsl:output method="xml" version="1.0" indent="no" omit-xml-declaration="yes"/>
+<xsl:output method="xml" version="1.0" indent="yes" omit-xml-declaration="yes"/>
 
 <!-- Text labels from translated Moodle files - now stored in the input XML file -->
 <xsl:variable name="moodle_labels" select="/container/moodlelabels"/>
@@ -670,10 +670,15 @@
                     <xsl:variable name="image_format">
                         <xsl:value-of select="concat('data:image/', $image_file_suffix, ';base64,')"/>
                     </xsl:variable>
-                    <p><img src="{concat($pluginfiles_string, image)}"/></p>
+                    <xsl:variable name="image_id">
+                        <xsl:value-of select="'IID'"/>
+                        <!-- Count the number of questions -->
+                        <xsl:number value="position()" format="0001"/>
+                    </xsl:variable>
+                    <p><img id="{$image_id}" src="{concat($pluginfiles_string, image)}"/></p>
 
                     <!-- Emit the image in the supplementary format, to be removed later -->
-                    <p class="ImageFile"><img src="{concat($image_format, normalize-space(image_base64))}" title="{image}"/></p>
+                    <div class="ImageFile"><img id="{$image_id}" title="{image}" src="{concat($image_format, normalize-space(image_base64))}"/></div>
                 </xsl:if>
             </td>
             <td style="width: 1.0cm"><p class="QFType"><xsl:value-of select="$qtype" /></p></td>
@@ -682,12 +687,19 @@
 
         <!-- Handle background image for DDI and DDM questions -->
         <xsl:if test="$qtype = 'DDI' or $qtype = 'DDM'">
+            <xsl:variable name="image_id">
+                <xsl:value-of select="'Q'"/>
+                <xsl:number value="position()" format="0001"/>
+                <xsl:value-of select="'_IID0000'"/>
+            </xsl:variable>
             <tr>
                 <td colspan="4" style="width: 12.0cm">
                     <p class="Cell">
-                        <img src="{concat($pluginfiles_string,file/@name)}"/>
+                        <img id="{$image_id}" src="{concat($pluginfiles_string,file/@name)}"/>
                     </p>
-                    <xsl:apply-templates select="file"/>
+                    <xsl:apply-templates select="file">
+                        <xsl:with-param name="image_id" select="$image_id"/>
+                    </xsl:apply-templates>
                 </td>
                 <!--<td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>-->
             </tr>
@@ -1761,8 +1773,16 @@
                 <!-- May be dealing with either an image or a text label -->
                 <xsl:choose>
                 <xsl:when test="file">
-                        <img src="{concat($pluginfiles_string,file/@name)}" alt="{normalize-space(text)}"/>
-                    <xsl:apply-templates select="file"/>
+                        <xsl:variable name="image_id">
+                            <xsl:value-of select="'Q'"/>
+                            <xsl:number value="count(preceding::question) + 1" format="0001"/>
+                            <xsl:value-of select="'_IID'"/>
+                            <xsl:number value="position()" format="0001"/>
+                        </xsl:variable>
+                        <img id="{$image_id}" src="{concat($pluginfiles_string,file/@name)}" alt="{normalize-space(text)}"/>
+                    <xsl:apply-templates select="file">
+                        <xsl:with-param name="image_id" select="$image_id"/>
+                    </xsl:apply-templates>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="normalize-space(text)"/>
@@ -1840,6 +1860,8 @@
 
 <!-- Handle images associated with '@@PLUGINFILE@@' keyword by including them in temporary supplementary paragraphs in whatever component they occur in -->
 <xsl:template match="file">
+    <xsl:param name="image_id"/>
+
     <xsl:variable name="image_file_suffix">
         <xsl:value-of select="translate(substring-after(@name, '.'), $ucase, $lcase)"/>
     </xsl:variable>
@@ -1850,7 +1872,13 @@
         <xsl:value-of select="concat('data:image/', $image_file_suffix, ';', @encoding, ',')"/>
     </xsl:variable>
 
-    <p class="ImageFile"><img src="{concat($image_format, .)}" title="{@name}"/></p>
+    <div class="ImageFile">
+        <img title="{@name}" src="{concat($image_format, .)}">
+            <xsl:if test="$image_id != ''">
+                <xsl:attribute name="id"><xsl:value-of select="$image_id"/></xsl:attribute>
+            </xsl:if>
+        </img>
+    </div>
 </xsl:template>
 
 <!-- got to preserve comments for style definitions -->
