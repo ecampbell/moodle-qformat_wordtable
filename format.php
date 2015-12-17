@@ -45,7 +45,7 @@ define('DEBUG_WORDTABLE', 0);
 require_once("$CFG->dirroot/question/format/xml/format.php");
 
 // Include XSLT processor functions.
-require_once(__DIR__ . "/xsl_emulate_xslt.inc");
+require_once(__DIR__ . "/xslemulatexslt.inc");
 
 /**
  * Importer for Microsoft Word table question format.
@@ -94,6 +94,8 @@ class qformat_wordtable extends qformat_xml {
         global $CFG, $USER, $COURSE, $OUTPUT;
         $realfilename = "";
         $filename = "";
+
+        debugging(__FUNCTION__ . ":" . __LINE__ . ": CFG->debug = {$CFG->debug}; CFG->debugdisplay = {$CFG->debugdisplay}", DEBUG_WORDTABLE);
 
         // Handle question imports in Lesson module by using mform, not the question/format.php qformat_default class.
         if (property_exists('qformat_default', 'realfilename')) {
