@@ -1657,23 +1657,29 @@
     <xsl:choose>
     <!-- If an answer starts with '%100%', leave it out -->
     <xsl:when test="starts-with($cloze_subquestion_string, $cloze_correct_prefix1)">
-        <xsl:value-of select="substring-after($cloze_subquestion_string, $cloze_correct_prefix1)"/>
+        <xsl:value-of select="substring-after($cloze_subquestion_string, $cloze_correct_prefix1)" disable-output-escaping="yes"/>
     </xsl:when>
     <!-- If an answer starts with '=', leave it out -->
     <xsl:when test="starts-with($cloze_subquestion_string, $cloze_correct_prefix2)">
-        <xsl:value-of select="substring-after($cloze_subquestion_string, $cloze_correct_prefix2)"/>
+        <xsl:value-of select="substring-after($cloze_subquestion_string, $cloze_correct_prefix2)" disable-output-escaping="yes"/>
     </xsl:when>
     <!-- If an answer has an incorrect prefix ('%0%'), just copy it -->
     <xsl:when test="starts-with($cloze_subquestion_string, $cloze_incorrect_prefix)">
-        <xsl:value-of select="$cloze_subquestion_string"/>
+        <xsl:value-of select="$cloze_subquestion_string" disable-output-escaping="yes"/>
     </xsl:when>
     <!-- If an answer has a partially correct prefix (i.e. starts with '%', but not '%0%' or '%100%', just copy it -->
     <xsl:when test="starts-with($cloze_subquestion_string, $cloze_incorrect_prefix)">
-        <xsl:value-of select="$cloze_subquestion_string"/>
+        <xsl:value-of select="$cloze_subquestion_string" disable-output-escaping="yes"/>
     </xsl:when>
     <xsl:otherwise>
+        <xsl:if test="contains(., '&amp;')">
+            <xsl:message>
+                <xsl:value-of select="concat('String: ', .)"/>
+            </xsl:message>
+        </xsl:if>
+
         <!-- Add explicit incorrect marker '%0%' if it is not present -->
-        <xsl:value-of select="concat($cloze_incorrect_prefix, $cloze_subquestion_string)"/>
+        <xsl:value-of select="concat($cloze_incorrect_prefix, $cloze_subquestion_string)" disable-output-escaping="yes"/>
     </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
