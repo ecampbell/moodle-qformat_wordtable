@@ -1704,7 +1704,7 @@
 </xsl:template>
 
 <!-- Convert italic into Moodle Cloze Short Answer format: e.g. {1:SHORTANSWER:%100%Answer1#Correct~%50%Answer2#Half-right} -->
-<xsl:template match="x:em[@class = 'italic']|x:i" mode="cloze">
+<xsl:template match="x:em[@class = 'italic']|x:i|x:em" mode="cloze">
     <xsl:param name="qweight_string" select="'1'"/>
     <xsl:param name="cloze_sa_keyword_string"/>
     <xsl:param name="cloze_distractor_answer_string"/>
