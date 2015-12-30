@@ -497,6 +497,8 @@ class qformat_wordtable extends qformat_xml {
         // Strip out any redundant namespace attributes, which XSLT on Windows seems to add.
         $xsltoutput = str_replace(' xmlns=""', '', $xsltoutput);
         $xsltoutput = str_replace(' xmlns="http://www.w3.org/1999/xhtml"', '', $xsltoutput);
+        // Unescape double minuses if they were substituted during CDATA content clean-up
+        $xsltoutput = str_replace("WordTableMinusMinus", "--", $xsltoutput);
 
         // Strip off the XML declaration, if present, since Word doesn't like it.
         if (strncasecmp($xsltoutput, "<?xml ", 5) == 0) {
@@ -699,12 +701,16 @@ class qformat_wordtable extends qformat_xml {
      */
     private function clean_html_text($cdatastring) {
         debugging(__FUNCTION__ . "(cdatastring = \"" . substr($cdatastring, 0, 100) . "\")", DEBUG_WORDTABLE);
+
+        // Escape double minuses, which cause XSLT processing to fail
+        $cdatastring = str_replace("--", "WordTableMinusMinus", $cdatastring);
+
         // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML.
         $doc = new DOMDocument();
         $doc->loadHTML('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><html><body>' . $cdatastring . '</body></html>');
         $doc->getElementsByTagName('html')->item(0)->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
         $xml = $doc->saveXML();
-        // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": xml: |" . str_replace("\n", "", $xml) . "|", DEBUG_WORDTABLE);
+        // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": xml: |" . substr(str_replace("\n", "", $xml), 250) . "|", DEBUG_WORDTABLE);
 
         $bodystart = stripos($xml, '<body>') + strlen('<body>');
         $bodylength = strripos($xml, '</body>') - $bodystart;
