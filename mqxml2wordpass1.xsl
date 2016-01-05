@@ -671,9 +671,10 @@
                         <xsl:value-of select="concat('data:image/', $image_file_suffix, ';base64,')"/>
                     </xsl:variable>
                     <xsl:variable name="image_id">
-                        <xsl:value-of select="'IID'"/>
+                        <xsl:value-of select="'Q'"/>
                         <!-- Count the number of questions -->
                         <xsl:number value="position()" format="0001"/>
+                        <xsl:value-of select="'_IID0001'"/>
                     </xsl:variable>
                     <p><img id="{$image_id}" src="{concat($pluginfiles_string, image)}"/></p>
 
@@ -857,6 +858,7 @@
                         <xsl:value-of select="concat('$attachmentsrequired_label: ', $attachmentsrequired_label, '; attachmentsrequired: ', attachmentsrequired, '&#x0a;')"/>
                         <xsl:value-of select="concat('$moodle_release_number: ', $moodle_release_number, '&#x0a;')"/>
                     </xsl:with-param>
+                    <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
                 </xsl:call-template>
                 <tr>
                     <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$attachmentsrequired_label"/></p></td>
@@ -900,6 +902,7 @@
                     <xsl:value-of select="concat('cloze_defaultmark_value: ', $defaultmark_value, '&#x0a;')"/>
                     <xsl:value-of select="concat('cloze_questiontext_string: ', translate($cloze_questiontext_string, '&#x0a;', ' '), '&#x0a;')"/>
                 </xsl:with-param>
+                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
             </xsl:call-template>
 
             <!-- Case sensitivity for SA subquestions -->
@@ -1520,11 +1523,12 @@
             <xsl:when test="$this_subquestion_type_string = $cloze_mch_keyword1 or $this_subquestion_type_string = $cloze_mch_keyword2">
                 <xsl:value-of select="$cloze_mch_keyword1"/>
             </xsl:when>
-                </xsl:choose>
+            </xsl:choose>
         </xsl:variable>
 
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('this_subquestion: type = ', $this_subquestion_type, ', mark = ', normalize-space(translate($this_subquestion_defaultmark, '&#x0a;', '')), '; default: ', $cloze_defaultmark_value)"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
 
         <!-- Compare this subquestions' type and mark against the defaults, to figure out how best to present it -->
@@ -1534,7 +1538,7 @@
             <xsl:value-of select="concat($cloze_start_delimiter, $this_subquestion_string, $cloze_end_delimiter)" disable-output-escaping="yes"/>
         </xsl:when>
         <xsl:when test="($this_subquestion_type = $cloze_sa_keyword1 and $cloze_sa_casesensitive_flag = '0') or ($this_subquestion_type = $cloze_sac_keyword1 and $cloze_sa_casesensitive_flag = '1')">
-            <!-- An SA subquestion in a consistent case-sensitivity cloze, so convert it to nice format -->
+            <!-- An SA subquestion in a consistent case-sensitivity cloze, so convert it to italic -->
             <xsl:call-template name="convert_cloze_subquestion">
                 <xsl:with-param name="cloze_subquestion_string" select="$this_subquestion_string"/>
                 <xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
@@ -1542,11 +1546,17 @@
             </xsl:call-template>
             </xsl:when>
         <xsl:when test="($this_subquestion_type = $cloze_mc_keyword1 and $cloze_mc_formatting_flag = 'D') or ($this_subquestion_type = $cloze_mch_keyword1 and $cloze_mc_formatting_flag = 'H') or ($this_subquestion_type = $cloze_mcv_keyword1 and $cloze_mc_formatting_flag = 'V')">
-            <!-- An MCD, MCH or MCV subquestion in a consistent cloze, so convert it to a slightly nicer format-->
+            <!-- An MCD, MCH or MCV subquestion in a consistent cloze, so convert it to  bold -->
             <xsl:call-template name="convert_cloze_subquestion">
                 <xsl:with-param name="cloze_subquestion_string" select="$this_subquestion_string"/>
                 <xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
                 <xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+            </xsl:call-template>
+        </xsl:when>
+        <xsl:when test="$this_subquestion_type = $cloze_num_keyword1 or $this_subquestion_type = $cloze_num_keyword2">
+            <!-- A NUMERICAL subquestion, so convert it to underline -->
+            <xsl:call-template name="convert_cloze_subquestion">
+                <xsl:with-param name="cloze_subquestion_string" select="$this_subquestion_string"/>
             </xsl:call-template>
         </xsl:when>
         <xsl:otherwise>
@@ -1779,13 +1789,13 @@
                 <!-- May be dealing with either an image or a text label -->
                 <xsl:choose>
                 <xsl:when test="file">
-                        <xsl:variable name="image_id">
-                            <xsl:value-of select="'Q'"/>
-                            <xsl:number value="count(preceding::question) + 1" format="0001"/>
-                            <xsl:value-of select="'_IID'"/>
-                            <xsl:number value="position()" format="0001"/>
-                        </xsl:variable>
-                        <img id="{$image_id}" src="{concat($pluginfiles_string,file/@name)}" alt="{normalize-space(text)}"/>
+                    <xsl:variable name="image_id">
+                        <xsl:value-of select="'Q'"/>
+                        <xsl:number value="count(preceding::question) + 1" format="0001"/>
+                        <xsl:value-of select="'_IID'"/>
+                        <xsl:number value="position()" format="0001"/>
+                    </xsl:variable>
+                    <img id="{$image_id}" src="{concat($pluginfiles_string,file/@name)}" alt="{normalize-space(text)}"/>
                     <xsl:apply-templates select="file">
                         <xsl:with-param name="image_id" select="$image_id"/>
                     </xsl:apply-templates>
@@ -1909,11 +1919,13 @@
 <!-- Include debugging information in the output -->
 <xsl:template name="debugComment">
     <xsl:param name="comment_text"/>
+    <xsl:param name="inline" select="'false'"/>
+    <xsl:param name="condition" select="'true'"/>
 
-    <xsl:if test="$debug_flag = '1'">
-        <xsl:text>&#x0a;</xsl:text>
+    <xsl:if test="boolean($condition) and $debug_flag != 0">
+        <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
         <xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
-        <xsl:text>&#x0a;</xsl:text>
+        <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
     </xsl:if>
 </xsl:template>
 </xsl:stylesheet>

@@ -43,7 +43,7 @@ $string['htmldocnotsupported'] = 'Incorrect Word format: please use <i>File>Save
 $string['preview_question_not_found'] = 'Preview question not found, name / course ID: {$a}';
 
 // Strings used in XSLT when converting questions into Word format.
-$string['cloze_instructions'] = 'Use <strong>bold</strong> for dropdown menu items and <em>italic</em> for text field items.';
+$string['cloze_instructions'] = 'Use <strong>bold</strong> for Multichoice, <em>italic</em> for Short Answer, and <u>Underline</u> for Numerical questions.';
 $string['cloze_distractor_column_label'] = 'Distractors';
 $string['cloze_feedback_column_label'] = 'Distractor Feedback';
 $string['cloze_mcformat_label'] = 'Orientation (D = dropdown; V = vertical, H = horizontal radio buttons)';

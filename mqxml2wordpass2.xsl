@@ -60,7 +60,7 @@
 
 <!-- Read in the input XML into a variable, and handle unusual situation where the inner container element doesn't have an explicit namespace declaration  -->
 <xsl:variable name="data" select="/container/*[local-name() = 'container']" />
-<xsl:variable name="contains_embedded_images" select="count($data//htm:img[contains(@src, $pluginfiles_string)])"/>
+<xsl:variable name="contains_embedded_images" select="count($data//htm:img[contains(@src, $base64data_string)])"/>
 
 <xsl:variable name="transformationfailed" select="$moodle_labels/data[@name = 'qformat_wordtable_transformationfailed']"/>
 <xsl:variable name="moodle_textdirection" select="$moodle_labels/data[@name = 'langconfig_thisdirection']"/>
@@ -268,14 +268,14 @@
 <xsl:template match="htm:img" mode="linkedImage">
     <!-- Place the hyperlink anchor inside the bookmark anchor -->
     <xsl:variable name="bookmark_name">
+        <xsl:value-of select="'MQIMAGE_Q'"/>
+        <xsl:number value="count(preceding::htm:div[@class = 'TableDiv']) + 1" format="0001"/>
+        <xsl:value-of select="'_IID'"/>
         <xsl:choose>
         <xsl:when test="@id">
-            <xsl:value-of select="concat('MQIMAGE_', @id)"/>
+            <xsl:value-of select="@id"/>
         </xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="'MQIMAGE_Q'"/>
-            <xsl:number value="count(preceding::question) + 1" format="0001"/>
-            <xsl:value-of select="'_EID'"/>
             <xsl:number value="count(preceding::htm:img) + 1" format="0001"/>
         </xsl:otherwise>
         </xsl:choose>
@@ -290,14 +290,14 @@
 <!-- Handle the img element within the main component text by replacing it with a bookmark as a placeholder -->
 <xsl:template match="htm:img" priority="2">
     <xsl:variable name="bookmark_name">
+        <xsl:value-of select="'MQIMAGE_Q'"/>
+        <xsl:number value="count(preceding::htm:div[@class = 'TableDiv']) + 1" format="0001"/>
+        <xsl:value-of select="'_IID'"/>
         <xsl:choose>
         <xsl:when test="@id">
-            <xsl:value-of select="concat('MQIMAGE_', @id)"/>
+            <xsl:value-of select="@id"/>
         </xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="'MQIMAGE_Q'"/>
-            <xsl:number value="count(preceding::question) + 1" format="0001"/>
-            <xsl:value-of select="'_EID'"/>
             <xsl:number value="count(preceding::htm:img) + 1" format="0001"/>
         </xsl:otherwise>
         </xsl:choose>
@@ -320,14 +320,14 @@
 <!-- Create a row in the embedded image table with all image metadata -->
 <xsl:template match="htm:img" mode="ImageTable">
     <xsl:variable name="image_id">
+        <xsl:value-of select="'Q'"/>
+        <xsl:number value="count(preceding::htm:div[@class = 'TableDiv']) + 1" format="0001"/>
+        <xsl:value-of select="'_IID'"/>
         <xsl:choose>
         <xsl:when test="@id and @id != ''">
             <xsl:value-of select="@id"/>
         </xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="'Q'"/>
-            <xsl:number value="count(preceding::question) + 1" format="0001"/>
-            <xsl:value-of select="'_EID'"/>
             <xsl:number value="count(preceding::htm:img) + 1" format="0001"/>
         </xsl:otherwise>
         </xsl:choose>
@@ -494,12 +494,13 @@ Copied from: https://gist.github.com/nils-werner/721650
 <!-- Include debugging information in the output -->
 <xsl:template name="debugComment">
     <xsl:param name="comment_text"/>
+    <xsl:param name="inline" select="'false'"/>
+    <xsl:param name="condition" select="'true'"/>
 
-    <xsl:if test="$debug_flag = '1'">
-        <xsl:text>&#x0a;</xsl:text>
+    <xsl:if test="boolean($condition) and $debug_flag != 0">
+        <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
         <xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
-        <xsl:text>&#x0a;</xsl:text>
+        <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
     </xsl:if>
 </xsl:template>
-
 </xsl:stylesheet>

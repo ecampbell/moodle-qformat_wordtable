@@ -664,7 +664,7 @@
                             </xsl:variable>
                             <xsl:call-template name="debugComment">
                                 <xsl:with-param name="comment_text" select="concat('current_hint_options_label: ', $current_hint_options_label, '; current_hint_options_flag: ', $current_hint_options_flag)"/>
-                                <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+                                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
                             </xsl:call-template>
                             <xsl:if test="contains($current_hint_options_flag, $yes_label)">
                                 <options>1</options>
@@ -853,7 +853,7 @@
 
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('$cloze_distractor_answer_string:', $cloze_distractor_answer_string)"/>
-        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
     </xsl:call-template>
 
     <!-- DDM: Show misplaced items? -->
@@ -944,6 +944,7 @@
                 </xsl:apply-templates>
                 <xsl:value-of select="']]&gt;'" disable-output-escaping="yes"/>
             </text>
+            <xsl:apply-templates select="$table_root/x:thead/x:tr[1]/x:th[1]//x:img" mode="moodle2pluginfile"/>
         </xsl:when>
         <xsl:otherwise>
             <!-- Standard question type, so stem is from heading -->
@@ -957,7 +958,7 @@
     <!-- Handle general feedback for all questions -->
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('$generalfeedback_label:', $generalfeedback_label)"/>
-        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
     </xsl:call-template>
     <generalfeedback format="html">
         <xsl:call-template name="rich_text_content">
@@ -972,14 +973,14 @@
         <defaultgrade><xsl:value-of select="$questionWeight"/></defaultgrade>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('defaultmark_label: ', $defaultmark_label, '; Default mark: ', $qweight_string)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
     </xsl:if>
 
     <!-- Penalty set for all question types, although it is 0 for some (e.g. DE, ES -->
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('penalty_label: ', $penalty_label, '; Penalty (percent): ', $questionPenalty_percent)"/>
-        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
     </xsl:call-template>
     <penalty><xsl:value-of select="$questionPenalty_value"/></penalty>
     <hidden>0</hidden>
@@ -1007,7 +1008,7 @@
                 </xsl:variable>
                 <xsl:call-template name="debugComment">
                     <xsl:with-param name="comment_text" select="concat('$responseRequired_value: ', $responseRequired_value, ', $responserequired_label: ', $responserequired_label, '; $responseRequired_flag: ', $responseRequired_flag)"/>
-                    <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+                    <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
                 </xsl:call-template>
                 <responserequired><xsl:value-of select="$responseRequired_value"/></responserequired>
             </xsl:if>
@@ -1607,7 +1608,7 @@
 
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('clozeBlock: ', translate(name(), $ucase, $lcase))"/>
-        <xsl:with-param name="condition" select="$debug_flag &gt;= '1'"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
     </xsl:call-template>
 
     <!-- Duplicate the block element, including its attributes -->
@@ -1615,12 +1616,12 @@
         <xsl:apply-templates select="@*"/>
 
         <xsl:choose>
-        <xsl:when test="x:strong or x:em or x:u">
+        <xsl:when test="text() or x:strong or x:em or x:u or x:img or x:span or x:sub or x:sup">
             <!-- Process the inline elements -->
             <xsl:call-template name="debugComment">
                 <xsl:with-param name="comment_text" select="concat('clozeBlock: ', 'inline content')"/>
                 <xsl:with-param name="inline" select="'true'"/>
-                <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
             </xsl:call-template>
             <xsl:call-template name="clozeInline">
                 <xsl:with-param name="qweight_string" select="$qweight_string"/>
@@ -1634,7 +1635,7 @@
             <xsl:call-template name="debugComment">
                 <xsl:with-param name="comment_text" select="concat('clozeBlock: ', 'block content')"/>
                 <xsl:with-param name="inline" select="'true'"/>
-                <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
             </xsl:call-template>
             <xsl:apply-templates select="node()" mode="clozeBlock">
                 <xsl:with-param name="qweight_string" select="$qweight_string"/>
@@ -1657,7 +1658,7 @@
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('clozeInline: ', substring(., 1, 30))"/>
         <xsl:with-param name="inline" select="'true'"/>
-        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
     </xsl:call-template>
 
     <!-- Process the inline nodes whether text or elements -->
@@ -1667,7 +1668,7 @@
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('clozeInline: elname = ', $elname, '; firstElement = ', $firstElement)"/>
             <xsl:with-param name="inline" select="'true'"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
          <xsl:variable name="text_string">
             <xsl:value-of select="."/>
@@ -1678,7 +1679,7 @@
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('clozeInline: text_string = ', $text_string)"/>
             <xsl:with-param name="inline" select="'true'"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
 
         <xsl:choose>
@@ -1717,13 +1718,22 @@
             </xsl:call-template>
         </xsl:when>
         <!-- Ignore subsequent bold/italic elements -->
-        <xsl:when test="($elname = 'em' or $elname = 'em' or $elname = 'u') and not($firstElement)"/>
+        <xsl:when test="($elname = 'em' or $elname = 'strong' or $elname = 'u') and not($firstElement)"/>
+        <xsl:when test="$elname = 'img'">
+            <!-- Convert images to a reference to the file element -->
+            <xsl:call-template name="debugComment">
+                <xsl:with-param name="comment_text" select="concat('clozeInline: img element = ', $elname)"/>
+                <xsl:with-param name="inline" select="'true'"/>
+                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
+            </xsl:call-template>
+            <xsl:apply-templates select="." mode="rich_text"/>
+        </xsl:when>
         <xsl:otherwise>
             <!-- Handle any other inline markup like images, subscript, etc. -->
             <xsl:call-template name="debugComment">
                 <xsl:with-param name="comment_text" select="concat('clozeInline: other element = ', $elname)"/>
                 <xsl:with-param name="inline" select="'true'"/>
-                <xsl:with-param name="condition" select="$debug_flag &gt;= '1'"/>
+                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
             </xsl:call-template>
 
             <xsl:apply-templates select="." mode="cloze"/>
@@ -1782,7 +1792,7 @@
         <!-- MC subquestion contains Moodle keywords, so no need to process it further -->
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('No Cloze processing required: ', $mctext_string)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
         <xsl:value-of select="$mctext_string"/>
     </xsl:when>
@@ -1792,7 +1802,7 @@
         <!-- Text starts with grade indicator (percent or '='), so just wrap the content with the keyword prefix and suffix, omitting distractors -->
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('Minimum Cloze processing required: ', $mctext_string)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
         <xsl:value-of select="concat($cloze_mc_prefix, $mctext_string, $cloze_end_delimiter)"/>
     </xsl:when>
@@ -1802,14 +1812,14 @@
         <!-- Text doesn't starts with grade indicator ('%' or '='), but does contain distractors delimited by ~, so prefix the first entry with a correct indicator -->
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('Minor Cloze processing required (prefix correct answer): ', $mctext_string)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
         <xsl:value-of select="concat($cloze_mc_prefix, $cloze_correct_prefix2, $mctext_string, $cloze_end_delimiter)"/>
     </xsl:when>
     <xsl:otherwise>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('Full Cloze processing required: ', $mctext_string)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
         <!-- Standard MC case, so process the correct answer, add other answers as distractors, and add generic distractors (if any) too-->
 
@@ -1826,7 +1836,7 @@
         </xsl:variable>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('$other_mc_answers: ', $other_mc_answers)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
 
         <!-- Get the common distractor list, but remove the SA wildcard distractor '*', if present -->
@@ -1842,7 +1852,7 @@
         </xsl:variable>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('$other_distractor_answers_string: ', $other_distractor_answers_string)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
         </xsl:call-template>
 
         <!-- Assemble the complete string, consisting of the current subquestion, other subquestions as distractors, and the generic distractors -->
@@ -2175,7 +2185,6 @@
   <xsl:if test="boolean($condition) and $debug_flag != '0'">
     <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
     <xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
-    <xsl:message><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:message>
     <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
   </xsl:if>
 </xsl:template>
