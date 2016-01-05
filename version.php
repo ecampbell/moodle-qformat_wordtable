@@ -25,7 +25,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
  **/
 
-$plugin->version  = 201010502;  // The current module version (Date: YYYYMMDDXX).
+$plugin->version  = 2016010503;  // The current module version (Date: YYYYMMDDXX).
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
 $plugin->release  = '3.5.4 (Build: 20160105)';  // The current module release in human-readable form (x.y).
