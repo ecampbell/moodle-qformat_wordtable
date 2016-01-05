@@ -70,6 +70,8 @@ class qformat_wordtable extends qformat_xml {
     private $word2mqxmlstylesheet2 = 'wordml2xhtmlpass2.xsl';
     /** @var string Stylesheet to import XHTML into question XML */
     private $word2mqxmlstylesheet3 = 'xhtml2mqxml.xsl';
+    /** @var string Stylesheet to clean up text inside Cloze questions */
+    private $word2mqxmlstylesheet4 = 'wordml2xhtmlpass2a.xsl';
 
     /**
      * Define required MIME-Type

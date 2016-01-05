@@ -81,6 +81,19 @@
     <!-- Out go horizontal bars -->
     <xsl:template match="x:p[@class='horizontalbar']"/>
 
+    <!-- Convert i to em -->
+    <xsl:template match="x:em[@class = 'italic']|x:i">
+        <em>
+            <xsl:apply-templates select="."/>
+        </em>
+    </xsl:template>
+
+    <!-- Convert b or em/@class=bold to strong -->
+    <xsl:template match="x:em[@class = 'bold']|x:b">
+        <strong>
+            <xsl:apply-templates select="."/>
+        </strong>
+    </xsl:template>
 
     <!-- For character level formatting - bold, italic, subscript, superscript - use semantic HTML rather than CSS styling -->
     <!-- Convert style properties inside span element to elements instead -->

@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2016/01/05    3.5.3     Improve handling of adjacent bold/italic formatting when importing Cloze questions.
 2015/12/30    3.5.2     Fix error in Cloze MC/SA subquestion import processing, and '--' in text in export processing.
 2015/12/15    3.5.1     Fix error in non-ASCII characters and alignment when exporting questions.
 2015/12/14    3.5.0     Support OU question types 'Drag and drop onto image,' 'Drag and drop markers',

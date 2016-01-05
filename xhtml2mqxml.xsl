@@ -664,7 +664,7 @@
                             </xsl:variable>
                             <xsl:call-template name="debugComment">
                                 <xsl:with-param name="comment_text" select="concat('current_hint_options_label: ', $current_hint_options_label, '; current_hint_options_flag: ', $current_hint_options_flag)"/>
-                                <xsl:with-param name="condition" select="$debug_flag &gt;= '1'"/>
+                                <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
                             </xsl:call-template>
                             <xsl:if test="contains($current_hint_options_flag, $yes_label)">
                                 <options>1</options>
@@ -934,7 +934,7 @@
             <text>
                 <xsl:value-of select="'&lt;![CDATA['" disable-output-escaping="yes"/>
                 <!-- Cloze questions get text from question, and need special character processing -->
-                <xsl:apply-templates select="$table_root/x:thead/x:tr[1]/x:th[1]/*" mode="cloze">
+                <xsl:apply-templates select="$table_root/x:thead/x:tr[1]/x:th[1]/*" mode="clozeBlock">
                     <xsl:with-param name="qweight_string" select="$qweight_string"/>
                     <!-- Capture case sensitivity and pass it on to short-answer sub-questions inside the Cloze question -->
                     <xsl:with-param name="cloze_sa_keyword_string" select="$cloze_sa_keyword_string"/>
@@ -942,7 +942,7 @@
                     <xsl:with-param name="cloze_mc_keyword_string" select="$cloze_mc_keyword_string"/>
                     <xsl:with-param name="cloze_distractor_answer_string" select="$cloze_distractor_answer_string"/>
                 </xsl:apply-templates>
-                <xsl:value-of select="']]>'" disable-output-escaping="yes"/>
+                <xsl:value-of select="']]&gt;'" disable-output-escaping="yes"/>
             </text>
         </xsl:when>
         <xsl:otherwise>
@@ -957,6 +957,7 @@
     <!-- Handle general feedback for all questions -->
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('$generalfeedback_label:', $generalfeedback_label)"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
     </xsl:call-template>
     <generalfeedback format="html">
         <xsl:call-template name="rich_text_content">
@@ -978,6 +979,7 @@
     <!-- Penalty set for all question types, although it is 0 for some (e.g. DE, ES -->
     <xsl:call-template name="debugComment">
         <xsl:with-param name="comment_text" select="concat('penalty_label: ', $penalty_label, '; Penalty (percent): ', $questionPenalty_percent)"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
     </xsl:call-template>
     <penalty><xsl:value-of select="$questionPenalty_value"/></penalty>
     <hidden>0</hidden>
@@ -1005,6 +1007,7 @@
                 </xsl:variable>
                 <xsl:call-template name="debugComment">
                     <xsl:with-param name="comment_text" select="concat('$responseRequired_value: ', $responseRequired_value, ', $responserequired_label: ', $responserequired_label, '; $responseRequired_flag: ', $responseRequired_flag)"/>
+                    <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
                 </xsl:call-template>
                 <responserequired><xsl:value-of select="$responseRequired_value"/></responserequired>
             </xsl:if>
@@ -1595,6 +1598,148 @@
 <xsl:variable name="cloze_distractor_feedback_colnum" select="3"/>
 <xsl:variable name="cloze_distractor_grade_colnum" select="4"/>
 
+<!-- Handle block elements in the Cloze question such as p and ul/li -->
+<xsl:template match="*" mode="clozeBlock">
+    <xsl:param name="qweight_string" select="'1'"/>
+    <xsl:param name="cloze_sa_keyword_string"/>
+    <xsl:param name="cloze_mc_keyword_string"/>
+    <xsl:param name="cloze_distractor_answer_string"/>
+
+    <xsl:call-template name="debugComment">
+        <xsl:with-param name="comment_text" select="concat('clozeBlock: ', translate(name(), $ucase, $lcase))"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt;= '1'"/>
+    </xsl:call-template>
+
+    <!-- Duplicate the block element, including its attributes -->
+    <xsl:element name="{translate(name(), $ucase, $lcase)}">
+        <xsl:apply-templates select="@*"/>
+
+        <xsl:choose>
+        <xsl:when test="x:strong or x:em or x:u">
+            <!-- Process the inline elements -->
+            <xsl:call-template name="debugComment">
+                <xsl:with-param name="comment_text" select="concat('clozeBlock: ', 'inline content')"/>
+                <xsl:with-param name="inline" select="'true'"/>
+                <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            </xsl:call-template>
+            <xsl:call-template name="clozeInline">
+                <xsl:with-param name="qweight_string" select="$qweight_string"/>
+                <xsl:with-param name="cloze_sa_keyword_string" select="$cloze_sa_keyword_string"/>
+                <xsl:with-param name="cloze_mc_keyword_string" select="$cloze_mc_keyword_string"/>
+                <xsl:with-param name="cloze_distractor_answer_string" select="$cloze_distractor_answer_string"/>
+            </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise>
+            <!-- Process subblock elements -->
+            <xsl:call-template name="debugComment">
+                <xsl:with-param name="comment_text" select="concat('clozeBlock: ', 'block content')"/>
+                <xsl:with-param name="inline" select="'true'"/>
+                <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+            </xsl:call-template>
+            <xsl:apply-templates select="node()" mode="clozeBlock">
+                <xsl:with-param name="qweight_string" select="$qweight_string"/>
+                <xsl:with-param name="cloze_sa_keyword_string" select="$cloze_sa_keyword_string"/>
+                <xsl:with-param name="cloze_mc_keyword_string" select="$cloze_mc_keyword_string"/>
+                <xsl:with-param name="cloze_distractor_answer_string" select="$cloze_distractor_answer_string"/>
+            </xsl:apply-templates>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:element>
+</xsl:template>
+
+<!-- Merge adjacent elements with the same name inside Cloze text, and convert to internal Moodle format -->
+<xsl:template name="clozeInline">
+    <xsl:param name="qweight_string" select="'1'"/>
+    <xsl:param name="cloze_sa_keyword_string"/>
+    <xsl:param name="cloze_mc_keyword_string"/>
+    <xsl:param name="cloze_distractor_answer_string"/>
+
+    <xsl:call-template name="debugComment">
+        <xsl:with-param name="comment_text" select="concat('clozeInline: ', substring(., 1, 30))"/>
+        <xsl:with-param name="inline" select="'true'"/>
+        <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+    </xsl:call-template>
+
+    <!-- Process the inline nodes whether text or elements -->
+    <xsl:for-each select="node()">
+        <xsl:variable name="elname" select="local-name()"/>
+        <xsl:variable name="firstElement" select="local-name(preceding-sibling::*[1]) != $elname"/>
+        <xsl:call-template name="debugComment">
+            <xsl:with-param name="comment_text" select="concat('clozeInline: elname = ', $elname, '; firstElement = ', $firstElement)"/>
+            <xsl:with-param name="inline" select="'true'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+        </xsl:call-template>
+         <xsl:variable name="text_string">
+            <xsl:value-of select="."/>
+            <!-- Merge in following siblings if it has the same element name -->
+            <xsl:apply-templates select="following-sibling::*[1][local-name() = $elname]" mode="clozeMergeAdjacent"/>
+         </xsl:variable>
+
+        <xsl:call-template name="debugComment">
+            <xsl:with-param name="comment_text" select="concat('clozeInline: text_string = ', $text_string)"/>
+            <xsl:with-param name="inline" select="'true'"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+        </xsl:call-template>
+
+        <xsl:choose>
+        <xsl:when test="self::text()">
+            <!-- Simple text, so just copy it -->
+            <xsl:value-of select="."/>
+        </xsl:when>
+        <xsl:when test="$elname = 'strong' and $firstElement">
+             <!-- Bold text, so convert it to MultiChoice -->
+             <xsl:call-template name="clozeMultiChoice">
+                <xsl:with-param name="mctext_string" select="$text_string"/>
+                <xsl:with-param name="qweight_string" select="$qweight_string"/>
+                <xsl:with-param name="cloze_sa_keyword_string" select="$cloze_sa_keyword_string"/>
+                <xsl:with-param name="cloze_mc_keyword_string" select="$cloze_mc_keyword_string"/>
+                <xsl:with-param name="cloze_distractor_answer_string" select="$cloze_distractor_answer_string"/>
+            </xsl:call-template>
+        </xsl:when>
+        <xsl:when test="$elname = 'em' and $firstElement">
+            <!-- Italic text, so convert it to Short Answer -->
+             <xsl:call-template name="clozeShortAnswer">
+                <xsl:with-param name="satext_string" select="$text_string"/>
+                <xsl:with-param name="qweight_string" select="$qweight_string"/>
+                <xsl:with-param name="cloze_sa_keyword_string" select="$cloze_sa_keyword_string"/>
+                <xsl:with-param name="cloze_mc_keyword_string" select="$cloze_mc_keyword_string"/>
+                <xsl:with-param name="cloze_distractor_answer_string" select="$cloze_distractor_answer_string"/>
+            </xsl:call-template>
+        </xsl:when>
+        <xsl:when test="$elname = 'u' and $firstElement">
+            <!-- Underlined text, so convert it to Numerical -->
+             <xsl:call-template name="clozeNumerical">
+                <xsl:with-param name="numtext_string" select="$text_string"/>
+                <xsl:with-param name="qweight_string" select="$qweight_string"/>
+                <xsl:with-param name="cloze_sa_keyword_string" select="$cloze_sa_keyword_string"/>
+                <xsl:with-param name="cloze_mc_keyword_string" select="$cloze_mc_keyword_string"/>
+                <xsl:with-param name="cloze_distractor_answer_string" select="$cloze_distractor_answer_string"/>
+            </xsl:call-template>
+        </xsl:when>
+        <!-- Ignore subsequent bold/italic elements -->
+        <xsl:when test="($elname = 'em' or $elname = 'em' or $elname = 'u') and not($firstElement)"/>
+        <xsl:otherwise>
+            <!-- Handle any other inline markup like images, subscript, etc. -->
+            <xsl:call-template name="debugComment">
+                <xsl:with-param name="comment_text" select="concat('clozeInline: other element = ', $elname)"/>
+                <xsl:with-param name="inline" select="'true'"/>
+                <xsl:with-param name="condition" select="$debug_flag &gt;= '1'"/>
+            </xsl:call-template>
+
+            <xsl:apply-templates select="." mode="cloze"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:for-each>
+</xsl:template>
+
+<!-- Recursive template used to match the next sibling if it is an element with the same name -->
+<xsl:template match="*" mode="clozeMergeAdjacent">
+  <xsl:variable name="elname" select="local-name()"/>
+
+  <xsl:apply-templates />
+  <xsl:apply-templates select="following-sibling::*[1][local-name() = $elname]" mode="clozeMergeAdjacent"/>
+</xsl:template>
+
 <!-- Copy Cloze elements except for Bold and Italic -->
 <xsl:template match="*" mode="cloze">
     <xsl:param name="qweight_string" select="'1'"/>
@@ -1615,7 +1760,8 @@
 </xsl:template>
 
 <!-- Convert bold into Moodle Cloze Multichoice format: e.g. {1:MULTICHOICE:=California#OK~Arizona#Wrong} -->
-<xsl:template match="x:strong|x:b|x:em[@class = 'bold']" mode="cloze">
+<xsl:template name="clozeMultiChoice">
+    <xsl:param name="mctext_string"/>
     <xsl:param name="qweight_string" select="'1'"/>
     <xsl:param name="cloze_sa_keyword_string"/>
     <xsl:param name="cloze_mc_keyword_string"/>
@@ -1627,33 +1773,42 @@
     <!-- Process the Cloze bold item if it doesn't contain ':MC' or ':MULTICHOICE' already -->
     <xsl:variable name="correct_option" select="normalize-space(.)"/>
     <xsl:choose>
-    <xsl:when test="contains($correct_option, $cloze_mc_keyword1) or contains($correct_option, $cloze_mc_keyword2) or contains($correct_option, $cloze_mch_keyword1) or contains($correct_option, $cloze_mch_keyword2) or contains($correct_option, $cloze_mcv_keyword1) or contains($correct_option, $cloze_mcv_keyword2)">
+    <xsl:when test="contains($mctext_string, $cloze_mc_keyword1) or 
+            contains($mctext_string, $cloze_mc_keyword2) or 
+            contains($mctext_string, $cloze_mch_keyword1) or 
+            contains($mctext_string, $cloze_mch_keyword2) or 
+            contains($mctext_string, $cloze_mcv_keyword1) or 
+            contains($mctext_string, $cloze_mcv_keyword2)">
         <!-- MC subquestion contains Moodle keywords, so no need to process it further -->
         <xsl:call-template name="debugComment">
-            <xsl:with-param name="comment_text" select="concat('No Cloze processing required: ', $correct_option)"/>
+            <xsl:with-param name="comment_text" select="concat('No Cloze processing required: ', $mctext_string)"/>
             <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
-        <xsl:value-of select="$correct_option"/>
+        <xsl:value-of select="$mctext_string"/>
     </xsl:when>
-    <xsl:when test="contains($correct_option, $cloze_answer_delimiter) and (not(starts-with($correct_option, $cloze_percent)) or not(starts-with($correct_option, $cloze_correct_prefix2)))">
-        <!-- Text doesn't starts with grade indicator ('%' or '='), but does contain distractors delimited by ~, so prefix the first entry with a correct indicator -->
-        <xsl:call-template name="debugComment">
-            <xsl:with-param name="comment_text" select="concat('Minimum Cloze processing required: ', $correct_option)"/>
-            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
-        </xsl:call-template>
-        <xsl:value-of select="concat($cloze_mc_prefix, $cloze_correct_prefix2, $correct_option, $cloze_end_delimiter)"/>
-    </xsl:when>
-    <xsl:when test="starts-with($correct_option, $cloze_percent) or starts-with($correct_option, $cloze_correct_prefix2) or contains($correct_option, $cloze_answer_delimiter)">
+    <xsl:when test="starts-with($mctext_string, $cloze_percent) or 
+            starts-with($mctext_string, $cloze_correct_prefix2) or 
+            contains($mctext_string, $cloze_answer_delimiter)">
         <!-- Text starts with grade indicator (percent or '='), so just wrap the content with the keyword prefix and suffix, omitting distractors -->
         <xsl:call-template name="debugComment">
-            <xsl:with-param name="comment_text" select="concat('Minimum Cloze processing required: ', $correct_option)"/>
+            <xsl:with-param name="comment_text" select="concat('Minimum Cloze processing required: ', $mctext_string)"/>
             <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
-        <xsl:value-of select="concat($cloze_mc_prefix, $correct_option, $cloze_end_delimiter)"/>
+        <xsl:value-of select="concat($cloze_mc_prefix, $mctext_string, $cloze_end_delimiter)"/>
+    </xsl:when>
+    <xsl:when test="contains($mctext_string, $cloze_answer_delimiter) and 
+            (not(starts-with($mctext_string, $cloze_percent)) or 
+             not(starts-with($mctext_string, $cloze_correct_prefix2)))">
+        <!-- Text doesn't starts with grade indicator ('%' or '='), but does contain distractors delimited by ~, so prefix the first entry with a correct indicator -->
+        <xsl:call-template name="debugComment">
+            <xsl:with-param name="comment_text" select="concat('Minor Cloze processing required (prefix correct answer): ', $mctext_string)"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
+        </xsl:call-template>
+        <xsl:value-of select="concat($cloze_mc_prefix, $cloze_correct_prefix2, $mctext_string, $cloze_end_delimiter)"/>
     </xsl:when>
     <xsl:otherwise>
         <xsl:call-template name="debugComment">
-            <xsl:with-param name="comment_text" select="concat('Full Cloze processing required: ', $correct_option)"/>
+            <xsl:with-param name="comment_text" select="concat('Full Cloze processing required: ', $mctext_string)"/>
             <xsl:with-param name="condition" select="$debug_flag &gt; '1'"/>
         </xsl:call-template>
         <!-- Standard MC case, so process the correct answer, add other answers as distractors, and add generic distractors (if any) too-->
@@ -1664,7 +1819,7 @@
                 <!-- Get the current option, which may be this MC subquestion or one of the other ones -->
                 <xsl:variable name="this_mc_option" select="normalize-space(.)"/>
                 <!-- If it isn't the current MC subquestion, include it as a distractor, marking it incorrect -->
-                <xsl:if test="$this_mc_option != $correct_option">
+                <xsl:if test="$this_mc_option != $mctext_string">
                     <xsl:value-of select="concat($cloze_answer_delimiter, $cloze_incorrect_prefix, $this_mc_option)"/>
                 </xsl:if>
             </xsl:for-each>
@@ -1694,7 +1849,7 @@
         <xsl:value-of select="$cloze_mc_prefix"/>
         <!-- Format the current MC subquestion text -->
         <xsl:call-template name="format_cloze_answer">
-            <xsl:with-param name="answer_string" select="$correct_option"/>
+            <xsl:with-param name="answer_string" select="$mctext_string"/>
             <xsl:with-param name="cloze_type" select="'MC'"/>
         </xsl:call-template>
         <!-- Other MC subquestions and generic distractors, plus the end-delimiter -->
@@ -1704,7 +1859,8 @@
 </xsl:template>
 
 <!-- Convert italic into Moodle Cloze Short Answer format: e.g. {1:SHORTANSWER:%100%Answer1#Correct~%50%Answer2#Half-right} -->
-<xsl:template match="x:em[@class = 'italic']|x:i|x:em" mode="cloze">
+<xsl:template name="clozeShortAnswer">
+    <xsl:param name="satext_string"/>
     <xsl:param name="qweight_string" select="'1'"/>
     <xsl:param name="cloze_sa_keyword_string"/>
     <xsl:param name="cloze_distractor_answer_string"/>
@@ -1712,20 +1868,19 @@
     <xsl:variable name="cloze_sa_prefix" select="concat($cloze_start_delimiter, $qweight_string, $cloze_sa_keyword_string)"/>
 
     <!-- Process the Cloze italic item if it doesn't contain ':SHORTANSWER:', ':SA:', ':SHORTANSWER_C:' or ':SAC:' already -->
-    <xsl:variable name="correct_option" select="."/>
     <xsl:choose>
-    <xsl:when test="contains($correct_option, $cloze_sa_keyword1) or contains($correct_option, $cloze_sa_keyword2) or contains($correct_option, $cloze_sac_keyword1) or contains($correct_option, $cloze_sac_keyword2)">
-        <xsl:value-of select="$correct_option"/>
+    <xsl:when test="contains($satext_string, $cloze_sa_keyword1) or contains($satext_string, $cloze_sa_keyword2) or contains($satext_string, $cloze_sac_keyword1) or contains($satext_string, $cloze_sac_keyword2)">
+        <xsl:value-of select="$satext_string"/>
     </xsl:when>
-    <xsl:when test="starts-with($correct_option, $cloze_percent)">
+    <xsl:when test="starts-with($satext_string, $cloze_percent)">
         <!-- Text starts with percent grade, so assume it just needs to be wrapped in SHORTANSWER keyword, don't add common distractors -->
-        <xsl:value-of select="concat($cloze_sa_prefix, $correct_option, $cloze_end_delimiter)"/>
+        <xsl:value-of select="concat($cloze_sa_prefix, $satext_string, $cloze_end_delimiter)"/>
     </xsl:when>
     <xsl:otherwise>
         <!-- Plain text, so output the SA keyword prefix, then the formatted answer, and finally append the common distractors -->
         <xsl:value-of select="$cloze_sa_prefix"/>
         <xsl:call-template name="split_cloze_answer">
-            <xsl:with-param name="answer_string" select="."/>
+            <xsl:with-param name="answer_string" select="$satext_string"/>
             <xsl:with-param name="first" select="'1'"/>
             <xsl:with-param name="cloze_type" select="'SA'"/>
         </xsl:call-template>
@@ -1735,27 +1890,29 @@
 </xsl:template>
 
 <!-- Convert underline into Moodle Cloze Numerical format: e.g. {1:NUMERICAL:%100%3.0:0.1#feedback 1~%50%36.7:0.2#feedback 2} -->
-<xsl:template match="x:u|x:span[@style and contains(@style, 'underline')]" mode="cloze">
+<xsl:template name="clozeNumerical">
+    <xsl:param name="numtext_string"/>
     <xsl:param name="qweight_string" select="'1'"/>
+    <xsl:param name="cloze_sa_keyword_string"/>
+    <xsl:param name="cloze_distractor_answer_string"/>
 
     <xsl:variable name="cloze_num_prefix" select="concat($cloze_start_delimiter, $qweight_string, $cloze_num_keyword1)"/>
 
     <!-- Process the Cloze underlined item if it doesn't contain 'NUMERICAL' already -->
-    <xsl:variable name="correct_option" select="."/>
     <xsl:choose>
-    <xsl:when test="contains($correct_option, $cloze_num_prefix)">
-        <xsl:value-of select="$correct_option"/>
+    <xsl:when test="contains($numtext_string, $cloze_num_prefix)">
+        <xsl:value-of select="$numtext_string"/>
     </xsl:when>
-    <xsl:when test="contains($correct_option, $cloze_percent)">
-        <xsl:value-of select="concat($cloze_num_prefix, $correct_option, $cloze_end_delimiter)"/>
+    <xsl:when test="contains($numtext_string, $cloze_percent)">
+        <xsl:value-of select="concat($cloze_num_prefix, $numtext_string, $cloze_end_delimiter)"/>
     </xsl:when>
-    <xsl:when test="contains($correct_option, 'NUMERICAL')">
-        <xsl:value-of select="$correct_option"/>
+    <xsl:when test="contains($numtext_string, 'NUMERICAL')">
+        <xsl:value-of select="$numtext_string"/>
     </xsl:when>
     <xsl:otherwise>
         <xsl:value-of select="$cloze_num_prefix"/>
         <xsl:call-template name="split_cloze_answer">
-            <xsl:with-param name="answer_string" select="."/>
+            <xsl:with-param name="answer_string" select="$numtext_string"/>
             <xsl:with-param name="first" select="'1'"/>
             <xsl:with-param name="cloze_type" select="'NUM'"/>
         </xsl:call-template>
@@ -2018,6 +2175,7 @@
   <xsl:if test="boolean($condition) and $debug_flag != '0'">
     <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
     <xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
+    <xsl:message><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:message>
     <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
   </xsl:if>
 </xsl:template>
