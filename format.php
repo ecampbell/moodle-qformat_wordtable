@@ -39,7 +39,7 @@ require_once($CFG->dirroot.'/lib/uploadlib.php');
 
 // Development: turn on all debug messages and strict warnings.
 // define('DEBUG_WORDTABLE', E_ALL | E_STRICT);.
-define('DEBUG_WORDTABLE', 0);
+define('DEBUG_WORDTABLE', DEBUG_NONE);
 
 // The wordtable plugin just extends XML import/export.
 require_once("$CFG->dirroot/question/format/xml/format.php");

@@ -1664,7 +1664,16 @@
     <!-- Process the inline nodes whether text or elements -->
     <xsl:for-each select="node()">
         <xsl:variable name="elname" select="local-name()"/>
-        <xsl:variable name="firstElement" select="local-name(preceding-sibling::*[1]) != $elname"/>
+        <xsl:variable name="firstElement">
+            <xsl:choose>
+            <xsl:when test="not(self::text())">
+                <xsl:value-of select="local-name(preceding-sibling::node()[1]) != $elname"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="'false'"/>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:call-template name="debugComment">
             <xsl:with-param name="comment_text" select="concat('clozeInline: elname = ', $elname, '; firstElement = ', $firstElement)"/>
             <xsl:with-param name="inline" select="'true'"/>
@@ -1673,7 +1682,7 @@
          <xsl:variable name="text_string">
             <xsl:value-of select="."/>
             <!-- Merge in following siblings if it has the same element name -->
-            <xsl:apply-templates select="following-sibling::*[1][local-name() = $elname]" mode="clozeMergeAdjacent"/>
+            <xsl:apply-templates select="following-sibling::node()[1][local-name() = $elname]" mode="clozeMergeAdjacent"/>
          </xsl:variable>
 
         <xsl:call-template name="debugComment">
@@ -1747,7 +1756,7 @@
   <xsl:variable name="elname" select="local-name()"/>
 
   <xsl:apply-templates />
-  <xsl:apply-templates select="following-sibling::*[1][local-name() = $elname]" mode="clozeMergeAdjacent"/>
+  <xsl:apply-templates select="following-sibling::node()[1][local-name() = $elname]" mode="clozeMergeAdjacent"/>
 </xsl:template>
 
 <!-- Copy Cloze elements except for Bold and Italic -->
