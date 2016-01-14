@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2016/01/14    3.5.6     Add PHPUnit tests for exports, remove debugging.
 2016/01/08    3.5.5     Fix incorrect conversion of Cloze text.
 2016/01/05    3.5.4     Improve handling of exported images to avoid bookmark name clashes.
 2016/01/05    3.5.3     Improve handling of adjacent bold/italic formatting when importing Cloze questions.

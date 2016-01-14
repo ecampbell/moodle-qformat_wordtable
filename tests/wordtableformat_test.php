@@ -32,28 +32,17 @@ require_once($CFG->dirroot . '/question/format/wordtable/format.php');
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/format/xml/tests/xmlformat_test.php');
 require_once($CFG->dirroot . '/tag/lib.php');
-require_once('helpers.php');
-
 
 /**
- * Unit tests for the Word import/export class.
+ * Unit tests for exporting questions into Word (via XML).
  *
- * @copyright  2009 The Open University
+ * Each test has a question in XML format, which is converted to HTML using 
+ * the qformat_wordtable::presave_process method, and then compared to the expected output.
+ * @copyright  2016 Eoin Campbell
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @group qformat_wordtable
  */
-class qformat_wordtable_test extends question_testcase {
-
-    /**
-     * Test if the imported XML input is the same as the expected XML (ignoring newlines).
-     *
-     * @param string $expectedxml as defined.
-     * @param string $xml as returned by import pre-process.
-     * @return mixed Boolean true/false, or some error indicator.
-     */
-    public function assert_same_xml($expectedxml, $xml) {
-        $this->assertEquals(str_replace("\r\n", "\n", $expectedxml),
-                str_replace("\r\n", "\n", $xml));
-    }
+class qformat_wordtable_export_test extends question_testcase {
 
     /**
      * Test if the exported HTML output is the same as the expected HTML (ignoring newlines).
@@ -63,58 +52,22 @@ class qformat_wordtable_test extends question_testcase {
      * @return mixed Boolean true/false, or some error indicator.
      */
     public function assert_same_html($expectedhtml, $html) {
-        // $html = str_replace("\r\n", "\n", substr($html, strpos($html, '<h2 ')));
-        // $this->assertEquals(str_replace("\r\n", "\n", $expectedhtml), $html);
+        global $CFG;
+        // Only test the question content, assuming a single question.
         $html = substr($html, strpos($html, '<h2 '));
+        // Remove any non-breaking spaces, which are often used in empty cells.
+        $html = str_replace("\xA0", "", $html);
+        $expectedhtml = str_replace("\xA0", "", $expectedhtml);
+        $html = str_replace("\r\n", "\n", $html);
+        $expectedhtml = str_replace("\r\n", "\n", $expectedhtml);
         $this->assertEquals($expectedhtml, $html);
-    }
-
-    /**
-     * Test if the imported XML for a Description question matches the expected content.
-     */
-    public function test_import_description() {
-        $xml = '  <question type="description">
-    <name>
-      <text>A description</text>
-    </name>
-    <questiontext format="html">
-      <text>The question text.</text>
-    </questiontext>
-    <generalfeedback>
-      <text>Here is some general feedback.</text>
-    </generalfeedback>
-    <defaultgrade>0</defaultgrade>
-    <penalty>0</penalty>
-    <hidden>0</hidden>
-    <tags>
-      <tag><text>tagDescription</text></tag>
-      <tag><text>tagTest</text></tag>
-    </tags>
-  </question>';
-        $xmldata = xmlize($xml);
-
-        $importer = new qformat_wordtable();
-        $q = $importer->import_description($xmldata['question']);
-
-        $expectedq = new stdClass();
-        $expectedq->qtype = 'description';
-        $expectedq->name = 'A description';
-        $expectedq->questiontext = 'The question text.';
-        $expectedq->questiontextformat = FORMAT_HTML;
-        $expectedq->generalfeedback = 'Here is some general feedback.';
-        $expectedq->defaultmark = 0;
-        $expectedq->length = 0;
-        $expectedq->penalty = 0;
-        $expectedq->tags = array('tagDescription', 'tagTest');
-
-        $this->assert(new question_check_specified_fields_expectation($expectedq), $q);
     }
 
     /**
      * Test if the exported HTML for a Description question matches the expected output.
      */
     public function test_export_description() {
-        $description_xml = '<question type="description">
+        $descriptionxml = '<question type="description">
     <name>
       <text>A description</text>
     </name>
@@ -127,24 +80,125 @@ class qformat_wordtable_test extends question_testcase {
     <defaultgrade>0</defaultgrade>
     <penalty>0</penalty>
     <hidden>0</hidden>
-  </question>
-';
+  </question>';
 
-        $expectedhtml = '<h2 class="MsoHeading2">A description</h2><p class="MsoBodyText"/><div class="TableDiv"><table border="1" dir="ltr"><thead>
-<tr><td colspan="3" style="width: 12.0cm"><p class="Cell">The question text.</p></td><td style="width: 1.0cm"><p class="QFType">DE</p></td></tr>
-<tr><td style="width: 1.0cm"><p class="Cell">' . "\xa0" . '</p></td><td style="width: 5.0cm"><p class="TableHead">' . "\xa0" . '</p></td><td style="width: 6.0cm"><p class="TableHead">' . "\xa0" . '</p></td><td style="width: 1.0cm"><p class="TableHead">' . "\xa0" . '</p></td></tr>
+        $expectedhtml = '<h2 class="MsoHeading2">A description</h2><p class="MsoBodyText"/>' .
+            '<div class="TableDiv"><table border="1" dir="ltr"><thead>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="Cell">The question text.</p></td>
+<td style="width: 1.0cm"><p class="QFType">DE</p></td></tr>
+<tr>
+<td style="width: 1.0cm"><p class="Cell"></p></td>
+<td style="width: 5.0cm"><p class="TableHead"></p></td>
+<td style="width: 6.0cm"><p class="TableHead"></p></td>
+<td style="width: 1.0cm"><p class="TableHead"></p></td></tr>
 </thead><tbody>
 
-<tr><td style="width: 1.0cm"><p class="Cell">' . "\xa0" . '</p></td><th style="width: 5.0cm"><p class="TableRowHead">Tags:</p></th><td style="width: 6.0cm"><p class="Cell">' . "\xa0" . '</p></td><td style="width: 1.0cm"><p class="Cell">' . "\xa0" . '</p></td></tr>
-<tr><td colspan="3" style="width: 12.0cm"><p class="Cell"><i>This is not actually a question. Instead it is a way to add some instructions, rubric or other content to the activity. This is similar to the way that labels can be used to add content to the course page.</i></p></td><td style="width: 1.0cm"><p class="Cell">' . "\xa0" . '</p></td></tr>
-</tbody></table></div><p class="MsoNormal">' . "\xa0" . '</p>
+<tr>
+<td style="width: 1.0cm"><p class="Cell"></p></td>
+<th style="width: 5.0cm"><p class="TableRowHead">Tags:</p></th>
+<td style="width: 6.0cm"><p class="Cell"></p></td>
+<td style="width: 1.0cm"><p class="Cell"></p></td></tr>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="Cell">' .
+'<i>This is not actually a question. Instead it is a way to add some instructions, rubric or other content to the activity. ' .
+'This is similar to the way that labels can be used to add content to the course page.</i></p></td>
+<td style="width: 1.0cm"><p class="Cell"></p></td></tr>
+</tbody></table></div><p class="MsoNormal"></p>
   </body>
 </html>
 ';
-        //$user = $this->getDataGenerator()->create_user();
+        $this->resetAfterTest(true);
         $this->setGuestUser();
         $exporter = new qformat_wordtable();
-        $html = $exporter->presave_process($description_xml);
+        $html = $exporter->presave_process($descriptionxml);
+
+        $this->assert_same_html($expectedhtml, $html);
+    }
+
+
+    /**
+     * Test if the exported HTML for an Essay question matches the expected output.
+     */
+    public function test_export_essay29() {
+        $descriptionxml = '<question type="essay">
+    <name><text>Moodle 2.9 Essay Question</text></name>
+    <questiontext format="moodle_auto_format">
+      <text><![CDATA[<p>Essay question text.</p>]]></text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text><![CDATA[<p>General Feedback led the charge</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <responseformat>editor</responseformat>
+    <responsefieldlines>15</responsefieldlines>
+    <attachments>1</attachments>
+    <graderinfo format="moodle_auto_format">
+      <text>Grader information.</text>
+    </graderinfo>
+    <responsetemplate format="moodle_auto_format">
+      <text>Optional response template.</text>
+    </responsetemplate>
+  </question>';
+
+        $expectedhtml = '<h2 class="MsoHeading2">Moodle 2.9 Essay Question</h2><p class="MsoBodyText"/>' .
+'<div class="TableDiv"><table border="1" dir="ltr"><thead>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="Cell">Essay question text.</p></td>
+<td style="width: 1.0cm"><p class="QFType">ES</p></td></tr>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">Default mark:</p></td>
+<td style="width: 1.0cm"><p class="Cell">1</p></td></tr>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">Response format:</p></td>
+<td style="width: 1.0cm"><p class="Cell">HTML editor</p></td></tr>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">Require text:</p></td>
+<td style="width: 1.0cm"><p class="Cell">Yes</p></td></tr><tr>
+<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">Input box size:</p></td>
+<td style="width: 1.0cm"><p class="Cell">15</p></td></tr>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">Allow attachments:</p></td>
+<td style="width: 1.0cm"><p class="Cell">1</p></td></tr>
+
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">Require attachments:</p></td>
+<td style="width: 1.0cm"><p class="Cell">0</p></td></tr>
+<tr>
+<td style="width: 1.0cm"><p class="Cell"></p></td>
+<td style="width: 5.0cm"><p class="TableHead">Response template</p></td>
+<td style="width: 6.0cm"><p class="TableHead">Information for graders</p></td>
+<td style="width: 1.0cm"><p class="TableHead"></p></td></tr>
+</thead><tbody>
+<tr>
+<td style="width: 1.0cm"><p class="Cell"></p></td>
+<td style="width: 5.0cm"><p class="Cell">Optional response template.</p></td>
+<td style="width: 6.0cm"><p class="Cell">Grader information.</p></td>
+<td style="width: 1.0cm"><p class="Cell"></p></td></tr>
+<tr>
+<td style="width: 1.0cm"><p class="Cell"></p></td>
+<th style="width: 5.0cm"><p class="TableRowHead">General feedback:</p></th>
+<td style="width: 6.0cm"><p class="Cell">General Feedback led the charge</p></td>
+<td style="width: 1.0cm"><p class="Cell"></p></td></tr>
+<tr>
+<td style="width: 1.0cm"><p class="Cell"></p></td>
+<th style="width: 5.0cm"><p class="TableRowHead">Tags:</p></th>
+<td style="width: 6.0cm"><p class="Cell"></p></td>
+<td style="width: 1.0cm"><p class="Cell"></p></td></tr>
+<tr>
+<td colspan="3" style="width: 12.0cm"><p class="Cell"><i>Allows a response of a few sentences or paragraphs. ' .
+'This must then be graded manually.</i></p></td>
+<td style="width: 1.0cm"><p class="Cell"></p></td></tr>
+</tbody></table></div><p class="MsoNormal"></p>
+  </body>
+</html>
+';
+        $this->resetAfterTest(true);
+        $this->setGuestUser();
+        $exporter = new qformat_wordtable();
+        $html = $exporter->presave_process($descriptionxml);
 
         $this->assert_same_html($expectedhtml, $html);
     }

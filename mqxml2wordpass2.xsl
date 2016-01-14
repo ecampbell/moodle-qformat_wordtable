@@ -220,6 +220,7 @@
 
 <!-- Look for table cells with just text, and wrap them in a Cell paragraph style -->
 <xsl:template match="htm:td">
+    <xsl:value-of select="'&#x0a;'"/> <!-- Start each cell on a new line to simplify PHPUnit tests -->
     <td>
         <xsl:call-template name="copyAttributes"/>
         <xsl:choose>
@@ -231,6 +232,14 @@
         <xsl:otherwise><xsl:apply-templates/></xsl:otherwise>
         </xsl:choose>
     </td>
+</xsl:template>
+
+<xsl:template match="htm:th">
+    <xsl:value-of select="'&#x0a;'"/> <!-- Start each cell on a new line to simplify PHPUnit tests -->
+    <th>
+        <xsl:call-template name="copyAttributes"/>
+        <xsl:apply-templates/>
+    </th>
 </xsl:template>
 
 <!-- Any paragraphs without an explicit class are set to have the Cell style -->
