@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/tag/lib.php');
 /**
  * Unit tests for exporting questions into Word (via XML).
  *
- * Each test has a question in XML format, which is converted to HTML using 
+ * Each test has a question in XML format, which is converted to HTML using
  * the qformat_wordtable::presave_process method, and then compared to the expected output.
  * @copyright  2016 Eoin Campbell
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -52,7 +52,6 @@ class qformat_wordtable_export_test extends question_testcase {
      * @return mixed Boolean true/false, or some error indicator.
      */
     public function assert_same_html($expectedhtml, $html) {
-        global $CFG;
         // Only test the question content, assuming a single question.
         $html = substr($html, strpos($html, '<h2 '));
         // Remove any non-breaking spaces, which are often used in empty cells.

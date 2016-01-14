@@ -71,7 +71,6 @@ class qformat_wordtable extends qformat_xml {
     /** @var string Stylesheet to import XHTML into question XML */
     private $word2mqxmlstylesheet3 = 'xhtml2mqxml.xsl';
     /** @var string Stylesheet to clean up text inside Cloze questions */
-    private $word2mqxmlstylesheet4 = 'wordml2xhtmlpass2a.xsl';
 
     /**
      * Define required MIME-Type
@@ -310,7 +309,6 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
         $this->debug_unlink($tempxhtmlfilename);
-        $mqxmlfragment = str_replace("\n", "", substr($xsltoutput, 0, 200));
 
         // Strip out most MathML element and attributes for compatibility with MathJax.
         $xsltoutput = str_replace('<mml:', '<', $xsltoutput);
@@ -592,7 +590,7 @@ class qformat_wordtable extends qformat_xml {
      * @return string
      */
     private function clean_all_questions($questionxmlstring) {
-        $xhtmlfragment = str_replace("\n", "", substr($questionxmlstring, 0, 200));
+        // @codingStandardsIgnoreLine $xhtmlfragment = str_replace("\n", "", substr($questionxmlstring, 0, 200));
         // @codingStandardsIgnoreLine debugging(__FUNCTION__ . "(questionxmlstring = $xhtmlfragment ...)", DEBUG_WORDTABLE);
         // Start assembling the cleaned output string, starting with empty.
         $cleanquestionxml = "";
@@ -661,7 +659,7 @@ class qformat_wordtable extends qformat_xml {
     private function clean_html_text($cdatastring) {
         // @codingStandardsIgnoreLine debugging(__FUNCTION__ . "(cdatastring = \"" . substr($cdatastring, 0, 100) . "\")", DEBUG_WORDTABLE);
 
-        // Escape double minuses, which cause XSLT processing to fail
+        // Escape double minuses, which cause XSLT processing to fail.
         $cdatastring = str_replace("--", "WordTableMinusMinus", $cdatastring);
 
         // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML.
