@@ -100,8 +100,8 @@ class qformat_wordtable_export_test extends question_testcase {
 <td style="width: 1.0cm"><p class="Cell"></p></td></tr>
 <tr>
 <td colspan="3" style="width: 12.0cm"><p class="Cell">' .
-    '<i>This is not actually a question. Instead it is a way to add some instructions, rubric or other content to the activity. ' .
-    'This is similar to the way that labels can be used to add content to the course page.</i></p></td>
+        '<i>This is not actually a question. Instead it is a way to add some instructions, rubric or other content to the activity. ' .
+        'This is similar to the way that labels can be used to add content to the course page.</i></p></td>
 <td style="width: 1.0cm"><p class="Cell"></p></td></tr>
 </tbody></table></div><p class="MsoNormal"></p>
   </body>
@@ -143,7 +143,7 @@ class qformat_wordtable_export_test extends question_testcase {
   </question>';
 
         $expectedhtml = '<h2 class="MsoHeading2">Moodle 2.9 Essay Question</h2><p class="MsoBodyText"/>' .
-    '<div class="TableDiv"><table border="1" dir="ltr"><thead>
+        '<div class="TableDiv"><table border="1" dir="ltr"><thead>
 <tr>
 <td colspan="3" style="width: 12.0cm"><p class="Cell">Essay question text.</p></td>
 <td style="width: 1.0cm"><p class="QFType">ES</p></td></tr>
@@ -188,7 +188,7 @@ class qformat_wordtable_export_test extends question_testcase {
 <td style="width: 1.0cm"><p class="Cell"></p></td></tr>
 <tr>
 <td colspan="3" style="width: 12.0cm"><p class="Cell"><i>Allows a response of a few sentences or paragraphs. ' .
-    'This must then be graded manually.</i></p></td>
+        'This must then be graded manually.</i></p></td>
 <td style="width: 1.0cm"><p class="Cell"></p></td></tr>
 </tbody></table></div><p class="MsoNormal"></p>
   </body>
