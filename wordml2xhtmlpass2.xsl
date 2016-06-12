@@ -18,7 +18,7 @@
  * XSLT stylesheet to transform rough XHTML derived from Word 2010 files into a more hierarchical format with divs wrapping each heading and table (question name and item)
  *
  * @package qformat_wordtable
- * @copyright 2010-2015 Eoin Campbell
+ * @copyright 2010-2016 Eoin Campbell
  * @author Eoin Campbell
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
 -->
@@ -34,7 +34,23 @@
     <xsl:preserve-space elements="x:span x:p"/>
 
     <xsl:param name="debug_flag" select="0"/>
+    <xsl:param name="pluginname"/>
     <xsl:param name="course_id"/>
+    <xsl:param name="heading1stylelevel" select="1"/>
+
+    <!-- Figure out an offset by which to demote Atto headings e.g. Heading 1  to H2, etc. -->
+    <!-- Use a system default, or a document-specific override -->
+    <xsl:variable name="moodleHeading1Level" select="/x:html/x:head/x:meta[@name = 'moodleHeading1Level']/@content"/>
+    <xsl:variable name="heading_demotion_offset">
+        <xsl:choose>
+        <xsl:when test="$moodleHeading1Level != ''">
+            <xsl:value-of select="$moodleHeading1Level - 1"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="$heading1stylelevel - 1"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
 
     <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
     <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
@@ -65,18 +81,18 @@
     <xsl:template match="text()">
         <xsl:value-of select="translate(., '&#x2009;', '&#x202f;')"/>
     </xsl:template>
-    
-    <xsl:template match="@mathvariant"/>
 
     <!-- Remove empty class attributes -->
     <xsl:template match="@class[.='']"/>
     
+    <!-- Omit superfluous MathML markup attributes -->
+    <xsl:template match="@mathvariant"/>
+
     <!-- Remove redundant style information, retaining only borders and widths on table cells, and text direction in paragraphs-->
     <xsl:template match="@style[not(parent::x:table) and not(contains(., 'direction:'))]" priority="1"/>
 
-
      <!-- Delete superfluous spans that wrap the complete para content -->
-    <xsl:template match="x:span[count(.//node()[self::span]) = count(.//node())]" priority="2"/>
+    <xsl:template match="x:span[count(.//node()[self::x:span]) = count(.//node())]" priority="2"/>
 
     <!-- Out go horizontal bars -->
     <xsl:template match="x:p[@class='horizontalbar']"/>
@@ -146,6 +162,18 @@
             <!-- No styles left, so just process the children in the normal way -->
             <xsl:apply-templates select="node()"/>
         </xsl:when>
+        <xsl:when test="$stylePropertyFirst = 'color:#000000'">
+            <!-- Omit spans that define text colour to black -->
+            <xsl:apply-templates select="." mode="styleProperty">
+                <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
+            </xsl:apply-templates>
+        </xsl:when>
+        <xsl:when test="$stylePropertyFirst = 'color:#1155CC' and parent::x:a">
+            <!-- Omit explicit text colour definition inside a hyperlink -->
+            <xsl:apply-templates select="." mode="styleProperty">
+                <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
+            </xsl:apply-templates>
+        </xsl:when>
         <xsl:when test="$stylePropertyFirst = 'font-weight:bold' or $stylePropertyFirst = 'Strong-H'">
             <!-- Convert bold style to strong element -->
             <strong>
@@ -167,6 +195,12 @@
             <xsl:apply-templates select="." mode="styleProperty">
                 <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
             </xsl:apply-templates>
+        </xsl:when>
+        <xsl:when test="$stylePropertyFirst = 'text-decoration:underline' and parent::x:a and contains(@style, 'color:#1155CC')">
+            <!-- Ignore underline style if it is in a hyperlink-->
+                <xsl:apply-templates select="." mode="styleProperty">
+                    <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
+                </xsl:apply-templates>
         </xsl:when>
         <xsl:when test="$stylePropertyFirst = 'text-decoration:underline'">
             <!-- Convert underline style to u element -->
@@ -275,7 +309,6 @@
     <!-- Delete question tables in normal processing, as they are grabbed by the previous heading 2 style -->
     <xsl:template match="x:table[contains(@class, 'moodleQuestion')]"/>
 
-
 <!-- Handle simple unnested lists, as long as they use the explicit "List Number" or "List Bullet" styles -->
 
     <!-- Assemble numbered lists -->
@@ -354,32 +387,57 @@
         </p>
     </xsl:template>
 
-
     <!-- Delete any temporary ToC Ids to enable differences to be checked more easily, reduce clutter -->
-    <xsl:template match="x:a[starts-with(translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '_toc') and @class = 'bookmarkStart' and count(@*) =3 and not(node())]" priority="4"/>
+    <xsl:template match="x:a[@class = 'bookmarkStart' and count(@*) = 3 and not(node())]" priority="4"/>
     <!-- Delete any spurious OLE_LINK bookmarks that Word inserts -->
     <xsl:template match="x:a[starts-with(translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'ole_link') and @class = 'bookmarkStart']" priority="4"/>
     <xsl:template match="x:a[starts-with(translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '_goback') and @class = 'bookmarkStart']" priority="4"/>
-
     <xsl:template match="x:a[@class='bookmarkEnd' and not(node())]" priority="2"/>
     <xsl:template match="x:a[@href='\* MERGEFORMAT']" priority="2"/>
-    
+
+    <!-- Omit table titles, since they are included in the table itself-->
+    <xsl:template match="x:p[@class = 'tabletitle']"/>
+    <!-- Process the table titles as a caption-->
+    <xsl:template match="x:p[@class = 'tabletitle']" mode="tablecaption">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <!-- Remove redundant style information, retaining only borders and widths on table cells, and text direction in paragraphs-->
+    <xsl:template match="x:table/@style">
+        <xsl:if test="contains(., 'margin-left:-')">
+            <xsl:attribute name="style">
+                <xsl:value-of select="substring-before(., 'margin-left:-')"/>
+            </xsl:attribute>
+        </xsl:if>
+    </xsl:template>
+
+    <!-- Mark table rows odd or even -->
+    <xsl:template match="x:tr">
+        <xsl:variable name="row_class">
+            <xsl:choose>
+            <xsl:when test="position() mod 2 = 1">
+                <xsl:value-of select="'r0'"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="'r1'"/>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <tr class="{$row_class}" style="vertical-align: text-top">
+            <xsl:apply-templates/>
+        </tr>
+    </xsl:template>
+
     <!-- Convert table body cells containing headings into th's -->
     <xsl:template match="x:td[contains(x:p[1]/@class, 'tablerowhead')]">
         <xsl:value-of select="$debug_newline"/>
         <th>
-            <xsl:apply-templates select="@*"/>
-            <xsl:apply-templates select="*"/>
+            <xsl:apply-templates/>
         </th>
     </xsl:template>
 
-    <!-- Table cells -->
-    <xsl:template match="x:td">
-        <xsl:value-of select="$debug_newline"/>
-        <td>
-            <xsl:apply-templates select="node()"/>
-        </td>
-    </xsl:template>
+    <!-- Delete unused image, hyperlink and style info -->
+    <xsl:template match="x:imageLinks|x:imagesContainer|x:styleMap|x:hyperLinks"/>
 
     <xsl:template match="@name[parent::x:a]">
         <xsl:attribute name="name">
@@ -387,16 +445,16 @@
         </xsl:attribute>
     </xsl:template>
 
-<!-- Include debugging information in the output -->
-<xsl:template name="debugComment">
-    <xsl:param name="comment_text"/>
-    <xsl:param name="inline" select="'false'"/>
-    <xsl:param name="condition" select="'true'"/>
+    <!-- Include debugging information in the output -->
+    <xsl:template name="debugComment">
+        <xsl:param name="comment_text"/>
+        <xsl:param name="inline" select="'false'"/>
+        <xsl:param name="condition" select="'true'"/>
 
-    <xsl:if test="boolean($condition) and $debug_flag &gt;= 1">
-        <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
-        <xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
-        <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
-    </xsl:if>
-</xsl:template>
+        <xsl:if test="boolean($condition) and $debug_flag &gt;= 1">
+            <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
+            <xsl:comment><xsl:value-of select="concat('Debug: ', $comment_text)"/></xsl:comment>
+            <xsl:if test="$inline = 'false'"><xsl:text>&#x0a;</xsl:text></xsl:if>
+        </xsl:if>
+    </xsl:template>
 </xsl:stylesheet>

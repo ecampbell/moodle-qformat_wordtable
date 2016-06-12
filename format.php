@@ -664,6 +664,7 @@ class qformat_wordtable extends qformat_xml {
 
         // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML.
         $doc = new DOMDocument();
+        libxml_use_internal_errors(true);
         $doc->loadHTML('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><html><body>' . $cdatastring . '</body></html>');
         $doc->getElementsByTagName('html')->item(0)->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
         $xml = $doc->saveXML();

@@ -4828,6 +4828,7 @@
     <xsl:template match="m:oMathPara">
         <xsl:apply-templates/>
     </xsl:template>
+    <xsl:template match="m:oMathParaPr"/>
 
     <xsl:template match="m:oMath">
         <math xmlns="http://www.w3.org/1998/Math/MathML">
