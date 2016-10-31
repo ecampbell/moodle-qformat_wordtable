@@ -80,9 +80,7 @@
 
  * XSLT stylesheet to transform WordProcessingML from Word 2010 files into linear XHTML format
  *
- * @package qformat_wordtable
- * @copyright 2010-2015 Eoin Campbell
- * @author Eoin Campbell
+ * @copyright 2004-2005, Oleg Tkachenko
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
 -->
 
@@ -3002,7 +3000,7 @@
         <xsl:param name="prsR" select="$prsRDefault"/>
 
         <xsl:if test="not(w:pPr/w:pStyle/@w:val='z-TopofForm') and not(w:pPr/w:pStyle/@w:val='z-BottomofForm')">
-            <xsl:value-of select="$debug_newline"/>
+            <xsl:value-of select="'&#x0a;'"/>
             <p>
 
                 <xsl:variable name="pStyleId">
@@ -4769,6 +4767,10 @@
             <xsl:when test="$img_rid != '' and $pluginname = 'atto_wordimport'">
                 <!-- Dereference the reference ID field to get the file name, and map to the src attribute -->
                 <xsl:value-of select="$imagesContainer/file[@filename = $img_filename]"/>
+            </xsl:when>
+            <xsl:when test="$img_rid != '' and $pluginname = 'booktool_wordimport'">
+                <!-- Dereference the reference ID field to get the file name, and map to the src attribute -->
+                <xsl:value-of select="substring-after($img_filename, '/')"/>
             </xsl:when>
             <xsl:when test="$img_rid != ''">
                 <!-- Dereference the reference ID field to get the file name, and map to the src attribute -->

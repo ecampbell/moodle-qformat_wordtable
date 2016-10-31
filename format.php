@@ -188,6 +188,9 @@ class qformat_wordtable extends qformat_xml {
                         if ($imagesuffix == 'jpg' or $imagesuffix == 'jpeg') {
                             $imagemimetype .= "jpeg";
                         }
+                        if ($imagesuffix == 'wmf') {
+                            $imagemimetype .= "x-wmf";
+                        }
                         // Handle recognised Internet formats only.
                         if ($imagemimetype != '') {
                             $imagestring .= '<file filename="media/' . $imagename . '" mime-type="' . $imagemimetype . '">';
