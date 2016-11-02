@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2016/11/02    3.5.11    Replace "<br>" with "<br/>" in the Moodle text strings used for exporting Word files (for Polish issue)
 2016/10/31    3.5.10    Retain table border style, handle WMF images better, support pre-formatted text
 2016/09/09    3.5.9     Strip out OfficeMath revision control markup from Word 2010 files
 2016/09/08    3.5.8     Strip out VML/drawingML markup from Word 2010 files

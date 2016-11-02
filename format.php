@@ -576,7 +576,7 @@ class qformat_wordtable extends qformat_xml {
         foreach ($textstrings as $typegroup => $grouparray) {
             foreach ($grouparray as $stringid) {
                 $namestring = $typegroup . '_' . $stringid;
-                $expout .= '<data name="' . $namestring . '"><value>' . get_string($stringid, $typegroup) . "</value></data>\n";
+                $expout .= '<data name="' . $namestring . '"><value>' . str_replace("<br>", "<br/>", get_string($stringid, $typegroup)) . "</value></data>\n";
             }
         }
         $expout .= "</moodlelabels>";
