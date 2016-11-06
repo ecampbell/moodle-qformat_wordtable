@@ -1286,7 +1286,7 @@
             <xsl:when test="$qtype = 'TF'">
                 <xsl:variable name="truefalse_value">
                     <xsl:choose>
-                    <xsl:when test="contains(translate(normalize-space($plain_text), $ucase, $lcase), translate($true_label, $ucase, $lcase))">
+                    <xsl:when test="starts-with(translate(normalize-space($plain_text), $ucase, $lcase), translate($true_label, $ucase, $lcase))">
                         <xsl:value-of select="'true'"/>
                     </xsl:when>
                     <xsl:otherwise><xsl:value-of select="'false'"/></xsl:otherwise>
