@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2016/11/14    3.5.13    Improve localisation by adding more strings for use in Word template, improve RTL language support
 2016/11/05    3.5.12    Fix Hebrew support for True/False question import
 2016/11/02    3.5.11    Replace "<br>" with "<br/>" in the Moodle text strings used for exporting Word files (for Polish issue)
 2016/10/31    3.5.10    Retain table border style, handle WMF images better, support pre-formatted text

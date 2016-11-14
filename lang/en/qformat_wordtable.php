@@ -61,11 +61,34 @@ $string['templateunavailable'] = 'Word-compatible XHTML template <b>{$a}</b> is 
 
 // These strings are part of the Word Startup template user interface, not the Moodle interface.
 // These templates are available at http://www.moodle2word.net/.
+$string['word_about_moodle2word'] = 'About Moodle2Word';
+$string['word_about_moodle2word_screentip'] = 'About the Moodle2Word Word templates and Moodle plug-in';
 $string['word_conversionfailed'] = 'Question import failed';
 $string['word_conversionsucceeded2'] = 'Question import <b>succeeded</b>, <br>click the \'Continue\' button to continue.';
 $string['word_conversionsucceeded'] = 'Question import <b>succeeded</b>, <br>click the <b>\'Close\'</b> button to continue.';
+$string['word_convert_images'] = 'Convert Images';
+$string['word_convert_images_screentip'] = 'Import image data in exported questions';
+$string['word_convert_images_supertip'] = 'Embed images into Word file';
+$string['word_currentquestion'] = ' (Current Question)';
+$string['word_import_screentip'] = 'Upload and import all the questions to your Moodle server';
+$string['word_import_mathtype'] = 'Import MathType Images';
+$string['word_import_mathtype_screentip'] = 'Import MathType Equation images';
+$string['word_import_mathtype_supertip'] = 'Run afer MathType \'Export Equations\' command';
+$string['word_login_supertip'] = 'Choose your own Moodle server';
+$string['word_multiple_answer'] = 'Multiple answer';
 $string['word_new_question_file'] = 'New Question File';
-$string['word_multiple_answer'] = 'Multiple Answer';
-$string['word_about_moodle2word'] = 'About Moodle2Word';
-$string['word_showhide_assessment_view'] = 'Show/Hide Assessment View';
+$string['word_new_question_file_screentip'] = 'Questions must be saved in Word 2010 (.docx) format';
+$string['word_new_question_file_supertip'] = 'Each Word file may contain multiple categories';
+$string['word_addcategory_supertip'] = 'Category names use the Heading 1 style';
+$string['word_preview'] = 'Preview Current Question'; // Obsolete
+$string['word_preview_screentip'] = 'Upload the current question to Moodle for preview';
+$string['word_preview_supertip'] = 'The cursor must be inside a table';
 $string['word_setunset_assessment_view'] = 'Set/Unset Assessment View';
+$string['word_setunset_assessment_screentip'] = 'Reformat questions for a printed assessment';
+$string['word_setunset_assessment_supertip'] = 'Set question metadata (name, correct answer indicators, feedback, etc.) to hidden';
+$string['word_showhide_assessment_view'] = 'Show/Hide Assessment View';
+$string['word_showhide_assessment_screentip'] = 'Show question metadata to edit, hide to preview printed assessment';
+$string['word_showhide_assessment_supertip'] = 'Shows or hides the hidden text';
+$string['word_shuffle_screentip'] = 'Shuffle the answers to MCQ/TF/MA questions';
+$string['word_shuffle_supertip'] = 'A few shuffles is better than 1';
+$string['word_view'] = 'View';

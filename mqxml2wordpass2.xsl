@@ -37,6 +37,7 @@
 <xsl:param name="institution_name"/>
 <xsl:param name="moodle_country"/> <!-- Users country -->
 <xsl:param name="moodle_language" select="'en'"/> <!-- Interface language for user -->
+<xsl:param name="moodle_textdirection"/> <!-- Current text direction ltr or rtl -->
 <xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
@@ -63,7 +64,7 @@
 <xsl:variable name="contains_embedded_images" select="count($data//htm:img[contains(@src, $base64data_string)])"/>
 
 <xsl:variable name="transformationfailed" select="$moodle_labels/data[@name = 'qformat_wordtable_transformationfailed']"/>
-<xsl:variable name="moodle_textdirection" select="$moodle_labels/data[@name = 'langconfig_thisdirection']"/>
+<xsl:variable name="langconfig_textdirection" select="$moodle_labels/data[@name = 'langconfig_thisdirection']"/>
 
 <!-- Get the locale if present as part of the language definition (e.g. zh_cn) -->
 <xsl:variable name="moodle_language_locale">
@@ -203,9 +204,23 @@
     <!-- Set the language of each style to be whatever is defined in Moodle, to assist spell-checking -->
 
     <xsl:choose>
+    <!-- For far-eastern languages, use the mso-fareast-language property -->
+    <xsl:when test="$word_language_fareast = 'true'">
+        <xsl:value-of select="concat('EN-GB;mso-fareast-language:', $word_language_and_locale)"/>
+    </xsl:when>
+    <xsl:otherwise>
+        <xsl:value-of select="$word_language_and_locale"/>
+    </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+<xsl:template match="processing-instruction('replace')[.='insert-language-direction']">
+    <!-- Set the language and text direction of the Word Normal style -->
+
+    <xsl:choose>
     <!-- For Right-to-Left languages, use the mso-bidi-language property -->
     <xsl:when test="$moodle_textdirection = 'rtl'">
-        <xsl:value-of select="concat('EN-GB;&#x0a;&#x09;mso-bidi-language:', $word_language_and_locale, ';&#x0a;&#x09;direction:rtl')"/>
+        <xsl:value-of select="concat('EN-GB;&#x0a;mso-bidi-language:', $word_language_and_locale, ';&#x0a;direction:rtl')"/>
     </xsl:when>
     <!-- For far-eastern languages, use the mso-fareast-language property -->
     <xsl:when test="$word_language_fareast = 'true'">
@@ -215,7 +230,6 @@
         <xsl:value-of select="$word_language_and_locale"/>
     </xsl:otherwise>
     </xsl:choose>
-
 </xsl:template>
 
 <!-- Look for table cells with just text, and wrap them in a Cell paragraph style -->
