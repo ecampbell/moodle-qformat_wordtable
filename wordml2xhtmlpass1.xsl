@@ -88,6 +88,8 @@
 
     <xsl:param name="debug_flag" select="'0'"/>
     <xsl:param name="pluginname"/>
+    <xsl:param name="moodle_language"/>
+    <xsl:param name="moodle_textdirection"/>
 
     <xsl:output method="xml" encoding="utf-8" indent="no" omit-xml-declaration="yes"/>
 
@@ -4057,7 +4059,12 @@
 
         <xsl:variable name="prsPAccum">
 
-            <xsl:for-each select="w:tblPr[1]/w:bidiVisual[1]"><xsl:if test="not(@w:val = 'off')">direction:ltr;</xsl:if></xsl:for-each>
+            <xsl:for-each select="w:tblPr[1]/w:bidiVisual[1]">
+                <xsl:if test="not(@w:val = 'off')">
+                    <xsl:value-of select="concat('direction:', $moodle_textdirection, ';')"/>
+                </xsl:if>
+            </xsl:for-each>
+
 
             <xsl:for-each select="$sTblStyleName"><xsl:call-template name="ApplyPPr.many"/></xsl:for-each>
         </xsl:variable>

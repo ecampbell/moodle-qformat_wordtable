@@ -64,7 +64,6 @@
 <xsl:variable name="contains_embedded_images" select="count($data//htm:img[contains(@src, $base64data_string)])"/>
 
 <xsl:variable name="transformationfailed" select="$moodle_labels/data[@name = 'qformat_wordtable_transformationfailed']"/>
-<xsl:variable name="langconfig_textdirection" select="$moodle_labels/data[@name = 'langconfig_thisdirection']"/>
 
 <!-- Get the locale if present as part of the language definition (e.g. zh_cn) -->
 <xsl:variable name="moodle_language_locale">
@@ -186,18 +185,13 @@
 <xsl:template match="processing-instruction('replace')[.='insert-meta']">
     <!-- Include custom properties used by Moodle2Word Startup Word template and re-import code -->
     <o:DC.Type><xsl:value-of select="'Question'"/></o:DC.Type>
-    <o:moodleCategory><xsl:value-of select="$moodle_labels/data[@name = 'moodle_categoryname']"/></o:moodleCategory>
+    <o:moodleQuestionSeqNum><xsl:value-of select="count($data//htm:table) + 1"/></o:moodleQuestionSeqNum>
     <o:moodleCourseID><xsl:value-of select="$course_id"/></o:moodleCourseID>
     <o:moodleImages><xsl:value-of select="$contains_embedded_images"/></o:moodleImages>
     <o:moodleLanguage><xsl:value-of select="$moodle_language"/></o:moodleLanguage>
-    <o:moodleNo><xsl:value-of select="$moodle_labels/data[@name = 'moodle_no']"/></o:moodleNo>
-    <o:moodleQuestion><xsl:value-of select="$moodle_labels/data[@name = 'moodle_question']"/></o:moodleQuestion>
-    <o:moodleYes><xsl:value-of select="$moodle_labels/data[@name = 'moodle_yes']"/></o:moodleYes>
-    <o:moodleQuestionSeqNum><xsl:value-of select="count($data//htm:table) + 1"/></o:moodleQuestionSeqNum>
     <o:moodleRelease><xsl:value-of select="$moodle_release"/></o:moodleRelease>
     <o:moodleURL><xsl:value-of select="$moodle_url"/></o:moodleURL>
     <o:moodleUsername><xsl:value-of select="$moodle_username"/></o:moodleUsername>
-    <o:yawcToolbarBehaviour><xsl:value-of select="'doNothing'"/></o:yawcToolbarBehaviour>
 </xsl:template>
 
 <xsl:template match="processing-instruction('replace')[.='insert-language']">
