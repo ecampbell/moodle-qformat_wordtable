@@ -27,8 +27,8 @@
     xmlns="http://www.w3.org/1999/xhtml"
     xmlns:x="http://www.w3.org/1999/xhtml"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
     xmlns:mml="http://www.w3.org/1998/Math/MathML"
+    xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     exclude-result-prefixes="x mc"
     version="1.0">
@@ -38,9 +38,9 @@
     <xsl:param name="debug_flag" select="0"/>
     <xsl:param name="pluginname"/>
     <xsl:param name="course_id"/>
-    <xsl:param name="heading1stylelevel" select="1"/>
+    <xsl:param name="heading1stylelevel"/> <!-- Should be 1 for Books and WordTable, 3 for Atto -->
 
-    <!-- Figure out an offset by which to demote Atto headings e.g. Heading 1  to H2, etc. -->
+    <!-- Figure out an offset by which to demote headings e.g. Heading 1  to H2, etc. -->
     <!-- Use a system default, or a document-specific override -->
     <xsl:variable name="moodleHeading1Level" select="/x:html/x:head/x:meta[@name = 'moodleHeading1Level']/@content"/>
     <xsl:variable name="heading_demotion_offset">
@@ -54,8 +54,6 @@
         </xsl:choose>
     </xsl:variable>
 
-    <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
-    <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
     <!-- Output a newline before paras and cells when debugging turned on -->
     <xsl:variable name="debug_newline">
         <xsl:if test="$debug_flag &gt;= 1">
@@ -91,7 +89,7 @@
     <xsl:template match="@mathvariant"/>
 
     <!-- Remove redundant style information, retaining only borders and widths on table cells, and text direction in paragraphs-->
-    <xsl:template match="@style[not(ancestor::x:table) and not(contains(., 'direction:'))]" priority="1"/>
+    <xsl:template match="@style[not(parent::x:table) and not(contains(., 'direction:'))]" priority="1"/>
 
      <!-- Delete superfluous spans that wrap the complete para content -->
     <xsl:template match="x:span[count(.//node()[self::x:span]) = count(.//node())]" priority="2"/>
@@ -418,6 +416,7 @@
     </xsl:template>
 
     <!-- Delete any temporary ToC Ids to enable differences to be checked more easily, reduce clutter -->
+    <xsl:template match="x:a[starts-with(translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '_toc') and @class = 'bookmarkStart' and count(@*) =3 and not(node())]" priority="4"/>
     <xsl:template match="x:a[@class = 'bookmarkStart' and count(@*) = 3 and not(node())]" priority="4"/>
     <!-- Delete any spurious OLE_LINK bookmarks that Word inserts -->
     <xsl:template match="x:a[starts-with(translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'ole_link') and @class = 'bookmarkStart']" priority="4"/>
@@ -429,7 +428,7 @@
     <xsl:template match="x:table">
         <!-- If in booktool and a table contains a h4 in the first heading cell, then it's a Case Study (for Kimmage DSC) -->
         <xsl:choose>
-        <xsl:when test="x:thead/x:tr[1]/x:th[1]/x:p[1]/@class = 'heading4' and $pluginname = 'booktool_wordimport'">
+        <xsl:when test="x:thead/x:tr[1]/x:th[1]/x:p[1]/@class = 'heading4' and ($pluginname = 'booktool_wordimport' or $pluginname = 'atto_wordimport')">
             <div class="casestudy">
                 <xsl:apply-templates select="x:thead/x:tr[1]/x:th[1]/x:p[@class = 'heading4']"/>
                 <div class="whitebox">
@@ -453,7 +452,6 @@
         </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-
 
     <!-- Omit table titles, since they are included in the table itself-->
     <xsl:template match="x:p[@class = 'tabletitle']"/>
@@ -505,11 +503,6 @@
     <!-- Clean up cell styles to reduce verbosity -->
     <xsl:template match="x:td/@style|x:th/@style" priority="1"/>
 
-    <!-- Process Figure captions, so that they can be explicitly styled -->
-    <xsl:template match="x:p[@class = 'caption' or @class = 'MsoCaption']">
-        <p class="figure-caption"><xsl:apply-templates/></p>
-    </xsl:template>
-
     <!-- Handle table body explicitly, so that rows can be marked odd or even -->
     <xsl:template match="x:tbody">
         <tbody>
@@ -542,6 +535,11 @@
         </th>
     </xsl:template>
 
+    <!-- Process Figure captions, so that they can be explicitly styled -->
+    <xsl:template match="x:p[@class = 'caption' or @class = 'MsoCaption']">
+        <p class="figure-caption"><xsl:apply-templates/></p>
+    </xsl:template>
+
     <!-- Strip out VML/drawingML markup from Word 2010 files (cf. http://officeopenxml.com/drwOverview.php)-->
     <xsl:template match="mc:AlternateContent|m:ctrlPr"/>
 
@@ -550,7 +548,7 @@
 
     <xsl:template match="@name[parent::x:a]">
         <xsl:attribute name="name">
-            <xsl:value-of select="translate(., $uppercase, $lowercase)"/>
+            <xsl:value-of select="translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"/>
         </xsl:attribute>
     </xsl:template>
 
