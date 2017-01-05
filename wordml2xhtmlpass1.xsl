@@ -3879,7 +3879,10 @@
         </xsl:variable>
 
         <xsl:for-each select="w:trPr[1]/w:gridBefore[1]/@w:val">
-            <xsl:call-template name="DisplayEmptyCell"><xsl:with-param name="i"><xsl:value-of select="."/></xsl:with-param></xsl:call-template>
+            <xsl:call-template name="DisplayEmptyCell">
+                <xsl:with-param name="i"><xsl:value-of select="."/></xsl:with-param>
+                <xsl:with-param name="table_celltype"><xsl:value-of select="$table_celltype"/></xsl:with-param>
+            </xsl:call-template>
         </xsl:for-each>
 
         <xsl:apply-templates select="*[not(name()='w:trPr')]">
@@ -3896,7 +3899,10 @@
         </xsl:apply-templates>
 
         <xsl:for-each select="w:trPr[1]/w:gridAfter[1]/@w:val">
-            <xsl:call-template name="DisplayEmptyCell"><xsl:with-param name="i"><xsl:value-of select="."/></xsl:with-param></xsl:call-template>
+            <xsl:call-template name="DisplayEmptyCell">
+                <xsl:with-param name="i"><xsl:value-of select="."/></xsl:with-param>
+                <xsl:with-param name="table_celltype"><xsl:value-of select="$table_celltype"/></xsl:with-param>
+            </xsl:call-template>
         </xsl:for-each>
         </tr>
     </xsl:template>

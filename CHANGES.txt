@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2017/01/05    3.5.15    Fix error when handling empty table cells
 2016/12/16    3.5.14    Improve RTL language support again
 2016/11/14    3.5.13    Improve localisation by adding more strings for use in Word template, improve RTL language support
 2016/11/05    3.5.12    Fix Hebrew support for True/False question import
