@@ -4071,7 +4071,6 @@
                 </xsl:if>
             </xsl:for-each>
 
-
             <xsl:for-each select="$sTblStyleName"><xsl:call-template name="ApplyPPr.many"/></xsl:for-each>
         </xsl:variable>
 
