@@ -252,7 +252,7 @@ class qformat_wordtable extends qformat_xml {
 
         // Pass 1 - convert WordML into linear XHTML.
         // Create a temporary file to store the merged WordML XML content to transform.
-        if (!($tempwordmlfilename = tempnam($CFG->dataroot . '/temp/', "w2q-"))) {
+        if (!($tempwordmlfilename = tempnam($CFG->tempdir . '/', "w2q-"))) {
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', basename($tempwordmlfilename)));
             return false;
         }
@@ -277,7 +277,7 @@ class qformat_wordtable extends qformat_xml {
         $xsltoutput = str_replace(' xmlns=""', '', $xsltoutput);
 
         // Write output of Pass 1 to a temporary file, for use in Pass 2.
-        $tempxhtmlfilename = $CFG->dataroot . '/temp/' . basename($tempwordmlfilename, ".tmp") . ".if1";
+        $tempxhtmlfilename = $CFG->tempdir . '/' . basename($tempwordmlfilename, ".tmp") . ".if1";
         if (($nbytes = file_put_contents($tempxhtmlfilename, $xsltoutput )) == 0) {
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempxhtmlfilename)));
             return false;
@@ -296,7 +296,7 @@ class qformat_wordtable extends qformat_xml {
         $xhtmlfragment = str_replace("\n", "", substr($xsltoutput, 600, 500));
 
         // Write the Pass 2 XHTML output to a temporary file.
-        $tempxhtmlfilename = $CFG->dataroot . '/temp/' . basename($tempwordmlfilename, ".tmp") . ".if2";
+        $tempxhtmlfilename = $CFG->tempdir . '/' . basename($tempwordmlfilename, ".tmp") . ".if2";
         $xhtmlfragment = "<pass3Container>\n" . $xsltoutput . $this->get_text_labels() . "\n</pass3Container>";
         if (($nbytes = file_put_contents($tempxhtmlfilename, $xhtmlfragment)) == 0) {
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempxhtmlfilename)));
@@ -322,7 +322,7 @@ class qformat_wordtable extends qformat_xml {
         $mmltextdirection = (right_to_left()) ? ' dir="rtl"' : '';
         $xsltoutput = str_replace('<math>', "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" $mmltextdirection>", $xsltoutput);
 
-        $tempmqxmlfilename = $CFG->dataroot . '/temp/' . basename($tempwordmlfilename, ".tmp") . ".xml";
+        $tempmqxmlfilename = $CFG->tempdir . '/' . basename($tempwordmlfilename, ".tmp") . ".xml";
         // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, including the HTML template too.
         if (($nbytes = file_put_contents($tempmqxmlfilename, $xsltoutput)) == 0) {
             echo $OUTPUT->notification(get_string('cannotwritetotempfile', 'qformat_wordtable', basename($tempmqxmlfilename)));
@@ -331,7 +331,7 @@ class qformat_wordtable extends qformat_xml {
 
         // Keep the original Word file for debugging if developer debugging enabled.
         if (debugging(null, DEBUG_WORDTABLE)) {
-            $copiedinputfile = $CFG->dataroot . '/temp/' . basename($tempwordmlfilename, ".tmp") . ".docx";
+            $copiedinputfile = $CFG->tempdir . '/' . basename($tempwordmlfilename, ".tmp") . ".docx";
             copy($filename, $copiedinputfile);
         }
 
@@ -398,7 +398,7 @@ class qformat_wordtable extends qformat_xml {
         }
 
         // Create a temporary file to store the XML content to transform.
-        if (!($tempxmlfilename = tempnam($CFG->dataroot . '/temp/', "q2w-"))) {
+        if (!($tempxmlfilename = tempnam($CFG->tempdir . '/', "q2w-"))) {
             echo $OUTPUT->notification(get_string('cannotopentempfile', 'qformat_wordtable', basename($tempxmlfilename)));
             return false;
         }
@@ -440,7 +440,7 @@ class qformat_wordtable extends qformat_xml {
         $this->debug_unlink($tempxmlfilename);
         $xhtmlfragment = str_replace("\n", "", substr($xsltoutput, 0, 200));
 
-        $tempxhtmlfilename = $CFG->dataroot . '/temp/' . basename($tempxmlfilename, ".tmp") . ".xhtm";
+        $tempxhtmlfilename = $CFG->tempdir . '/' . basename($tempxmlfilename, ".tmp") . ".xhtm";
         // Write the intermediate (Pass 1) XHTML contents to be transformed in Pass 2, this time including the HTML template too.
         $xmloutput = "<container>\n" . $xsltoutput . "\n<htmltemplate>\n" . file_get_contents($htmltemplatefilepath) .
                      "\n</htmltemplate>\n" . $this->get_text_labels() . "\n</container>";
