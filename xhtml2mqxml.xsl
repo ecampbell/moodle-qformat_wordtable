@@ -875,6 +875,7 @@
         <xsl:when test="starts-with($questionPenalty_percent, '25')">0.25</xsl:when>
         <xsl:when test="starts-with($questionPenalty_percent, '20')">0.2</xsl:when>
         <xsl:when test="starts-with($questionPenalty_percent, '10')">0.1</xsl:when>
+        <xsl:when test="starts-with($questionPenalty_percent, '0')">0.0000000</xsl:when>
         <xsl:otherwise>0.3333333</xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
