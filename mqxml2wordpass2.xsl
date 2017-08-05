@@ -444,6 +444,50 @@
 <!-- Delete the supplementary paragraphs containing images within each question component, as they are no longer needed -->
 <xsl:template match="htm:div[@class = 'ImageFile']"/>
 
+<!-- Handle Bootstrap Alert component divs -->
+<!-- Handle Bootstrap Alert component divs -->
+<xsl:template match="htm:div[starts-with(@class, 'alert')]/htm:p">
+    <xsl:variable name="alert_class">
+        <xsl:choose>
+        <xsl:when test="contains(../@class, 'alert-danger')">
+            <xsl:value-of select="'Danger'"/>
+        </xsl:when>
+        <xsl:when test="contains(../@class, 'alert-info')">
+            <xsl:value-of select="'Info'"/>
+        </xsl:when>
+        <xsl:when test="contains(../@class, 'alert-success')">
+            <xsl:value-of select="'Success'"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="'Warning'"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <xsl:comment><xsl:value-of select="concat('../@class = ', @class, '; alert_class: ', $alert_class)"/></xsl:comment>
+    <p class="{$alert_class}"><xsl:apply-templates/></p>
+</xsl:template>
+
+<xsl:template match="htm:div[starts-with(@class, 'alert')]">
+    <xsl:variable name="alert_class">
+        <xsl:choose>
+        <xsl:when test="contains(@class, 'alert-danger')">
+            <xsl:value-of select="'Danger'"/>
+        </xsl:when>
+        <xsl:when test="contains(@class, 'alert-info')">
+            <xsl:value-of select="'Info'"/>
+        </xsl:when>
+        <xsl:when test="contains(@class, 'alert-success')">
+            <xsl:value-of select="'Success'"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="'Warning'"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <xsl:comment><xsl:value-of select="concat('@class = ', @class, '; alert_class: ', $alert_class)"/></xsl:comment>
+    <p class="{$alert_class}"><xsl:apply-templates/></p>
+</xsl:template>
+
 <!-- Preserve comments for style definitions -->
 <xsl:template match="comment()">
     <xsl:comment><xsl:value-of select="."  /></xsl:comment>

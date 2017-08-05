@@ -540,6 +540,11 @@
         <p class="figure-caption"><xsl:apply-templates/></p>
     </xsl:template>
 
+    <!-- Process Bootstrap Alert components -->
+    <xsl:template match="x:p[@class = 'danger' or @class = 'info' or @class = 'success' or @class = 'warning']">
+        <div class="{concat('alert alert-', @class)}"><p><xsl:apply-templates/></p></div>
+    </xsl:template>
+
     <!-- Strip out VML/drawingML markup from Word 2010 files (cf. http://officeopenxml.com/drwOverview.php)-->
     <xsl:template match="mc:AlternateContent|m:ctrlPr"/>
 
