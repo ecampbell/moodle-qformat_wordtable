@@ -100,7 +100,7 @@ class qformat_wordtable_export_test extends question_testcase {
 <td style="width: 1.0cm"><p class="Cell"></p></td></tr>
 <tr>
 <td colspan="3" style="width: 12.0cm"><p class="Cell">' .
-        '<i>This is not actually a question. ' . 
+        '<i>This is not actually a question. ' .
         'Instead it is a way to add some instructions, rubric or other content to the activity. ' .
         'This is similar to the way that labels can be used to add content to the course page.</i></p></td>
 <td style="width: 1.0cm"><p class="Cell"></p></td></tr>
