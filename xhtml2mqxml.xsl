@@ -816,7 +816,7 @@
         <xsl:when test="$answerNumbering_flag = 'A'">ABCD</xsl:when>
         <xsl:when test="$answerNumbering_flag = 'a'">abc</xsl:when>
         <xsl:when test="$answerNumbering_flag = 'i'">iii</xsl:when>
-        <xsl:when test="$answerNumbering_flag = 'I'">III</xsl:when>
+        <xsl:when test="$answerNumbering_flag = 'I'">IIII</xsl:when>
         <xsl:when test="$answerNumbering_flag = '1'">123</xsl:when>
         <xsl:otherwise>none</xsl:otherwise>
         </xsl:choose>

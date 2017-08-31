@@ -445,7 +445,6 @@
 <xsl:template match="htm:div[@class = 'ImageFile']"/>
 
 <!-- Handle Bootstrap Alert component divs -->
-<!-- Handle Bootstrap Alert component divs -->
 <xsl:template match="htm:div[starts-with(@class, 'alert')]/htm:p">
     <xsl:variable name="alert_class">
         <xsl:choose>
