@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2017/08/31    3.5.20    Don't raise the memory limit for XSLT any more, fix roman uppercase numbering import bug
 2017/08/14    3.5.19    Handle list item duplication bug inside adjacent table cells
 2017/08/06    3.5.18    Handle Bootstrap Alert components
 2017/05/21    3.5.17    Handle penalty value of 0% on multiple tries

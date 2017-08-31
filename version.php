@@ -25,9 +25,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
  **/
 
-$plugin->version   = 2017081401;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2017083101;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
-$plugin->release  = '3.5.19 (Build: 2017081401)';  // The current module release in human-readable form (x.y).
+$plugin->release  = '3.5.20 (Build: 2017083101)';  // The current module release in human-readable form (x.y).
 $plugin->requires = 2011070100.03;  // Requires Moodle 2.1 or later.
 $plugin->cron     = 0;           // Period for cron to check this module (secs).
