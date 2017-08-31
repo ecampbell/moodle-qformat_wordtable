@@ -112,8 +112,9 @@ class qformat_wordtable extends qformat_xml {
         // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": Word file = $realfilename; path = '$filename'", DEBUG_WORDTABLE);
         $basefilename = basename($filename);
         $baserealfilename = basename($realfilename);
-        // Give XSLT as much memory as possible, to enable larger Word files to be imported.
-        raise_memory_limit(MEMORY_HUGE);
+
+        // Uncomment next line to give XSLT as much memory as possible, to enable larger Word files to be imported.
+        // raise_memory_limit(MEMORY_HUGE);
 
         // Check that the file is in Word 2010 format, not HTML, XML, or Word 2003.
         if ((substr($realfilename, -3, 3) == 'doc')) {
