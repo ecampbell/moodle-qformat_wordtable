@@ -34,6 +34,8 @@
  */
 
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once("$CFG->libdir/xmlize.php");
 require_once($CFG->dirroot.'/lib/uploadlib.php');
 
@@ -156,7 +158,7 @@ class qformat_wordtable extends qformat_xml {
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
             'pluginname' => 'qformat_wordtable',
-            'heading1stylelevel' => '1', // Default HTML heading element level for 'Heading 1' Word style
+            'heading1stylelevel' => '1', // Default HTML heading element level for 'Heading 1' Word style.
             'debug_flag' => DEBUG_WORDTABLE
             );
 

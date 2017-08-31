@@ -25,6 +25,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
  **/
 
+
+defined('MOODLE_INTERNAL') || die();
+
 $plugin->version   = 2017083101;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
