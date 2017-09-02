@@ -592,7 +592,7 @@
         <!-- Handle any hints that are included, 3 or 4 (MS, DDM) rows for each successive hint -->
         <xsl:if test="$moodleReleaseNumber &gt; '19'">
             <xsl:variable name="hintn_prefix" select="normalize-space(substring-before($hintn_label, '{no}'))"/>
-            <xsl:for-each select="$table_root/x:tbody/x:tr[starts-with(x:th, $hintn_prefix)]">
+            <xsl:for-each select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $hintn_prefix)]">
                 <xsl:variable name="current_hint_row_num" select="position()"/>
                 <xsl:variable name="hint_text_norm" select="normalize-space(x:td[position() = $hints_colnum])"/>
                 <xsl:if test="$hint_text_norm != '' and $hint_text_norm != '&#160;' and $hint_text_norm != '_'">
@@ -602,11 +602,9 @@
                         </xsl:call-template>
 
                         <!-- Get the 1st row following the hint, check that it has the correct label, defining the handling of the hint (show number of parts correct) -->
-                        <xsl:variable name="hint_sncf_cell" select="following-sibling::x:tr[1]/x:th"/>
-                        <xsl:variable name="hint_sncf_cell_norm" select="normalize-space($hint_sncf_cell)"/>
-                        <xsl:variable name="hint_sncf_cell_lc" select="translate($hint_sncf_cell_norm, $ucase, $lcase)"/>
+                        <xsl:variable name="hint_sncf_cell" select="normalize-space(following-sibling::x:tr[1]/x:th)"/>
+                        <xsl:variable name="hint_sncf_cell_lc" select="translate($hint_sncf_cell, $ucase, $lcase)"/>
                         <xsl:variable name="current_hint_shownumcorrect_flag">
-
                             <xsl:if test="starts-with($hint_sncf_cell_lc, translate($hint_shownumcorrect_label, $ucase, $lcase))">
                                 <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[1]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
                             </xsl:if>
