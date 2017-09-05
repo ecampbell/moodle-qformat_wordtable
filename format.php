@@ -116,7 +116,7 @@ class qformat_wordtable extends qformat_xml {
         $baserealfilename = basename($realfilename);
 
         // Uncomment next line to give XSLT as much memory as possible, to enable larger Word files to be imported.
-        // raise_memory_limit(MEMORY_HUGE);
+        // @codingStandardsIgnoreLine raise_memory_limit(MEMORY_HUGE);
 
         // Check that the file is in Word 2010 format, not HTML, XML, or Word 2003.
         if ((substr($realfilename, -3, 3) == 'doc')) {
@@ -225,14 +225,10 @@ class qformat_wordtable extends qformat_xml {
                                 break;
                             case "word/_rels/footnotes.xml.rels" . $xmlfiledata . "</footnoteLinks>\n";
                                 break;
-                            /* @codingStandardsIgnoreStart
-                            case "word/_rels/settings.xml.rels":
-                                $wordmldata .= "<settingsLinks>" . $xmlfiledata . "</settingsLinks>\n";
-                                break;
-                            default:
-                                debugging(__FUNCTION__ . ":" . __LINE__ . ": Ignore '$zefilename'", DEBUG_WORDTABLE);
-                                @codingStandardsIgnoreEnd
-                            */
+                            // @codingStandardsIgnoreLine case "word/_rels/settings.xml.rels":
+                                // @codingStandardsIgnoreLine $wordmldata .= "<settingsLinks>" . $xmlfiledata . 
+                                // @codingStandardsIgnoreLine "</settingsLinks>\n";
+                                // @codingStandardsIgnoreLine break;
                         }
                     }
                 } else { // Can't read the file from the Word .docx file.
