@@ -27,6 +27,7 @@
 $string['pluginname'] = 'Microsoft Word 2010 table format (wordtable)';
 $string['pluginname_help'] = 'This is a front-end for converting Microsoft Word 2010 files into Moodle Question XML format for import, and converting Moodle Question XML format into a format suitable for editing in Microsoft Word.';
 $string['pluginname_link'] = 'qformat/wordtable';
+$string['privacy:metadata'] = 'The WordTable question format plugin does not store any personal data.';
 $string['wordtable'] = 'Microsoft Word 2010 table format (wordtable)';
 $string['wordtable_help'] = 'This is a front-end for converting Microsoft Word 2010 files into Moodle Question XML format for import, and converting Moodle Question XML format into an enhanced XHTML format for exporting into a format suitable for editing in Microsoft Word.';
 $string['noquestions'] = 'No questions to export';

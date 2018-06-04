@@ -15,22 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Code fragment to define the version of wordtable for Moodle 2.x
- *
- * This fragment is called by moodle_needs_upgrading() and /admin/index.php
+ * Privacy Subsystem implementation for qformat_wordtable.
  *
  * @package    qformat_wordtable
- * @copyright  2010-2016 Eoin Campbell
- * @author     Eoin Campbell
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
- **/
+ * @copyright  2018 Eoin Campbell
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
+namespace qformat_wordtable\privacy;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2018060401;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->maturity  = MATURITY_STABLE;  // Maturity level.
-$plugin->component  = 'qformat_wordtable';  // Plugin name.
-$plugin->release  = '3.5.22 (Build: 2018060401)';  // The current module release in human-readable form (x.y).
-$plugin->requires = 2011070100.03;  // Requires Moodle 2.1 or later.
-$plugin->cron     = 0;           // Period for cron to check this module (secs).
+/**
+ * Privacy Subsystem for qformat_wordtable implementing null_provider.
+ *
+ * @copyright  2018 Eoin Campbell
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
