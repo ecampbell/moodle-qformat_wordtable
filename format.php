@@ -576,7 +576,13 @@ class qformat_wordtable extends qformat_xml {
         foreach ($textstrings as $typegroup => $grouparray) {
             foreach ($grouparray as $stringid) {
                 $namestring = $typegroup . '_' . $stringid;
-                $expout .= '<data name="' . $namestring . '"><value>' . get_string($stringid, $typegroup) . "</value></data>\n";
+                // Clean up question type explanation, in case the default text has been overridden on the site.
+                if ($stringid == 'pluginnamesummary') {
+                    $cleantext = $this->convert_to_xml(get_string($stringid, $typegroup));
+                } else {
+                    $cleantext = get_string($stringid, $typegroup);
+                }
+                $expout .= '<data name="' . $namestring . '"><value>' . $cleantext . "</value></data>\n";
             }
         }
         $expout .= "</moodlelabels>";
@@ -611,7 +617,7 @@ class qformat_wordtable extends qformat_xml {
         for ($i = 0; $i < $numquestions; $i++) {
             $qtype = $questionmatches[$i][2];
             $questioncontent = $questionmatches[$i][3];
-            // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i", DEBUG_WORDTABLE);
+            // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": Processing question " . $i, DEBUG_WORDTABLE);
             // Split the question into chunks at CDATA boundaries, using ungreedy (?) and matching across newlines (s modifier).
             $foundcdatasections = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $questioncontent, $cdatamatches, PREG_SET_ORDER);
             // @codingStandardsIgnoreStart
@@ -664,26 +670,7 @@ class qformat_wordtable extends qformat_xml {
         // @codingStandardsIgnoreLine debugging(__FUNCTION__ . "(cdatastring = \"" . substr($cdatastring, 0, 100) . "\")", DEBUG_WORDTABLE);
 
         // Escape double minuses, which cause XSLT processing to fail.
-        $cdatastring = str_replace("--", "WordTableMinusMinus", $cdatastring);
-
-        // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML.
-        $doc = new DOMDocument();
-        libxml_use_internal_errors(true);
-        $doc->loadHTML('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><html><body>' . $cdatastring . '</body></html>');
-        $doc->getElementsByTagName('html')->item(0)->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-        $xml = $doc->saveXML();
-        // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": xml: |" . substr(str_replace("\n", "", $xml), 250) . "|", DEBUG_WORDTABLE);
-
-        $bodystart = stripos($xml, '<body>') + strlen('<body>');
-        $bodylength = strripos($xml, '</body>') - $bodystart;
-        // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": bodystart = {$bodystart}, bodylength = {$bodylength}", DEBUG_WORDTABLE);
-        if ($bodystart || $bodylength) {
-            $cleanxhtml = substr($xml, $bodystart, $bodylength);
-            // @codingStandardsIgnoreLine debugging(__FUNCTION__ . ":" . __LINE__ . ": clean xhtml: |" . $cleanxhtml . "|", DEBUG_WORDTABLE);
-        } else {
-            // @codingStandardsIgnoreLine debugging(__FUNCTION__ . "() -> Invalid XHTML, using original cdata string", DEBUG_WORDTABLE);
-            $cleanxhtml = $cdatastring;
-        }
+        $cleanxhtml = $this->convert_to_xml($cdatastring);
 
         // Fix up filenames after @@PLUGINFILE@@ to replace URL-encoded characters with ordinary characters.
         $foundpluginfilenames = preg_match_all('~(.*?)<img src="@@PLUGINFILE@@/([^"]*)(.*)~s', $cleanxhtml,
@@ -703,9 +690,39 @@ class qformat_wordtable extends qformat_xml {
 
         // Strip soft hyphens (0xAD, or decimal 173).
         $cleanxhtml = preg_replace('/\xad/u', '', $cleanxhtml);
-
         // @codingStandardsIgnoreLine debugging(__FUNCTION__ . "() -> |" . str_replace("\n", "", substr($cleanxhtml, 0, 100)) . " ...|", DEBUG_WORDTABLE);
         return $cleanxhtml;
     }
 
+    /**
+     * Convert content into well-formed XML
+     *
+     * A string containing clean XHTML is returned
+     *
+     * @param string $cdatastring XHTML from questions or help text
+     * @return string well-formed XML
+     */
+    private function convert_to_xml($cdatastring) {
+
+        // Escape double minuses, which cause XSLT processing to fail.
+        $cdatastring = str_replace("--", "WordTableMinusMinus", $cdatastring);
+
+        // Wrap the string in a HTML wrapper, load it into a new DOM document as HTML, but save as XML.
+        $doc = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $doc->loadHTML('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><html><body>' . $cdatastring . '</body></html>');
+        $doc->getElementsByTagName('html')->item(0)->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+        $xml = $doc->saveXML();
+
+        $bodystart = stripos($xml, '<body>') + strlen('<body>');
+        $bodylength = strripos($xml, '</body>') - $bodystart;
+
+        if ($bodystart || $bodylength) {
+            $cleanxhtml = substr($xml, $bodystart, $bodylength);
+        } else {
+            $cleanxhtml = $cdatastring;
+        }
+
+        return $cleanxhtml;
+    }
 }

@@ -1,22 +1,23 @@
 # Change log
 
 Date          Version   Comment
-2018/06/04    3.5.22    Support Privacy API for GDPR compliance
-2017/09/02    3.5.21    Fix handling of hints
-2017/08/31    3.5.20    Don't raise the memory limit for XSLT any more, fix roman uppercase numbering import bug
+2018/08/03    3.5.23    Clean Moodle question type explanatory text XHTML exported to Word, for more robust operation.
+2018/06/04    3.5.22    Support Privacy API for GDPR compliance.
+2017/09/02    3.5.21    Fix handling of hints.
+2017/08/31    3.5.20    Don't raise the memory limit for XSLT any more, fix roman uppercase numbering import bug.
 2017/08/14    3.5.19    Handle list item duplication bug inside adjacent table cells
-2017/08/06    3.5.18    Handle Bootstrap Alert components
-2017/05/21    3.5.17    Handle penalty value of 0% on multiple tries
-2017/04/17    3.5.16    Use canonical reference to temp directory, start using PHPStorm IDE
-2017/01/05    3.5.15    Fix error when handling empty table cells
-2016/12/16    3.5.14    Improve RTL language support again
-2016/11/14    3.5.13    Improve localisation by adding more strings for use in Word template, improve RTL language support
-2016/11/05    3.5.12    Fix Hebrew support for True/False question import
-2016/11/02    3.5.11    Replace "<br>" with "<br/>" in the Moodle text strings used for exporting Word files (for Polish issue)
-2016/10/31    3.5.10    Retain table border style, handle WMF images better, support pre-formatted text
-2016/09/09    3.5.9     Strip out OfficeMath revision control markup from Word 2010 files
-2016/09/08    3.5.8     Strip out VML/drawingML markup from Word 2010 files
-2016/06/12    3.5.7     Fix equation problem, improve table handling and Cloze question formatting
+2017/08/06    3.5.18    Handle Bootstrap Alert components.
+2017/05/21    3.5.17    Handle penalty value of 0% on multiple tries.
+2017/04/17    3.5.16    Use canonical reference to temp directory, start using PHPStorm IDE.
+2017/01/05    3.5.15    Fix error when handling empty table cells.
+2016/12/16    3.5.14    Improve RTL language support again.
+2016/11/14    3.5.13    Improve localisation by adding more strings for use in Word template, improve RTL language support.
+2016/11/05    3.5.12    Fix Hebrew support for True/False question import.
+2016/11/02    3.5.11    Replace "<br>" with "<br/>" in the Moodle text strings used for exporting Word files (for Polish issue).
+2016/10/31    3.5.10    Retain table border style, handle WMF images better, support pre-formatted text.
+2016/09/09    3.5.9     Strip out OfficeMath revision control markup from Word 2010 files.
+2016/09/08    3.5.8     Strip out VML/drawingML markup from Word 2010 files.
+2016/06/12    3.5.7     Fix equation problem, improve table handling and Cloze question formatting.
 2016/01/14    3.5.6     Add PHPUnit tests for exports, remove debugging.
 2016/01/08    3.5.5     Fix incorrect conversion of Cloze text.
 2016/01/05    3.5.4     Improve handling of exported images to avoid bookmark name clashes.
