@@ -978,7 +978,18 @@
             <xsl:text>&#x0a;</xsl:text>
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$idnumber_label"/></p></td>
-                <td style="width: 1.0cm"><p class="QFID"><xsl:value-of select="$idnumber_value"/></p></td>
+                <td style="width: 1.0cm">
+                    <p class="QFID">
+                        <xsl:choose>
+                        <xsl:when test="$idnumber != ''">
+                            <xsl:value-of select="$idnumber_value"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="$blank_cell"/>
+                        </xsl:otherwise>
+                        </xsl:choose>
+                    </p>
+                </td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if> <!-- 2.x Essay-specific question fields -->
