@@ -137,6 +137,7 @@
     </xsl:choose>
 </xsl:variable>
 <xsl:variable name="tags_label" select="concat($moodle_labels/data[@name = 'moodle_tags'], $colon_string)"/>
+<xsl:variable name="idnumber_label" select="concat($moodle_labels/data[@name = 'question_idnumber'], $colon_string)"/>
 
 <xsl:variable name="matching_shuffle_label" select="concat($moodle_labels/data[@name = 'quiz_shuffle'], $colon_string)"/>
 <xsl:variable name="mcq_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_multichoice_shuffleanswers']"/>

@@ -126,7 +126,7 @@
 <xsl:variable name="quiz_shuffle_label" select="$moodle_labels/data[@name = 'quiz_shuffle']"/>
 <xsl:variable name="answernumbering_label" select="$moodle_labels/data[@name = 'qtype_multichoice_answernumbering']"/>
 
-<!-- ID Number (Moodle 3.6+ -->
+<!-- ID Number (Moodle 3.6+) -->
 <xsl:variable name="idnumber_label" select="$moodle_labels/data[@name = 'question_idnumber']"/>
 
 
@@ -788,7 +788,7 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- Get the text value of the shuffle answers flag, to compare it with Yes or No on the required language --> 
+    <!-- Get the text value of the shuffle answers flag, to compare it with Yes or No in the required language --> 
     <xsl:variable name="shuffleAnswers_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $shuffle_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
     <!-- Shuffle the answers (MA/MC/MAT): Use the values true/false for Moodle 2.x and 0/1 for Moodle 1.9 -->
     <xsl:variable name="shuffleAnswers_value">
@@ -809,6 +809,14 @@
             <xsl:text>true</xsl:text>
         </xsl:otherwise>
         </xsl:choose>
+    </xsl:variable>
+
+    <!-- Get the text value of the ID number field --> 
+    <xsl:variable name="idnumber_string" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $idnumber_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
+    <xsl:variable name="idnumber_value">
+        <xsl:if test="($idnumber_string != '' and $idnumber_string != '&#160;'">
+            <xsl:value-of select="$idnumber_string"/>
+        </xsl:if>
     </xsl:variable>
 
     <!-- Answer numbering format field -->
@@ -987,6 +995,9 @@
     </xsl:call-template>
     <penalty><xsl:value-of select="$questionPenalty_value"/></penalty>
     <hidden>0</hidden>
+    <xsl:if test="$moodleReleaseNumber &gt;= '36'">
+        <idnumber><xsl:value-of select="$idnumber_value"/></idnumber>
+    </xsl:if>
 
     <!-- Specific metadata for each question type -->
     <xsl:choose>
