@@ -71,6 +71,7 @@ $string['word_convert_images'] = 'Convert Images';
 $string['word_convert_images_screentip'] = 'Import image data in exported questions';
 $string['word_convert_images_supertip'] = 'Embed images into Word file';
 $string['word_currentquestion'] = ' (Current Question)';
+$string['word_gapselect_supertip'] = 'Warning: customised Select missing words Moodle plugin required for this question type.';
 $string['word_import_screentip'] = 'Upload and import all the questions to your Moodle server';
 $string['word_import_mathtype'] = 'Import MathType Images';
 $string['word_import_mathtype_screentip'] = 'Import MathType Equation images';

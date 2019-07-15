@@ -517,7 +517,7 @@ class qformat_wordtable extends qformat_xml {
                             'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
             'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
             'qtype_truefalse' => array('false', 'true'),
-            'question' => array('category', 'clearwrongparts', 'defaultmark', 'generalfeedback', 'hintn',
+            'question' => array('category', 'clearwrongparts', 'defaultmark', 'generalfeedback', 'idnumber', 'hintn',
                             'penaltyforeachincorrecttry', 'questioncategory', 'shownumpartscorrect',
                             'shownumpartscorrectwhenfinished'),
             'quiz' => array('answer', 'answers', 'casesensitive', 'correct', 'correctanswers',

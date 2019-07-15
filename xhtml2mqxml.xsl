@@ -126,6 +126,10 @@
 <xsl:variable name="quiz_shuffle_label" select="$moodle_labels/data[@name = 'quiz_shuffle']"/>
 <xsl:variable name="answernumbering_label" select="$moodle_labels/data[@name = 'qtype_multichoice_answernumbering']"/>
 
+<!-- ID Number (Moodle 3.6+ -->
+<xsl:variable name="idnumber_label" select="$moodle_labels/data[@name = 'question_idnumber']"/>
+
+
 <!-- Generic feedback labels -->
 <xsl:variable name="correctfeedback_label" select="$moodle_labels/data[@name = 'qtype_multichoice_correctfeedback']"/>
 <xsl:variable name="feedback_label" select="$moodle_labels/data[@name = 'moodle_feedback']"/>
@@ -1055,10 +1059,10 @@
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
         <answernumbering><xsl:value-of select="$answerNumbering_value"/></answernumbering>
     </xsl:when>
-    <xsl:when test="$qtype = 'MAT'">
+    <xsl:when test="$qtype = 'MAT' or $qtype = 'MW'">
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
     </xsl:when>
-    <xsl:when test="($qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT' or $qtype = 'MW') and $shuffleAnswers_value = 'true'">
+    <xsl:when test="($qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT') and $shuffleAnswers_value = 'true'">
 
         <shuffleanswers/>
     </xsl:when>

@@ -140,6 +140,7 @@
 
 <xsl:variable name="matching_shuffle_label" select="concat($moodle_labels/data[@name = 'quiz_shuffle'], $colon_string)"/>
 <xsl:variable name="mcq_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_multichoice_shuffleanswers']"/>
+<xsl:variable name="gapselect_shuffle_label" select="concat($moodle_labels/data[@name = 'qtype_gapselect_shuffle'], $colon_string)"/>
 <xsl:variable name="answernumbering_label" select="$moodle_labels/data[@name = 'qtype_multichoice_answernumbering']"/>
 
 <!-- Per-question feedback labels -->
@@ -461,6 +462,8 @@
         </xsl:choose>
     </xsl:variable>
 
+    <xsl:variable name="idnumber_value" value="idnumber"/>
+
     <xsl:variable name="showmisplaced_flag">
         <xsl:choose>
         <!-- shuffleanswers element might be duplicated in XML, or contain either 'true' or '1', so allow for these possibilities -->
@@ -735,6 +738,13 @@
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
+        <xsl:if test="$qtype = 'MW'">
+            <tr>
+                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$gapselect_shuffle_label"/></p></td>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$shuffleanswers_flag"/></p></td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+        </xsl:if>
         <xsl:if test="$qtype = 'DDI' or $qtype = 'DDM'">
             <tr>
                 <td colspan="3" style="width: 12.0cm">
@@ -961,6 +971,16 @@
             </tr>
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
+
+        <!-- New 2nd last heading row: optional ID number -->
+        <xsl:if test="$moodle_release_number &gt;= '36'">
+            <xsl:text>&#x0a;</xsl:text>
+            <tr>
+                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$idnumber_label"/></p></td>
+                <td style="width: 1.0cm"><p class="QFID"><xsl:value-of select="$idnumber_value"/></p></td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+        </xsl:if> <!-- 2.x Essay-specific question fields -->
 
         <!-- Last heading row: column headings for table body -->
         <tr>
