@@ -811,10 +811,10 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- Get the text value of the ID number field --> 
-    <xsl:variable name="idnumber_string" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $idnumber_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
+    <!-- Get the text value of the ID number field  -->
+    <xsl:variable name="idnumber_string" select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $idnumber_label)]/x:th[position() = $flag_value_colnum])"/>
     <xsl:variable name="idnumber_value">
-        <xsl:if test="($idnumber_string != '' and $idnumber_string != '&#160;'">
+        <xsl:if test="$idnumber_string != '' and $idnumber_string != '&#160;'">
             <xsl:value-of select="$idnumber_string"/>
         </xsl:if>
     </xsl:variable>
