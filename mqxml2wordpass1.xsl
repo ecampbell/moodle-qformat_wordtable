@@ -463,7 +463,7 @@
         </xsl:choose>
     </xsl:variable>
 
-    <xsl:variable name="idnumber_value" value="idnumber"/>
+    <xsl:variable name="idnumber_value" select="idnumber"/>
 
     <xsl:variable name="showmisplaced_flag">
         <xsl:choose>
@@ -981,7 +981,7 @@
                 <td style="width: 1.0cm">
                     <p class="QFID">
                         <xsl:choose>
-                        <xsl:when test="$idnumber != ''">
+                        <xsl:when test="$idnumber_value != ''">
                             <xsl:value-of select="$idnumber_value"/>
                         </xsl:when>
                         <xsl:otherwise>
