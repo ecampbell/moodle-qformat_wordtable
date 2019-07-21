@@ -279,8 +279,8 @@
 <xsl:variable name="multichoiceset_showeachfeedback_label" select="$moodle_labels/data[@name = 'qtype_multichoiceset_showeachanswerfeedback']"/>
 <xsl:variable name="multichoiceset_instructions" select="$moodle_labels/data[@name = 'qtype_multichoiceset_pluginnamesummary']"/>
 
-<!-- Multichoice Set (All-or-Nothing Multichoice) question labels -->
-<xsl:variable name="missingword_instructions" select="$moodle_labels/data[@name = 'qtype_gapselect_pluginnamesummary']"/>
+<!-- Gapselect (Select missing word) question labels -->
+<xsl:variable name="missingword_instructions" select="$moodle_labels/data[@name = 'qtype_gapselect_errornoslots']"/>
 <xsl:variable name="group_label" select="$moodle_labels/data[@name = 'qtype_gapselect_group']"/>
 
 <!-- Short Answer question labels -->
@@ -615,7 +615,6 @@
     <!-- Instruction text for each question type -->
     <xsl:variable name="instruction_text">
         <xsl:choose>
-        <xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$ddm_instructions"/></xsl:when>
         <xsl:when test="$qtype = 'DDT'"><xsl:value-of select="$ddt_instructions"/></xsl:when>
@@ -1341,7 +1340,19 @@
 
         <!-- Instructions row for each question type -->
         <tr>
-            <td colspan="3" style="width: 12.0cm"><p class="Cell"><i><xsl:value-of select="$instruction_text"/></i></p></td>
+            <td colspan="3" style="width: 12.0cm">
+            <xsl:choose>
+            <xsl:when test="$qtype = 'CL'">
+                <p class="Cell">
+                    <xsl:apply-templates select="$moodle_labels/data[@name = 'qformat_wordtable_cloze_instructions']"/>
+                </p>
+            </xsl:when>
+            <xsl:otherwise>
+                <p class="Cell"><i><xsl:value-of select="$instruction_text"/></i></p>
+            </xsl:otherwise>
+            </xsl:choose>
+            
+            </td>
             <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
         </tr>
         <xsl:text>&#x0a;</xsl:text>

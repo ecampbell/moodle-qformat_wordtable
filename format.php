@@ -558,7 +558,7 @@ class qformat_wordtable extends qformat_xml {
         }
         // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('gapselect', false))) {
-            $textstrings['qtype_gapselect'] = array('pluginnamesummary', 'group', 'shuffle');
+            $textstrings['qtype_gapselect'] = array('pluginnamesummary', 'errornoslots', 'group', 'shuffle');
         }
         // Add 'Drag and drop onto image' question type, added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('ddimageortext', false))) {
