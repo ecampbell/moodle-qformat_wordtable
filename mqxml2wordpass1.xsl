@@ -165,7 +165,7 @@
 <!-- Default feedback text (2.5+ only) -->
 <xsl:variable name="correctfeedback_default">
     <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt; '24'">
+    <xsl:when test="$moodle_release_number &gt;= '25'">
         <xsl:value-of select="$moodle_labels/data[@name = 'question_correctfeedbackdefault']"/>
     </xsl:when>
     <xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is correct'"/></xsl:when>
@@ -175,7 +175,7 @@
 </xsl:variable>
 <xsl:variable name="incorrectfeedback_default">
     <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt; '24'">
+    <xsl:when test="$moodle_release_number &gt;= '25'">
         <xsl:value-of select="$moodle_labels/data[@name = 'question_incorrectfeedbackdefault']"/>
     </xsl:when>
     <xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is incorrect'"/></xsl:when>
@@ -185,7 +185,7 @@
 </xsl:variable>
 <xsl:variable name="pcorrectfeedback_default">
     <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt; '24'">
+    <xsl:when test="$moodle_release_number &gt;= '25'">
         <xsl:value-of select="$moodle_labels/data[@name = 'question_partiallycorrectfeedbackdefault']"/>
     </xsl:when>
     <xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is partially correct'"/></xsl:when>
@@ -210,6 +210,13 @@
 </xsl:variable>
 
 <!-- Essay question labels -->
+<xsl:variable name="acceptedfiletypes_label">
+    <xsl:choose>
+    <xsl:when test="$moodle_release_number &gt;= '35'">
+        <xsl:value-of select="concat($moodle_labels/data[@name = 'qtype_essay_acceptedfiletypes'], $colon_string)"/>
+    </xsl:when>
+    </xsl:choose>
+</xsl:variable>
 <xsl:variable name="allowattachments_label" select="concat($moodle_labels/data[@name = 'qtype_essay_allowattachments'], $colon_string)"/>
 <xsl:variable name="attachmentsoptional_label" select="concat($moodle_labels/data[@name = 'qtype_essay_attachmentsoptional'], $colon_string)"/>
 <xsl:variable name="attachmentsrequired_label" select="concat($moodle_labels/data[@name = 'qtype_essay_attachmentsrequired'], $colon_string)"/>
@@ -231,6 +238,14 @@
     <xsl:choose>
     <xsl:when test="$moodle_release_number = '19'">
         <xsl:value-of select="$moodle_labels/data[@name = 'moodle_formatplain']"/>
+    </xsl:when>
+    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_formatplain']"/></xsl:otherwise>
+    </xsl:choose>
+</xsl:variable>
+<xsl:variable name="format_noinline_label">
+    <xsl:choose>
+    <xsl:when test="$moodle_release_number &gt;= '27'">
+        <xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_formatnoinline']"/>
     </xsl:when>
     <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_formatplain']"/></xsl:otherwise>
     </xsl:choose>
@@ -510,7 +525,7 @@
         <xsl:choose>
         <xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_distractor_column_label"/></xsl:when>
         <xsl:when test="$qtype = 'DE'"><xsl:value-of select="$blank_cell"/></xsl:when>
-        <xsl:when test="$qtype = 'ES' and $moodle_release_number &gt; '24'"><xsl:value-of select="$responsetemplate_label"/></xsl:when>
+        <xsl:when test="$qtype = 'ES' and $moodle_release_number &gt;= '25'"><xsl:value-of select="$responsetemplate_label"/></xsl:when>
         <xsl:when test="$qtype = 'ES'"><xsl:value-of select="$blank_cell"/></xsl:when>
         <xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$question_label"/></xsl:when>
         <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_draggableitem_label"/></xsl:when>
@@ -778,7 +793,7 @@
         </xsl:if>
 
         <!-- Essay questions in Moodle 2.x have 3 specific fields, for Response field format, Attachments, and Number of lines -->
-        <xsl:if test="$qtype = 'ES' and $moodle_release_number &gt; '19'">
+        <xsl:if test="$qtype = 'ES' and $moodle_release_number &gt;= '20'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responseformat_label"/></p></td>
                 <td style="width: 1.0cm">
@@ -792,6 +807,9 @@
                         </xsl:when>
                         <xsl:when test="responseformat = 'plain'">
                             <xsl:value-of select="$format_plain_label"/>
+                        </xsl:when>
+                        <xsl:when test="responseformat = 'noinline'">
+                            <xsl:value-of select="$format_noinline_label"/>
                         </xsl:when>
                         <xsl:when test="responseformat = 'editor'">
                             <xsl:value-of select="$format_html_label"/>
@@ -808,7 +826,7 @@
                         <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'html'">
                             <xsl:value-of select="$format_html_label"/>
                         </xsl:when>
-                        <xsl:otherwise><xsl:value-of select="$format_editor_label"/></xsl:otherwise>
+                        <xsl:otherwise><xsl:value-of select="$format_editorfilepicker_label"/></xsl:otherwise>
                         </xsl:choose>
                     </p>
                 </td>
@@ -879,6 +897,25 @@
                                 <xsl:value-of select="attachmentsrequired"/>
                             </xsl:when>
                             <xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+                            </xsl:choose>
+                        </p>
+                    </td>
+                </tr>
+                <xsl:text>&#x0a;</xsl:text>
+            </xsl:if>
+
+            <!-- Essays: accepted file types field -->
+            <xsl:if test="$moodle_release_number &gt;= '35'">
+                <xsl:text>&#x0a;</xsl:text>
+                <tr>
+                    <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$acceptedfiletypes_label"/></p></td>
+                    <td style="width: 1.0cm">
+                        <p class="Cell">
+                            <xsl:choose>
+                            <xsl:when test="acceptedfiletypes">
+                                <xsl:value-of select="acceptedfiletypes"/>
+                            </xsl:when>
+                            <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
                             </xsl:choose>
                         </p>
                     </td>

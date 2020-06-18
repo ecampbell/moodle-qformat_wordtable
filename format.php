@@ -546,6 +546,12 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['qtype_essay'][] = 'responserequired';
             $textstrings['qtype_essay'][] = 'responseisrequired';
             $textstrings['qtype_essay'][] = 'responsenotrequired';
+            $textstrings['qtype_essay'][] = 'formatnoinline';
+
+        }
+        if ($CFG->release >= '3.5') {
+            // Add support for new Essay accepted file type added in Moodle 3.5.
+            $textstrings['qtype_essay'][] = 'acceptedfiletypes';
         }
         if ($CFG->release >= '3.6') {
             // Add support for new optional ID number field added in Moodle 3.6.

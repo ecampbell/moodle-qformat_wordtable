@@ -141,6 +141,7 @@
 <xsl:variable name="description_instructions" select="$moodle_labels/data[@name = 'qtype_description_pluginnamesummary']"/>
 
 <!-- Essay question labels -->
+<xsl:variable name="acceptedfiletypes_label" select="$moodle_labels/data[@name = 'qtype_essay_acceptedfiletypes']"/>
 <xsl:variable name="allowattachments_label" select="$moodle_labels/data[@name = 'qtype_essay_allowattachments']"/>
 <xsl:variable name="attachmentsrequired_label" select="$moodle_labels/data[@name = 'qtype_essay_attachmentsrequired']"/>
 <xsl:variable name="graderinfo_label" select="$moodle_labels/data[@name = 'qtype_essay_graderinfo']"/>
@@ -150,6 +151,7 @@
 <xsl:variable name="responseformateditor_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formateditor'], $ucase, $lcase))"/>
 <xsl:variable name="responseformateditorfilepicker_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formateditorfilepicker'], $ucase, $lcase))"/>
 <xsl:variable name="responseformatmono_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formatmonospaced'], $ucase, $lcase))"/>
+<xsl:variable name="responseformatnoinline_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formatnoinline'], $ucase, $lcase))"/>
 <xsl:variable name="responseformatplain_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_formatplain'], $ucase, $lcase))"/>
 
 <xsl:variable name="responsetemplate_help_label" select="normalize-space(translate($moodle_labels/data[@name = 'qtype_essay_responsetemplate_help'], $ucase, $lcase))"/>
@@ -903,12 +905,18 @@
         <xsl:when test="contains($response_format_flag, $responseformatplain_label)">
             <xsl:text>plain</xsl:text>
         </xsl:when>
+        <xsl:when test="contains($response_format_flag, $responseformatnoinline_label)">
+            <xsl:text>noinline</xsl:text>
+        </xsl:when>
         <xsl:when test="contains($response_format_flag, $responseformateditor_label)">
             <xsl:text>editor</xsl:text>
         </xsl:when>
         <xsl:otherwise><xsl:text>editor</xsl:text></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
+
+    <!-- Essay question format of accepted file types -->
+    <xsl:variable name="acceptedfiletypes_flag" select="translate(normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $acceptedfiletypes_label)]/x:th[position() = $flag_value_colnum]), $ucase, $lcase)"/>
 
     <!-- Get the name of the question, which is in the h2 preceding the table -->
     <xsl:variable name="qseqnum" select="count(preceding::x:table[@class = 'moodleQuestion'])"/>

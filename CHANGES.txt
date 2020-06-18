@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2020/06/18    3.6.1     Add support for 'No online text' responses and accepted file types
 2019/07/15    3.6.0     Add support for optional ID number field in Moodle 3.6, plus small Missing Word type bug-fixes.
 2018/08/03    3.5.23    Clean Moodle question type explanatory text XHTML exported to Word, for more robust operation.
 2018/06/04    3.5.22    Support Privacy API for GDPR compliance.
