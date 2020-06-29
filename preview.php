@@ -32,6 +32,7 @@ global $OUTPUT, $DB;
 // Declare empty array to prevent each debug message from including a complete backtrace.
 $backtrace = array();
 
+require_login();
 // Get the assigned temporary question name.
 $qname = required_param('qname', PARAM_TEXT);
 // Get the course id.
