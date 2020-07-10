@@ -161,21 +161,21 @@
   <xsl:template match="m:borderBox">
 
     <!-- Get Lowercase versions of properties -->
-    <xsl:variable name="sLowerCaseHideTop" select="translate(m:borderBoxPr[last()]/m:hideTop[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseHideTop" select="translate(m:borderBoxPr[last()]/m:hideTop[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseHideBot" select="translate(m:borderBoxPr[last()]/m:hideBot[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseHideBot" select="translate(m:borderBoxPr[last()]/m:hideBot[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseHideLeft" select="translate(m:borderBoxPr[last()]/m:hideLeft[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseHideLeft" select="translate(m:borderBoxPr[last()]/m:hideLeft[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseHideRight" select="translate(m:borderBoxPr[last()]/m:hideRight[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseHideRight" select="translate(m:borderBoxPr[last()]/m:hideRight[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseStrikeH" select="translate(m:borderBoxPr[last()]/m:strikeH[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseStrikeH" select="translate(m:borderBoxPr[last()]/m:strikeH[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseStrikeV" select="translate(m:borderBoxPr[last()]/m:strikeV[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseStrikeV" select="translate(m:borderBoxPr[last()]/m:strikeV[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseStrikeBLTR" select="translate(m:borderBoxPr[last()]/m:strikeBLTR[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseStrikeBLTR" select="translate(m:borderBoxPr[last()]/m:strikeBLTR[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseStrikeTLBR" select="translate(m:borderBoxPr[last()]/m:strikeTLBR[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseStrikeTLBR" select="translate(m:borderBoxPr[last()]/m:strikeTLBR[last()]/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
     <xsl:variable name="fHideTop">
       <xsl:call-template name="ForceTrueStrVal">
@@ -219,13 +219,13 @@
     </xsl:variable>
 
     <xsl:choose>
-      <xsl:when test="$fHideTop=1 
-                      and $fHideBot=1 
-                      and $fHideLeft=1 
-                      and $fHideRight=1 
-                      and $fStrikeH=0 
-                      and $fStrikeV=0 
-                      and $fStrikeBLTR=0 
+      <xsl:when test="$fHideTop=1
+                      and $fHideBot=1
+                      and $fHideLeft=1
+                      and $fHideRight=1
+                      and $fStrikeH=0
+                      and $fStrikeV=0
+                      and $fStrikeBLTR=0
                       and $fStrikeTLBR=0">
         <mml:mrow>
           <xsl:apply-templates select="m:e[1]" />
@@ -357,8 +357,8 @@
                 <xsl:when test="count(m:e[1]/*/m:rPr[last()]/m:nor) = 0">0</xsl:when>
                 <xsl:otherwise>
                   <xsl:call-template name="ForceFalseStrVal">
-                    <xsl:with-param name="str" select="translate(m:e[1]/*/m:rPr[last()]/m:nor/@m:val, 
-                                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+                    <xsl:with-param name="str" select="translate(m:e[1]/*/m:rPr[last()]/m:nor/@m:val,
+                                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                                 'abcdefghijklmnopqrstuvwxyz')" />
                   </xsl:call-template>
                 </xsl:otherwise>
@@ -420,7 +420,7 @@
 
   <xsl:template name="CreateMathMLMatrixAttr">
     <xsl:param name="mcJc" />
-    <xsl:variable name="sLowerCaseMcjc" select="translate($mcJc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseMcjc" select="translate($mcJc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                             'abcdefghijklmnopqrstuvwxyz')" />
     <xsl:choose>
       <xsl:when test="$sLowerCaseMcjc='left'">
@@ -433,21 +433,21 @@
   </xsl:template>
 
   <xsl:template match="m:phant">
-    <xsl:variable name="sLowerCaseZeroWidVal" select="translate(m:phantPr[last()]/m:zeroWid[last()]/@m:val, 
-		                                                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseZeroWidVal" select="translate(m:phantPr[last()]/m:zeroWid[last()]/@m:val,
+		                                                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                       'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseZeroAscVal" select="translate(m:phantPr[last()]/m:zeroAsc[last()]/@m:val, 
-		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseZeroAscVal" select="translate(m:phantPr[last()]/m:zeroAsc[last()]/@m:val,
+		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                     'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseZeroDescVal" select="translate(m:phantPr[last()]/m:zeroDesc[last()]/@m:val, 
-		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseZeroDescVal" select="translate(m:phantPr[last()]/m:zeroDesc[last()]/@m:val,
+		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                     'abcdefghijklmnopqrstuvwxyz')" />
-    <xsl:variable name="sLowerCaseShowVal" select="translate(m:phantPr[last()]/m:show[last()]/@m:val, 
-		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseShowVal" select="translate(m:phantPr[last()]/m:show[last()]/@m:val,
+		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                     'abcdefghijklmnopqrstuvwxyz')" />
 
 
-    <!-- The following properties default to 'yes' unless the last value equals 'no' or there isn't any node for 
+    <!-- The following properties default to 'yes' unless the last value equals 'no' or there isn't any node for
          the property -->
 
     <xsl:variable name="fZeroWid">
@@ -503,7 +503,7 @@
           </mml:mrow>
         </xsl:element>
       </xsl:when>
-      <!-- Don't show phantom contents, but don't smash anything, therefore, just 
+      <!-- Don't show phantom contents, but don't smash anything, therefore, just
            use mphantom -->
       <xsl:when test="$fZeroWid=0 and $fZeroAsc=0 and $fZeroDesc=0">
         <xsl:element name="mml:mphantom">
@@ -554,8 +554,8 @@
         <xsl:when test="count(m:radPr[last()]/m:degHide)=0">0</xsl:when>
         <xsl:otherwise>
           <xsl:call-template name="ForceFalseStrVal">
-            <xsl:with-param name="str" select="translate(m:radPr[last()]/m:degHide/@m:val, 
-		                                                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+            <xsl:with-param name="str" select="translate(m:radPr[last()]/m:degHide/@m:val,
+		                                                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                          'abcdefghijklmnopqrstuvwxyz')" />
           </xsl:call-template>
         </xsl:otherwise>
@@ -579,6 +579,11 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+
+<!-- Strip out OMML m:deg element as it isn't handled elsewhere, and mml:mn is enough -->
+<xsl:template match="m:deg">
+    <xsl:apply-templates/>
+</xsl:template>
 
   <xsl:template name="OutputNaryMo">
     <xsl:param name="ndCur" select="." />
@@ -604,11 +609,11 @@
     </mml:mo>
   </xsl:template>
 
-  <!-- %%Template match m:nary 
-		Process an n-ary. 
-		
+  <!-- %%Template match m:nary
+		Process an n-ary.
+
 		Decides, based on which arguments are supplied, between
-		using an mo, msup, msub, or msubsup for the n-ary operator		
+		using an mo, msup, msub, or msubsup for the n-ary operator
 	-->
   <xsl:template match="m:nary">
     <xsl:variable name="sLowerCaseSubHide">
@@ -617,8 +622,8 @@
           <xsl:text>off</xsl:text>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="translate(m:naryPr[last()]/m:subHide/@m:val, 
-	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+          <xsl:value-of select="translate(m:naryPr[last()]/m:subHide/@m:val,
+	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 	                                  'abcdefghijklmnopqrstuvwxyz')" />
         </xsl:otherwise>
       </xsl:choose>
@@ -630,16 +635,16 @@
           <xsl:text>off</xsl:text>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="translate(m:naryPr[last()]/m:supHide/@m:val, 
-	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+          <xsl:value-of select="translate(m:naryPr[last()]/m:supHide/@m:val,
+	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 	                                  'abcdefghijklmnopqrstuvwxyz')" />
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
 
     <xsl:variable name="sLowerCaseLimLoc">
-      <xsl:value-of select="translate(m:naryPr[last()]/m:limLoc/@m:val, 
-	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+      <xsl:value-of select="translate(m:naryPr[last()]/m:limLoc/@m:val,
+	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 	                                  'abcdefghijklmnopqrstuvwxyz')" />
     </xsl:variable>
 
@@ -647,8 +652,8 @@
       <xsl:choose>
         <xsl:when test="count(m:naryPr[last()]/m:grow)=0">off</xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="translate(m:naryPr[last()]/m:grow/@m:val, 
-	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+          <xsl:value-of select="translate(m:naryPr[last()]/m:grow/@m:val,
+	                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 	                                  'abcdefghijklmnopqrstuvwxyz')" />
         </xsl:otherwise>
       </xsl:choose>
@@ -838,12 +843,12 @@
 
   <xsl:template match="m:groupChr">
     <xsl:variable name="ndLastGroupChrPr" select="m:groupChrPr[last()]" />
-    <xsl:variable name="sLowerCasePos" select="translate($ndLastGroupChrPr/m:pos/@m:val, 
-		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCasePos" select="translate($ndLastGroupChrPr/m:pos/@m:val,
+		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                     'abcdefghijklmnopqrstuvwxyz')" />
 
-    <xsl:variable name="sLowerCaseVertJc" select="translate($ndLastGroupChrPr/m:vertJc/@m:val, 
-		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCaseVertJc" select="translate($ndLastGroupChrPr/m:vertJc/@m:val,
+		                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                     'abcdefghijklmnopqrstuvwxyz')" />
     <xsl:variable name="ndLastChr" select="$ndLastGroupChrPr/m:chr" />
 
@@ -928,9 +933,9 @@
     </mml:mrow>
   </xsl:template>
 
-  <!-- %%Template: match m:f 
-		
-		m:f maps directly to mfrac. 
+  <!-- %%Template: match m:f
+
+		m:f maps directly to mfrac.
 	-->
   <xsl:template match="m:f">
     <xsl:variable name="sLowerCaseType" select="translate(m:fPr[last()]/m:type/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')" />
@@ -964,8 +969,8 @@
   </xsl:template>
 
 
-  <!-- %%Template: CreateMathMLFracProp 
-		
+  <!-- %%Template: CreateMathMLFracProp
+
 			Make fraction properties based on supplied parameters.
 			OMML differentiates between a linear fraction and a skewed
 			one. For MathML, we write both as bevelled.
@@ -998,8 +1003,8 @@
     </xsl:choose>
   </xsl:template>
 
-  <!-- %%Template: match m:e | m:den | m:num | m:lim | m:sup | m:sub 
-		
+  <!-- %%Template: match m:e | m:den | m:num | m:lim | m:sup | m:sub
+
 		These element delinate parts of an expression (like the numerator).  -->
   <xsl:template match="m:e | m:den | m:num | m:lim | m:sup | m:sub">
     <xsl:choose>
@@ -1022,7 +1027,7 @@
   </xsl:template>
 
   <xsl:template match="m:bar">
-    <xsl:variable name="sLowerCasePos" select="translate(m:barPr/m:pos/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    <xsl:variable name="sLowerCasePos" select="translate(m:barPr/m:pos/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                                       'abcdefghijklmnopqrstuvwxyz')" />
 
     <xsl:variable name="fTop">
@@ -1058,7 +1063,7 @@
 
   <!-- %%Template match m:d
 
-		Process a delimiter. 
+		Process a delimiter.
 	-->
   <xsl:template match="m:d">
     <mml:mfenced>
@@ -1111,7 +1116,7 @@
         <xsl:when test="count(child::m:rPr[last()]/m:nor) = 0">0</xsl:when>
         <xsl:otherwise>
           <xsl:call-template name="ForceFalseStrVal">
-            <xsl:with-param name="str" select="translate(child::m:rPr[last()]/m:nor/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+            <xsl:with-param name="str" select="translate(child::m:rPr[last()]/m:nor/@m:val, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                                       'abcdefghijklmnopqrstuvwxyz')" />
           </xsl:call-template>
         </xsl:otherwise>
@@ -1223,8 +1228,8 @@
         <mml:mtr>
           <mml:mtd>
             <xsl:choose>
-              <xsl:when test="m:argPr[last()]/m:scrLvl/@m:val!='0' or 
-					            not(m:argPr[last()]/m:scrLvl/@m:val)  or 
+              <xsl:when test="m:argPr[last()]/m:scrLvl/@m:val!='0' or
+					            not(m:argPr[last()]/m:scrLvl/@m:val)  or
 					            m:argPr[last()]/m:scrLvl/@m:val=''">
                 <mml:mrow>
                   <mml:maligngroup />
@@ -1272,8 +1277,8 @@
               <xsl:when test="count($ndCur/m:rPr[last()]/m:nor) = 0">0</xsl:when>
               <xsl:otherwise>
                 <xsl:call-template name="ForceFalseStrVal">
-                  <xsl:with-param name="str" select="translate($ndCur/m:rPr[last()]/m:nor/@m:val, 
-                                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+                  <xsl:with-param name="str" select="translate($ndCur/m:rPr[last()]/m:nor/@m:val,
+                                                                     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		                                                                 'abcdefghijklmnopqrstuvwxyz')" />
                 </xsl:call-template>
               </xsl:otherwise>
@@ -1304,7 +1309,7 @@
     <xsl:param name="sAllMt" />
     <xsl:param name="cAmp" />
     <xsl:choose>
-      <xsl:when test="string-length(substring-after($sAllMt, '&amp;')) &gt; 0 or 
+      <xsl:when test="string-length(substring-after($sAllMt, '&amp;')) &gt; 0 or
 			                substring($sAllMt, string-length($sAllMt))='&#x0026;'">
         <xsl:call-template name="CountAmp">
           <xsl:with-param name="sAllMt" select="substring-after($sAllMt, '&#x0026;')" />
@@ -1318,18 +1323,18 @@
   </xsl:template>
 
   <!-- %%Template: ParseEqArrMr
-			
-			Similar to ParseMt, but this one has to do more for an equation array. 
+
+			Similar to ParseMt, but this one has to do more for an equation array.
       In equation arrays &amp; is a special character which denotes alignment.
-      
+
       The &amp; in an equation works by alternating between meaning insert alignment spacing
       and insert alignment mark.  For each equation in the equation array
       there is an implied align space at the beginning of the equation.  Within each equation,
       the first &amp; means alignmark, the second, align space, the third, alignmark, etc.
-      
+
       For this reason when parsing m:r's in equation arrays it is important to keep track of what
       the next ampersand will mean.
-      
+
       $align=0 => Omml's align space, which is similar to MathML's maligngroup.
       $align=1 => Omml's alignment mark, which is similar to MathML's malignmark.
 	-->
@@ -1442,7 +1447,7 @@
                 <xsl:otherwise>
                   <mml:mtext>
                     <xsl:value-of select="substring($sToParse,1,1)" />
-                  </mml:mtext>                  
+                  </mml:mtext>
                 </xsl:otherwise>
               </xsl:choose>
               <xsl:call-template name="ParseEqArrMr">
@@ -1496,10 +1501,10 @@
 
   <!-- %%Template: ParseMt
 
-			Produce a run of text. Technically, OMML makes no distinction 
-			between numbers, operators, and other characters in a run. For 
-			MathML we need to break these into mi, mn, or mo elements. 
-			
+			Produce a run of text. Technically, OMML makes no distinction
+			between numbers, operators, and other characters in a run. For
+			MathML we need to break these into mi, mn, or mo elements.
+
 			See also ParseEqArrMr
 	-->
   <xsl:template name="ParseMt">
@@ -1542,9 +1547,9 @@
             <xsl:choose>
               <xsl:when test="ancestor::m:fName">
                 <xsl:choose>
-                  <xsl:when test="($iFirstOper=$iFirstNum) and 
+                  <xsl:when test="($iFirstOper=$iFirstNum) and
 											($iFirstOper=string-length($sToParse)) and
-							                (substring($sRepOperWith-, string-length($sRepOperWith-))!='0') and 
+							                (substring($sRepOperWith-, string-length($sRepOperWith-))!='0') and
 							                (substring($sRepOperWith-, string-length($sRepOperWith-))!='-')">
                     <xsl:value-of select="string-length($sToParse)" />
                   </xsl:when>
@@ -1626,13 +1631,13 @@
     </xsl:if>
   </xsl:template>
 
-  <!-- %%Template: SNumStart 
-	
-		Return the longest substring of sToParse starting from the 
+  <!-- %%Template: SNumStart
+
+		Return the longest substring of sToParse starting from the
 		start of sToParse that is a number. In addition, it takes the
-		pattern string, which is sToParse with all of its numbers 
-		replaced with a 0. sPattern should be the same length 
-		as sToParse		
+		pattern string, which is sToParse with all of its numbers
+		replaced with a 0. sPattern should be the same length
+		as sToParse
 	-->
   <xsl:template name="SNumStart">
     <xsl:param name="sToParse" select="''" />
@@ -1658,10 +1663,10 @@
   </xsl:template>
 
   <!-- %%Template SRepeatCharAcc
-	
+
 			The core of SRepeatChar with an accumulator. The current
 			string is in param $acc, and we will double and recurse,
-			if we're less than half of the required length or else just 
+			if we're less than half of the required length or else just
 			add the right amount of characters to the accumulator and
 			return
 	-->
@@ -1688,7 +1693,7 @@
 
 
   <!-- %%Template SRepeatChar
-	
+
 			Generates a string nchRequired long by repeating the given character ch
 	-->
   <xsl:template name="SRepeatChar">
@@ -1703,10 +1708,10 @@
   </xsl:template>
 
   <!-- %%Template SReplaceOperWithMinus
-	
+
 		Go through the given string and replace every instance
 		of an operator with a minus '-'. This helps quickly identify
-		the first instance of an operator.  
+		the first instance of an operator.
 	-->
   <xsl:template name="SReplaceOperWithMinus">
     <xsl:param name="sToParse" select="''" />
@@ -1715,25 +1720,25 @@
   </xsl:template>
 
   <!-- %%Template SReplaceNumWithZero
-	
+
 		Go through the given string and replace every instance
 		of an number with a zero '0'. This helps quickly identify
-		the first occurence of a number. 
-		
-		Considers the '.' and ',' part of a number iff they are sandwiched 
+		the first occurence of a number.
+
+		Considers the '.' and ',' part of a number iff they are sandwiched
 		between two other numbers. 0.3 will be recognized as a number,
-		x.3 will not be. Since these characters can also be an operator, this 
+		x.3 will not be. Since these characters can also be an operator, this
 		should be called before SReplaceOperWithMinus.
 	-->
   <xsl:template name="SReplaceNumWithZero">
     <xsl:param name="sToParse" select="''" />
 
     <!-- First do a simple replace. Numbers will all be come 0's.
-			After this point, the pattern involving the . or , that 
+			After this point, the pattern involving the . or , that
 			we are looking for will become 0.0 or 0,0 -->
     <xsl:variable name="sSimpleReplace" select="translate($sToParse, $sNumbers, $sZeros)" />
 
-    <!-- And then, replace 0.0 with just 000. This means that the . will 
+    <!-- And then, replace 0.0 with just 000. This means that the . will
 			become part of the number -->
     <xsl:variable name="sReplacePeriod">
       <xsl:call-template name="SReplace">
@@ -1743,7 +1748,7 @@
       </xsl:call-template>
     </xsl:variable>
 
-    <!-- And then, replace 0,0 with just 000. This means that the , will 
+    <!-- And then, replace 0,0 with just 000. This means that the , will
 			become part of the number -->
     <xsl:call-template name="SReplace">
       <xsl:with-param name="sInput" select="$sReplacePeriod" />
@@ -1753,14 +1758,14 @@
   </xsl:template>
 
   <!-- Template to translate Word's borderBox properties into the menclose notation attribute
-       The initial call to this SHOULD NOT pass an sAttribute.  Subsequent calls to 
+       The initial call to this SHOULD NOT pass an sAttribute.  Subsequent calls to
        CreateMencloseNotationAttrFromBorderBoxAttr by CreateMencloseNotationAttrFromBorderBoxAttr will
        update the sAttribute as appropriate.
-       
+
        CreateMencloseNotationAttrFromBorderBoxAttr looks at each attribute (fHideTop, fHideBot, etc.) one at a time
        in the order they are listed and passes a modified sAttribute to CreateMencloseNotationAttrFromBorderBoxAttr.
-       Each successive call to CreateMencloseNotationAttrFromBorderBoxAttr knows which attribute to look at because 
-       the previous call should have omitted passing the attribute it just analyzed.  This is why as you read lower 
+       Each successive call to CreateMencloseNotationAttrFromBorderBoxAttr knows which attribute to look at because
+       the previous call should have omitted passing the attribute it just analyzed.  This is why as you read lower
        and lower in the template that each call to CreateMencloseNotationAttrFromBorderBoxAttr has fewer and fewer attributes.
        -->
   <xsl:template name="CreateMencloseNotationAttrFromBorderBoxAttr">
@@ -1778,14 +1783,14 @@
       <xsl:when test="string-length($sAttribute) = 0">
         <xsl:choose>
           <xsl:when test="string-length($fHideTop) &gt; 0
-                      and string-length($fHideBot) &gt; 0 
+                      and string-length($fHideBot) &gt; 0
                       and string-length($fHideLeft) &gt; 0
                       and string-length($fHideRight) &gt; 0">
 
             <xsl:choose>
-              <xsl:when test="$fHideTop = 0 
+              <xsl:when test="$fHideTop = 0
                               and $fHideBot = 0
-                              and $fHideLeft = 0 
+                              and $fHideLeft = 0
                               and $fHideRight = 0">
                 <!-- We can use 'box' instead of top, bot, left, and right.  Therefore,
                   replace sAttribute with 'box' and begin analyzing params fStrikeH
@@ -2036,7 +2041,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <!-- Return 0 iff $str is explicitly set to a false value.  
+  <!-- Return 0 iff $str is explicitly set to a false value.
        Return true otherwise -->
   <xsl:template name="ForceFalseStrVal">
     <xsl:param name="str" />
@@ -2051,7 +2056,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <!-- Return 1 iff $str is explicitly set to a true value.  
+  <!-- Return 1 iff $str is explicitly set to a true value.
        Return false otherwise -->
   <xsl:template name="ForceTrueStrVal">
     <xsl:param name="str" />
