@@ -376,7 +376,6 @@ class qformat_wordtable extends qformat_xml {
             'moodle_release' => $CFG->release,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
-            'debug_flag' => debugging('', DEBUG_WORDTABLE),
             'transformationfailed' => get_string('transformationfailed', 'qformat_wordtable', $this->mqxml2wordstylesheet2)
         );
 

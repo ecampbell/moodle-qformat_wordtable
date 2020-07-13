@@ -44,9 +44,7 @@ if (($question = $DB->get_record('question', array('name' => $qname)))) {
     // Figure out the proper URL, allowing for an installation in a subfolder.
     $moodlerootfolderpath = parse_url($CFG->wwwroot, PHP_URL_PATH);
     $redirecturl = $moodlerootfolderpath . "/question/preview.php?id=" . $question->id . "&courseid=" . $courseid;
-    debugging("Preview question: Redirecting to $redirecturl", DEBUG_DEVELOPER, $backtrace);
     redirect($redirecturl);
 } else {   // No question found, report an error message so the reader isn't looking at a blank screen.
-    debugging("Preview question: No question found", DEBUG_DEVELOPER, $backtrace);
     echo $OUTPUT->notification(get_string('preview_question_not_found', 'qformat_wordtable', $qname . " / " . $courseid));
 }
