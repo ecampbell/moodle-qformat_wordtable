@@ -1053,7 +1053,7 @@
         <single>false</single>
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
         <answernumbering><xsl:value-of select="$answerNumbering_value"/></answernumbering>
-        <showstandardinstruction><xsl:value-of select="$answerNumbering_value"/></showstandardinstruction>
+        <showstandardinstruction><xsl:value-of select="$showstandardinstruction_value"/></showstandardinstruction>
     </xsl:when>
     <xsl:when test="$qtype = 'MC'">
         <single>true</single>

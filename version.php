@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version   = 2020112001;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
-$plugin->release  = '3.7 (Build: 2020112001)';  // The current module release in human-readable form (x.y).
+$plugin->release  = '3.7.0 (Build: 2020112001)';  // The current module release in human-readable form (x.y).
 $plugin->requires = 2020061500.00;  // Requires Moodle 3.9 or later.
 $plugin->cron     = 0;           // Period for cron to check this module (secs).
 $plugin->dependencies = array('booktool_wordimport' => 2020070601);
