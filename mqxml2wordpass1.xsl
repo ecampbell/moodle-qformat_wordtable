@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
- * XSLT stylesheet to transform Moodle Question XML-formatted questions into Word-compatible HTML tables 
+ * XSLT stylesheet to transform Moodle Question XML-formatted questions into Word-compatible HTML tables
  *
  * @package    qformat_wordtable
  * @copyright  2010-2015 Eoin Campbell
@@ -35,6 +35,7 @@
 <xsl:param name="institution_name"/>
 <xsl:param name="moodle_language" select="'en'"/> <!-- Interface language for user -->
 <xsl:param name="moodle_release"/> <!-- 1.9 or 2.x -->
+<xsl:param name="moodle_version"/>  <!-- Datestamp of release -->
 <xsl:param name="moodle_textdirection" select="'ltr'"/> <!-- ltr/rtl, ltr except for Arabic, Hebrew, Urdu, Farsi, Maldivian (who knew?) -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
@@ -93,6 +94,7 @@
 -->
 <!-- Convert Moodle release numbers such as "2.4" to "24" for easier numerical comparisons, to decide what question heading rows to include -->
 <xsl:variable name="moodle_release_number" select="translate(substring($moodle_release, 1, 3), '.', '')"/>
+<xsl:variable name="moodle_release_date" select="substring($moodle_version, 1, 8)"/>
 
 <!-- Handle colon usage in French -->
 <xsl:variable name="colon_string">
@@ -107,35 +109,14 @@
 <xsl:variable name="answer_label" select="$moodle_labels/data[@name = 'quiz_answer']"/>
 <xsl:variable name="answers_label" select="$moodle_labels/data[@name = 'quiz_answers']"/>
 <xsl:variable name="categoryname_label" select="$moodle_labels/data[@name = 'moodle_categoryname']"/>
-<xsl:variable name="defaultmark_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="concat($moodle_labels/data[@name = 'quiz_defaultgrade'], $colon_string)"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="concat($moodle_labels/data[@name = 'question_defaultmark'], $colon_string)"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="defaultmark_label" select="concat($moodle_labels/data[@name = 'question_defaultmark'], $colon_string)"/>
 <xsl:variable name="grade_label" select="$moodle_labels/data[@name = 'moodle_grade']"/>
 <xsl:variable name="no_label" select="$moodle_labels/data[@name = 'moodle_no']"/>
 <xsl:variable name="yes_label" select="$moodle_labels/data[@name = 'moodle_yes']"/>
 <xsl:variable name="item_label" select="$moodle_labels/data[@name = 'grades_item']"/>
-<xsl:variable name="penalty_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="concat($moodle_labels/data[@name = 'quiz_penaltyfactor'], $colon_string)"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="concat($moodle_labels/data[@name = 'question_penaltyforeachincorrecttry'], $colon_string)"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="penalty_label" select="concat($moodle_labels/data[@name = 'question_penaltyforeachincorrecttry'], $colon_string)"/>
 <xsl:variable name="question_label" select="$moodle_labels/data[@name = 'moodle_question']"/>
-<xsl:variable name="category_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'question_questioncategory']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'question_category']"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="category_label" select="$moodle_labels/data[@name = 'question_category']"/>
 <xsl:variable name="tags_label" select="concat($moodle_labels/data[@name = 'moodle_tags'], $colon_string)"/>
 <xsl:variable name="idnumber_label" select="concat($moodle_labels/data[@name = 'question_idnumber'], $colon_string)"/>
 
@@ -143,56 +124,21 @@
 <xsl:variable name="mcq_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_multichoice_shuffleanswers']"/>
 <xsl:variable name="gapselect_shuffle_label" select="concat($moodle_labels/data[@name = 'qtype_gapselect_shuffle'], $colon_string)"/>
 <xsl:variable name="answernumbering_label" select="$moodle_labels/data[@name = 'qtype_multichoice_answernumbering']"/>
+<xsl:variable name="showstandardinstruction_label" select="$moodle_labels/data[@name = 'qtype_multichoice_showstandardinstruction']"/>
 
 <!-- Per-question feedback labels -->
 <xsl:variable name="correctfeedback_label" select="concat($moodle_labels/data[@name = 'qtype_multichoice_correctfeedback'], $colon_string)"/>
 <xsl:variable name="feedback_label" select="$moodle_labels/data[@name = 'moodle_feedback']"/>
-<xsl:variable name="generalfeedback_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="concat($moodle_labels/data[@name = 'quiz_generalfeedback'], $colon_string)"/>
-    </xsl:when>
-    <xsl:otherwise>
-        <xsl:value-of select="concat($moodle_labels/data[@name = 'question_generalfeedback'], $colon_string)"/>
-    </xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="generalfeedback_label" select="concat($moodle_labels/data[@name = 'question_generalfeedback'], $colon_string)"/>
 
 <xsl:variable name="incorrectfeedback_label" select="concat($moodle_labels/data[@name = 'qtype_multichoice_incorrectfeedback'], $colon_string)"/>
 <xsl:variable name="pcorrectfeedback_label" select="concat($moodle_labels/data[@name = 'qtype_multichoice_partiallycorrectfeedback'], $colon_string)"/>
 <xsl:variable name="shownumcorrectfeedback_label" select="concat($moodle_labels/data[@name = 'question_shownumpartscorrectwhenfinished'], $colon_string)"/>
 
 <!-- Default feedback text (2.5+ only) -->
-<xsl:variable name="correctfeedback_default">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt;= '25'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'question_correctfeedbackdefault']"/>
-    </xsl:when>
-    <xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is correct'"/></xsl:when>
-    <xsl:when test="starts-with($moodle_language, 'es')"><xsl:value-of select="'Respuesta correcta'"/></xsl:when>
-    <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
-<xsl:variable name="incorrectfeedback_default">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt;= '25'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'question_incorrectfeedbackdefault']"/>
-    </xsl:when>
-    <xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is incorrect'"/></xsl:when>
-    <xsl:when test="starts-with($moodle_language, 'es')"><xsl:value-of select="'Respuesta incorrecta.'"/></xsl:when>
-    <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
-<xsl:variable name="pcorrectfeedback_default">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt;= '25'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'question_partiallycorrectfeedbackdefault']"/>
-    </xsl:when>
-    <xsl:when test="starts-with($moodle_language, 'en')"><xsl:value-of select="'Your answer is partially correct'"/></xsl:when>
-    <xsl:when test="starts-with($moodle_language, 'es')"><xsl:value-of select="'Respuesta parcialmente correcta.'"/></xsl:when>
-    <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="correctfeedback_default" select="$moodle_labels/data[@name = 'question_correctfeedbackdefault']"/>
+<xsl:variable name="incorrectfeedback_default" select="$moodle_labels/data[@name = 'question_incorrectfeedbackdefault']"/>
+<xsl:variable name="pcorrectfeedback_default" select="$moodle_labels/data[@name = 'question_partiallycorrectfeedbackdefault']"/>
 
 <!-- Hint labels; don't add a colon yet, because we'll suffix a specific hint number when printing -->
 <xsl:variable name="hintn_label" select="$moodle_labels/data[@name = 'question_hintn']"/>
@@ -200,23 +146,10 @@
 <xsl:variable name="hint_clearwrongparts_label" select="$moodle_labels/data[@name = 'question_clearwrongparts']"/>
 
 <!-- Description labels -->
-<xsl:variable name="description_instructions">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'qformat_wordtable_description_instructions']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'qtype_description_pluginnamesummary']"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="description_instructions" select="$moodle_labels/data[@name = 'qtype_description_pluginnamesummary']"/>
 
 <!-- Essay question labels -->
-<xsl:variable name="acceptedfiletypes_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt;= '35'">
-        <xsl:value-of select="concat($moodle_labels/data[@name = 'qtype_essay_acceptedfiletypes'], $colon_string)"/>
-    </xsl:when>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="acceptedfiletypes_label" select="concat($moodle_labels/data[@name = 'qtype_essay_acceptedfiletypes'], $colon_string)"/>
 <xsl:variable name="allowattachments_label" select="concat($moodle_labels/data[@name = 'qtype_essay_allowattachments'], $colon_string)"/>
 <xsl:variable name="attachmentsoptional_label" select="concat($moodle_labels/data[@name = 'qtype_essay_attachmentsoptional'], $colon_string)"/>
 <xsl:variable name="attachmentsrequired_label" select="concat($moodle_labels/data[@name = 'qtype_essay_attachmentsrequired'], $colon_string)"/>
@@ -226,44 +159,16 @@
 <xsl:variable name="responsefieldlines_label" select="concat($moodle_labels/data[@name = 'qtype_essay_responsefieldlines'], $colon_string)"/>
 <xsl:variable name="responseformat_label" select="concat($moodle_labels/data[@name = 'qtype_essay_responseformat'], $colon_string)"/>
 <xsl:variable name="responserequired_label" select="concat($moodle_labels/data[@name = 'qtype_essay_responserequired'], $colon_string)"/>
-<xsl:variable name="format_html_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'moodle_formathtml']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_formateditor']"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
-<xsl:variable name="format_plain_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'moodle_formatplain']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_formatplain']"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
-<xsl:variable name="format_noinline_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number &gt;= '27'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_formatnoinline']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_formatplain']"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="format_html_label" select="$moodle_labels/data[@name = 'qtype_essay_formateditor']"/>
+<xsl:variable name="format_plain_label" select="$moodle_labels/data[@name = 'qtype_essay_formatplain']"/>
+<xsl:variable name="format_noinline_label" select="$moodle_labels/data[@name = 'qtype_essay_formatnoinline']"/>
 <!-- Moodle 2.x only -->
 <xsl:variable name="format_editorfilepicker_label" select="$moodle_labels/data[@name = 'qtype_essay_formateditorfilepicker']"/>
 <xsl:variable name="format_mono_label" select="$moodle_labels/data[@name = 'qtype_essay_formatmonospaced']"/>
 <!-- Moodle 1.9 only -->
 <xsl:variable name="format_auto_label" select="$moodle_labels/data[@name = 'moodle_formattext']"/>
 <xsl:variable name="format_markdown_label" select="$moodle_labels/data[@name = 'moodle_formatmarkdown']"/>
-<xsl:variable name="essay_instructions">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'qformat_wordtable_essay_instructions']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'qtype_essay_pluginnamesummary']"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="essay_instructions" select="$moodle_labels/data[@name = 'qtype_essay_pluginnamesummary']"/>
 
 <!-- Matching question labels -->
 <xsl:variable name="matching_instructions" select="$moodle_labels/data[@name = 'qtype_match_filloutthreeqsandtwoas']"/>
@@ -272,23 +177,13 @@
 <xsl:variable name="choice_label">
     <xsl:variable name="choice_text" select="$moodle_labels/data[@name = 'qtype_multichoice_choiceno']"/>
     <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'quiz_choice']"/>
-    </xsl:when>
     <xsl:when test="contains($choice_text, '{')">
         <xsl:value-of select="normalize-space(substring-before($choice_text, '{'))"/>
     </xsl:when>
     <xsl:otherwise><xsl:value-of select="$choice_text"/></xsl:otherwise>
     </xsl:choose>
 </xsl:variable>
-<xsl:variable name="multichoice_instructions">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="concat($moodle_labels/data[@name = 'qformat_wordtable_multichoice_instructions'], ' (MC/MA)')"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="concat($moodle_labels/data[@name = 'qtype_multichoice_pluginnamesummary'], ' (MC/MA)')"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="multichoice_instructions" select="concat($moodle_labels/data[@name = 'qtype_multichoice_pluginnamesummary'], ' (MC/MA)')"/>
 
 <!-- Multichoice Set (All-or-Nothing Multichoice) question labels -->
 <xsl:variable name="multichoiceset_showeachfeedback_label" select="$moodle_labels/data[@name = 'qtype_multichoiceset_showeachanswerfeedback']"/>
@@ -299,14 +194,7 @@
 <xsl:variable name="group_label" select="$moodle_labels/data[@name = 'qtype_gapselect_group']"/>
 
 <!-- Short Answer question labels -->
-<xsl:variable name="casesensitive_label">
-    <xsl:choose>
-    <xsl:when test="$moodle_release_number = '19'">
-        <xsl:value-of select="concat($moodle_labels/data[@name = 'quiz_casesensitive'], $colon_string)"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="concat($moodle_labels/data[@name = 'qtype_shortanswer_casesensitive'], $colon_string)"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="casesensitive_label" select="concat($moodle_labels/data[@name = 'qtype_shortanswer_casesensitive'], $colon_string)"/>
 <xsl:variable name="shortanswer_instructions" select="$moodle_labels/data[@name = 'qtype_shortanswer_filloutoneanswer']"/>
 
 <!-- True/False question labels -->
@@ -361,7 +249,7 @@
     <html>
         <xsl:variable name="category">
             <xsl:variable name="raw_category" select="normalize-space(./question[1]/category)"/>
-        
+
             <xsl:choose>
             <xsl:when test="contains($raw_category, '$course$/')">
                 <xsl:value-of select="substring-after($raw_category, '$course$/')"/>
@@ -369,7 +257,7 @@
             <xsl:otherwise><xsl:value-of select="$raw_category"/></xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-            
+
         <head>
             <title><xsl:value-of select="concat($course_name, ', ', $category_label, $colon_string, ' ', $category)"/></title>
         </head>
@@ -384,7 +272,7 @@
 <!-- Throw away extra wrapper elements included in container XML -->
 <xsl:template match="/container/moodlelabels"/>
 
-<!-- Omit any Numerical, Random or Calculated questions because we don't want to attempt to import them later 
+<!-- Omit any Numerical, Random or Calculated questions because we don't want to attempt to import them later
 <xsl:template match="question[@type = 'numerical']"/>
 <xsl:template match="question[starts-with(@type, 'calc')]"/>
 <xsl:template match="question[starts-with(@type, 'random')]"/>
@@ -394,7 +282,7 @@
 <xsl:template match="question[@type = 'category']">
     <xsl:variable name="category">
         <xsl:variable name="raw_category" select="normalize-space(category)"/>
-    
+
         <xsl:choose>
         <xsl:when test="contains($raw_category, '$course$/')">
             <xsl:value-of select="substring-after($raw_category, '$course$/')"/>
@@ -462,6 +350,16 @@
         </xsl:choose>
     </xsl:variable>
 
+    <!-- Show standard instruction new field in 3.9 for MC and MS -->
+    <xsl:variable name="showstandardinstruction_flag">
+        <xsl:choose>
+        <xsl:when test="showstandardinstruction = '1'">
+            <xsl:value-of select="$yes_label"/>
+        </xsl:when>
+        <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+
     <xsl:variable name="shuffleanswers_flag">
         <xsl:choose>
         <!-- shuffleanswers element might be duplicated in XML, or contain either 'true' or '1', so allow for these possibilities -->
@@ -525,8 +423,7 @@
         <xsl:choose>
         <xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_distractor_column_label"/></xsl:when>
         <xsl:when test="$qtype = 'DE'"><xsl:value-of select="$blank_cell"/></xsl:when>
-        <xsl:when test="$qtype = 'ES' and $moodle_release_number &gt;= '25'"><xsl:value-of select="$responsetemplate_label"/></xsl:when>
-        <xsl:when test="$qtype = 'ES'"><xsl:value-of select="$blank_cell"/></xsl:when>
+        <xsl:when test="$qtype = 'ES'"><xsl:value-of select="$responsetemplate_label"/></xsl:when>
         <xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$question_label"/></xsl:when>
         <xsl:when test="$qtype = 'DDI'"><xsl:value-of select="$ddi_draggableitem_label"/></xsl:when>
         <xsl:when test="$qtype = 'DDM'"><xsl:value-of select="$ddm_marker_label"/></xsl:when>
@@ -539,7 +436,6 @@
         <xsl:choose>
         <xsl:when test="$qtype = 'CL'"><xsl:value-of select="$cloze_feedback_column_label"/></xsl:when>
         <xsl:when test="$qtype = 'DE'"><xsl:value-of select="$blank_cell"/></xsl:when>
-        <xsl:when test="$qtype = 'ES' and $moodle_release_number = '19'"><xsl:value-of select="$blank_cell"/></xsl:when>
         <xsl:when test="$qtype = 'ES'"><xsl:value-of select="$graderinfo_label"/></xsl:when>
         <xsl:when test="$qtype = 'MAT'"><xsl:value-of select="$answer_label"/></xsl:when>
         <xsl:when test="$qtype = 'CL' or $qtype = 'MA' or $qtype = 'MC' or $qtype = 'SA' or $qtype = 'TF' or $qtype = 'MS' or $qtype = 'NUM' or starts-with($qtype, 'C')">
@@ -656,7 +552,7 @@
     </xsl:variable>
     <h2 class="MsoHeading2"><xsl:value-of select="normalize-space($qheading)"/></h2>
     <p class="MsoBodyText"> </p>
-    
+
     <!-- Generate the table containing the question stem and the answers -->
     <div class="TableDiv">
     <table border="1" dir="{$moodle_textdirection}">
@@ -792,8 +688,17 @@
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
 
+        <!-- Show standard instructions? New 3.9 feature -->
+        <xsl:if test="$qtype = 'MC' or $qtype = 'MA' or $qtype = 'MS'">
+            <tr>
+                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$showstandardinstruction_label"/></p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$showstandardinstruction_flag"/></p></td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+        </xsl:if>
+
         <!-- Essay questions in Moodle 2.x have 3 specific fields, for Response field format, Attachments, and Number of lines -->
-        <xsl:if test="$qtype = 'ES' and $moodle_release_number &gt;= '20'">
+        <xsl:if test="$qtype = 'ES'">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responseformat_label"/></p></td>
                 <td style="width: 1.0cm">
@@ -814,16 +719,16 @@
                         <xsl:when test="responseformat = 'editor'">
                             <xsl:value-of select="$format_html_label"/>
                         </xsl:when>
-                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'markdown'">
+                        <xsl:when test="questiontext/@format = 'markdown'">
                             <xsl:value-of select="$format_markdown_label"/>
                         </xsl:when>
-                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'moodle_auto_format'">
+                        <xsl:when test="questiontext/@format = 'moodle_auto_format'">
                             <xsl:value-of select="$format_auto_label"/>
                         </xsl:when>
-                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'plain_text'">
+                        <xsl:when test="questiontext/@format = 'plain_text'">
                             <xsl:value-of select="$format_plain_label"/>
                         </xsl:when>
-                        <xsl:when test="$moodle_release_number = '19' and questiontext/@format = 'html'">
+                        <xsl:when test="questiontext/@format = 'html'">
                             <xsl:value-of select="$format_html_label"/>
                         </xsl:when>
                         <xsl:otherwise><xsl:value-of select="$format_editorfilepicker_label"/></xsl:otherwise>
@@ -834,18 +739,16 @@
             <xsl:text>&#x0a;</xsl:text>
 
             <!-- Essays: text input required flag -->
-            <xsl:if test="$moodle_release_number &gt;= '27'">
-                <xsl:variable name="responserequired_flag">
-                    <xsl:choose>
-                    <xsl:when test="responserequired = 0"><xsl:value-of select="$no_label"/></xsl:when>
-                    <xsl:otherwise><xsl:value-of select="$yes_label"/></xsl:otherwise>
-                    </xsl:choose>
-                </xsl:variable>
-                <tr>
-                    <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responserequired_label"/></p></td>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$responserequired_flag"/></p></td>
-                </tr>
-            </xsl:if>
+            <xsl:variable name="responserequired_flag">
+                <xsl:choose>
+                <xsl:when test="responserequired = 0"><xsl:value-of select="$no_label"/></xsl:when>
+                <xsl:otherwise><xsl:value-of select="$yes_label"/></xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+            <tr>
+                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responserequired_label"/></p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$responserequired_flag"/></p></td>
+            </tr>
 
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$responsefieldlines_label"/></p></td>
@@ -879,49 +782,44 @@
             <xsl:text>&#x0a;</xsl:text>
 
             <!-- Essays: number of attachments required field -->
-            <xsl:if test="$moodle_release_number &gt;= '27'">
-                <xsl:text>&#x0a;</xsl:text>
-                <xsl:call-template name="debugComment">
-                    <xsl:with-param name="comment_text">
-                        <xsl:value-of select="concat('$attachmentsrequired_label: ', $attachmentsrequired_label, '; attachmentsrequired: ', attachmentsrequired, '&#x0a;')"/>
-                        <xsl:value-of select="concat('$moodle_release_number: ', $moodle_release_number, '&#x0a;')"/>
-                    </xsl:with-param>
-                    <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
-                </xsl:call-template>
-                <tr>
-                    <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$attachmentsrequired_label"/></p></td>
-                    <td style="width: 1.0cm">
-                        <p class="Cell">
-                            <xsl:choose>
-                            <xsl:when test="attachmentsrequired">
-                                <xsl:value-of select="attachmentsrequired"/>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
-                            </xsl:choose>
-                        </p>
-                    </td>
-                </tr>
-                <xsl:text>&#x0a;</xsl:text>
-            </xsl:if>
+            <xsl:text>&#x0a;</xsl:text>
+            <xsl:call-template name="debugComment">
+                <xsl:with-param name="comment_text">
+                    <xsl:value-of select="concat('$attachmentsrequired_label: ', $attachmentsrequired_label, '; attachmentsrequired: ', attachmentsrequired, '&#x0a;')"/>
+                    <xsl:value-of select="concat('$moodle_release_number: ', $moodle_release_number, '&#x0a;')"/>
+                </xsl:with-param>
+                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
+            </xsl:call-template>
+            <tr>
+                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$attachmentsrequired_label"/></p></td>
+                <td style="width: 1.0cm">
+                    <p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="attachmentsrequired">
+                            <xsl:value-of select="attachmentsrequired"/>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+                        </xsl:choose>
+                    </p>
+                </td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
 
             <!-- Essays: accepted file types field -->
-            <xsl:if test="$moodle_release_number &gt;= '35'">
-                <xsl:text>&#x0a;</xsl:text>
-                <tr>
-                    <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$acceptedfiletypes_label"/></p></td>
-                    <td style="width: 1.0cm">
-                        <p class="Cell">
-                            <xsl:choose>
-                            <xsl:when test="acceptedfiletypes">
-                                <xsl:value-of select="acceptedfiletypes"/>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
-                            </xsl:choose>
-                        </p>
-                    </td>
-                </tr>
-                <xsl:text>&#x0a;</xsl:text>
-            </xsl:if>
+            <tr>
+                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$acceptedfiletypes_label"/></p></td>
+                <td style="width: 1.0cm">
+                    <p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="acceptedfiletypes">
+                            <xsl:value-of select="acceptedfiletypes"/>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
+                        </xsl:choose>
+                    </p>
+                </td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
         </xsl:if> <!-- 2.x Essay-specific question fields -->
 
         <!-- Short answers: are they case-sensitive? -->
@@ -974,7 +872,7 @@
         </xsl:if>
 
         <!-- Show number of correct responses when finished (Moodle 2.x only) -->
-        <xsl:if test="($qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MS' or $qtype = 'MW' or $qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT') and $moodle_release_number &gt; '19'">
+        <xsl:if test="($qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MS' or $qtype = 'MW' or $qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT')">
             <tr>
                 <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right">
                     <xsl:choose>
@@ -1010,25 +908,23 @@
         </xsl:if>
 
         <!-- New 2nd last heading row: optional ID number -->
-        <xsl:if test="$moodle_release_number &gt;= '36'">
-            <xsl:text>&#x0a;</xsl:text>
-            <tr>
-                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$idnumber_label"/></p></td>
-                <td style="width: 1.0cm">
-                    <p class="QFID">
-                        <xsl:choose>
-                        <xsl:when test="$idnumber_value != ''">
-                            <xsl:value-of select="$idnumber_value"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:value-of select="$blank_cell"/>
-                        </xsl:otherwise>
-                        </xsl:choose>
-                    </p>
-                </td>
-            </tr>
-            <xsl:text>&#x0a;</xsl:text>
-        </xsl:if> <!-- 2.x Essay-specific question fields -->
+        <xsl:text>&#x0a;</xsl:text>
+        <tr>
+            <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$idnumber_label"/></p></td>
+            <td style="width: 1.0cm">
+                <p class="QFID">
+                    <xsl:choose>
+                    <xsl:when test="$idnumber_value != ''">
+                        <xsl:value-of select="$idnumber_value"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="$blank_cell"/>
+                    </xsl:otherwise>
+                    </xsl:choose>
+                </p>
+            </td>
+        </tr>
+        <xsl:text>&#x0a;</xsl:text>
 
         <!-- Last heading row: column headings for table body -->
         <tr>
@@ -1062,10 +958,7 @@
                 <td style="{$col2_width}">
                 <!-- Essay questions in Moodle 1.9 to 2.3 have no response template, so leave it out -->
                     <xsl:choose>
-                    <xsl:when test="$moodle_release_number &lt; '25'">
-                        <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
-                    </xsl:when>
-                    <xsl:when test="$moodle_release_number &gt; '24' and responsetemplate and normalize-space(responsetemplate) = ''">
+                    <xsl:when test="responsetemplate and normalize-space(responsetemplate) = ''">
                         <p class="Cell"><xsl:value-of select="$responsetemplate_help_label"/></p>
                     </xsl:when>
                     <xsl:when test="responsetemplate and responsetemplate/@format and responsetemplate/@format = 'html'">
@@ -1082,13 +975,13 @@
                 </td>
                 <td style="{$col3_width}">
                     <xsl:choose>
-                    <xsl:when test="$moodle_release_number &gt; '19' and graderinfo and graderinfo = ''">
+                    <xsl:when test="graderinfo and graderinfo = ''">
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
-                    <xsl:when test="$moodle_release_number &gt; '19' and graderinfo and graderinfo/@format and graderinfo/@format = 'html'">
+                    <xsl:when test="graderinfo and graderinfo/@format and graderinfo/@format = 'html'">
                         <xsl:apply-templates select="graderinfo/*"/>
                     </xsl:when>
-                    <xsl:when test="$moodle_release_number &gt; '19' and graderinfo and graderinfo/@format and graderinfo/@format != 'html'">
+                    <xsl:when test="graderinfo and graderinfo/@format and graderinfo/@format != 'html'">
                         <p class="Cell"><xsl:apply-templates select="graderinfo/*"/></p>
                     </xsl:when>
                     <xsl:otherwise>
@@ -1159,7 +1052,7 @@
                         <xsl:apply-templates select="generalfeedback/*"/>
                     </xsl:otherwise>
                     </xsl:choose>
-                
+
                 </td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
@@ -1167,7 +1060,7 @@
         </xsl:if>
 
         <!-- Correct and Incorrect feedback for MA, MAT, MC and MW questions only -->
-        <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW' or starts-with($qtype, 'DD')">
+        <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'MAT' or $qtype = 'MW' or starts-with($qtype, 'DD')">
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$correctfeedback_label"/></p></th>
@@ -1198,7 +1091,7 @@
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
         <!-- Partially correct feedback for MA (Multi-answer), MAT(ching) and Missing Word (gapselect) questions only -->
-        <xsl:if test="$qtype = 'MA' or ($qtype = 'MAT' and $moodle_release_number &gt; '19') or $qtype = 'MW' or starts-with($qtype, 'DD')">
+        <xsl:if test="$qtype = 'MA' or $qtype = 'MAT' or $qtype = 'MW' or starts-with($qtype, 'DD')">
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$pcorrectfeedback_label"/></p></th>
@@ -1216,164 +1109,162 @@
         </xsl:if>
 
         <!-- Hints rows (added in Moodle 2.x) for CL MA MAT MC SA questions -->
-        <xsl:if test="$moodle_release_number &gt; '19'">
-            <xsl:for-each select="hint[text != '']">
-                <!-- Define a label for the hint text row (row 1 of 3) -->
-                <xsl:variable name="hint_number_label" select="concat(substring-before($hintn_label, '{no}'), position())"/>
-                <tr>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_number_label, $colon_string)"/></p></th>
-                    <td style="{$col3_width}">
-                        <xsl:apply-templates/>
-                    </td>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                </tr>
-                <xsl:text>&#x0a;</xsl:text>
-                <!-- Most question types allow for some fields on the behaviour of hints, but SA doesn't, and CL only in 2.4+ -->
-                <xsl:if test="($qtype != 'CL') or ($qtype = 'CL' and $moodle_release_number &gt; '23')">
-                    <tr>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_shownumpartscorrect_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                        <td style="{$col3_width}"><p class="Cell">
-                            <xsl:choose>
-                            <xsl:when test="shownumcorrect">
-                                <xsl:value-of select="$yes_label"/>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
-                            </xsl:choose>
-                        </p></td>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    </tr>
-                    <xsl:text>&#x0a;</xsl:text>
-                    <tr>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        <th style="{$col2_width}">
-                            <p class="TableRowHead">
-                                <xsl:choose>
-                                <xsl:when test="$qtype = 'DDM'">
-                                    <xsl:value-of select="concat($ddm_hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
-                                </xsl:otherwise>
-                                </xsl:choose>
-                            </p>
-                        </th>
-                        <td style="{$col3_width}"><p class="Cell">
-                            <xsl:choose>
-                            <xsl:when test="clearwrong">
-                                <xsl:value-of select="$yes_label"/>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
-                            </xsl:choose>
-                        </p></td>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    </tr>
-                    <xsl:text>&#x0a;</xsl:text>
-                    <xsl:if test="$qtype = 'MS'">
-                        <tr>
-                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                            <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                            <td style="{$col3_width}"><p class="Cell">
-                                <xsl:choose>
-                                <xsl:when test="options and options = '1'">
-                                    <xsl:value-of select="$yes_label"/>
-                                </xsl:when>
-                                <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
-                                </xsl:choose>
-                            </p></td>
-                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        </tr>
-                        <xsl:text>&#x0a;</xsl:text>
-                    </xsl:if>
-                    <xsl:text>&#x0a;</xsl:text>
-                    <xsl:if test="$qtype = 'DDM'">
-                        <tr>
-                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                            <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($ddm_stateincorrectlyplaced_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                            <td style="{$col3_width}"><p class="Cell">
-                                <xsl:choose>
-                                <xsl:when test="options and options = '1'">
-                                    <xsl:value-of select="$yes_label"/>
-                                </xsl:when>
-                                <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
-                                </xsl:choose>
-                            </p></td>
-                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        </tr>
-                        <xsl:text>&#x0a;</xsl:text>
-                    </xsl:if>
-                </xsl:if>
-            </xsl:for-each>
-
-            <!-- Include 1 empty hint row even if there are no hints, or if hint elements are present, but only have flags set -->
-            <xsl:if test="(not(hint) or hint/text = '') and ($qtype != 'DE' and $qtype != 'ES' and $qtype != 'TF')">
-                <!-- Define a label for the hint text row (row 1 of 3) -->
-                <xsl:variable name="hint_number_label" select="concat(substring-before($hintn_label, '{no}'), 1)"/>
-                <tr>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_number_label, $colon_string)"/></p></th>
-                    <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                </tr>
-                <xsl:text>&#x0a;</xsl:text>
-                <!-- Most question types allow for some fields on the behaviour of hints, but SA doesn't, and CL only in 2.4+ -->
-                <xsl:if test="($qtype != 'CL' and $qtype != 'SA') or ($qtype = 'CL' and $moodle_release_number &gt; '23')">
-                    <tr>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_shownumpartscorrect_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                        <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$no_label"/></p></td>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    </tr>
-                    <xsl:text>&#x0a;</xsl:text>
-                    <tr>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                        <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$no_label"/></p></td>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    </tr>
-                    <xsl:if test="$qtype = 'MS'">
-                        <xsl:text>&#x0a;</xsl:text>
-                        <tr>
-                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                            <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                            <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$no_label"/></p></td>
-                            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        </tr>
-                    </xsl:if>
-                </xsl:if>
-                <xsl:text>&#x0a;</xsl:text>
-            </xsl:if> 
-            <!-- End Hint processing -->
-
-            <!-- Tags row (added in Moodle 2.x) -->
+        <xsl:for-each select="hint[text != '']">
+            <!-- Define a label for the hint text row (row 1 of 3) -->
+            <xsl:variable name="hint_number_label" select="concat(substring-before($hintn_label, '{no}'), position())"/>
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$tags_label"/></p></th>
+                <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_number_label, $colon_string)"/></p></th>
                 <td style="{$col3_width}">
-                    <p class="Cell">
-                            <xsl:choose>
-                            <xsl:when test="tags[tag = '']">
-                                <!-- tag element present but empty -->
-                                <xsl:value-of select="$blank_cell"/>
-                            </xsl:when>
-                            <xsl:when test="tags/tag">
-                                <!-- tag element present and not empty -->
-                                    <xsl:for-each select="tags/tag">
-                                        <xsl:value-of select="normalize-space(.)"/>
-                                        <xsl:if test="position() != last()">
-                                            <xsl:text>, </xsl:text>
-                                        </xsl:if>
-                                    </xsl:for-each>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
-                            </xsl:choose>
-                    </p>
+                    <xsl:apply-templates/>
                 </td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
+            <!-- Most question types allow for some fields on the behaviour of hints, but SA doesn't, and CL only in 2.4+ -->
+            <xsl:if test="($qtype != 'CL') or ($qtype = 'CL')">
+                <tr>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_shownumpartscorrect_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                    <td style="{$col3_width}"><p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="shownumcorrect">
+                            <xsl:value-of select="$yes_label"/>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                        </xsl:choose>
+                    </p></td>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                </tr>
+                <xsl:text>&#x0a;</xsl:text>
+                <tr>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    <th style="{$col2_width}">
+                        <p class="TableRowHead">
+                            <xsl:choose>
+                            <xsl:when test="$qtype = 'DDM'">
+                                <xsl:value-of select="concat($ddm_hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
+                            </xsl:otherwise>
+                            </xsl:choose>
+                        </p>
+                    </th>
+                    <td style="{$col3_width}"><p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="clearwrong">
+                            <xsl:value-of select="$yes_label"/>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                        </xsl:choose>
+                    </p></td>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                </tr>
+                <xsl:text>&#x0a;</xsl:text>
+                <xsl:if test="$qtype = 'MS'">
+                    <tr>
+                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                        <td style="{$col3_width}"><p class="Cell">
+                            <xsl:choose>
+                            <xsl:when test="options and options = '1'">
+                                <xsl:value-of select="$yes_label"/>
+                            </xsl:when>
+                            <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                            </xsl:choose>
+                        </p></td>
+                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    </tr>
+                    <xsl:text>&#x0a;</xsl:text>
+                </xsl:if>
+                <xsl:text>&#x0a;</xsl:text>
+                <xsl:if test="$qtype = 'DDM'">
+                    <tr>
+                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($ddm_stateincorrectlyplaced_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                        <td style="{$col3_width}"><p class="Cell">
+                            <xsl:choose>
+                            <xsl:when test="options and options = '1'">
+                                <xsl:value-of select="$yes_label"/>
+                            </xsl:when>
+                            <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                            </xsl:choose>
+                        </p></td>
+                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    </tr>
+                    <xsl:text>&#x0a;</xsl:text>
+                </xsl:if>
+            </xsl:if>
+        </xsl:for-each>
+
+        <!-- Include 1 empty hint row even if there are no hints, or if hint elements are present, but only have flags set -->
+        <xsl:if test="(not(hint) or hint/text = '') and ($qtype != 'DE' and $qtype != 'ES' and $qtype != 'TF')">
+            <!-- Define a label for the hint text row (row 1 of 3) -->
+            <xsl:variable name="hint_number_label" select="concat(substring-before($hintn_label, '{no}'), 1)"/>
+            <tr>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_number_label, $colon_string)"/></p></th>
+                <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+            <!-- Most question types allow for some fields on the behaviour of hints, but SA doesn't, and CL only in 2.4+ -->
+            <xsl:if test="($qtype != 'CL' and $qtype != 'SA') or ($qtype = 'CL')">
+                <tr>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_shownumpartscorrect_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                    <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$no_label"/></p></td>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                </tr>
+                <xsl:text>&#x0a;</xsl:text>
+                <tr>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                    <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$no_label"/></p></td>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                </tr>
+                <xsl:if test="$qtype = 'MS'">
+                    <xsl:text>&#x0a;</xsl:text>
+                    <tr>
+                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                        <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$no_label"/></p></td>
+                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    </tr>
+                </xsl:if>
+            </xsl:if>
+            <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
+        <!-- End Hint processing -->
+
+        <!-- Tags row (added in Moodle 2.x) -->
+        <tr>
+            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+            <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$tags_label"/></p></th>
+            <td style="{$col3_width}">
+                <p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="tags[tag = '']">
+                            <!-- tag element present but empty -->
+                            <xsl:value-of select="$blank_cell"/>
+                        </xsl:when>
+                        <xsl:when test="tags/tag">
+                            <!-- tag element present and not empty -->
+                                <xsl:for-each select="tags/tag">
+                                    <xsl:value-of select="normalize-space(.)"/>
+                                    <xsl:if test="position() != last()">
+                                        <xsl:text>, </xsl:text>
+                                    </xsl:if>
+                                </xsl:for-each>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:value-of select="$blank_cell"/></xsl:otherwise>
+                        </xsl:choose>
+                </p>
+            </td>
+            <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+        </tr>
+        <xsl:text>&#x0a;</xsl:text>
 
         <!-- Instructions row for each question type -->
         <tr>
@@ -1388,7 +1279,7 @@
                 <p class="Cell"><i><xsl:value-of select="$instruction_text"/></i></p>
             </xsl:otherwise>
             </xsl:choose>
-            
+
             </td>
             <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
         </tr>
@@ -1490,7 +1381,7 @@
 <xsl:template match="text">
     <xsl:variable name="text_string">
         <xsl:variable name="raw_text" select="normalize-space(.)"/>
-        
+
         <xsl:choose>
         <!-- If the string is wrapped in <p>...</p>, get rid of it -->
         <xsl:when test="starts-with($raw_text, '&lt;p&gt;') and substring($raw_text, -4) = '&lt;/p&gt;'">
@@ -1505,7 +1396,7 @@
         <xsl:otherwise><xsl:value-of select="$raw_text"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-    
+
     <xsl:value-of select="$text_string" disable-output-escaping="yes"/>
 </xsl:template>
 
@@ -1517,7 +1408,7 @@
 
     <xsl:variable name="text_string">
         <xsl:variable name="raw_text" select="normalize-space(.)"/>
-        
+
         <xsl:choose>
         <!-- If the string is wrapped in <p>...</p>, get rid of it -->
         <xsl:when test="starts-with($raw_text, '&lt;p&gt;') and substring($raw_text, -4) = '&lt;/p&gt;'">
@@ -1567,7 +1458,7 @@
         <!-- Have a subquestion, so handle it -->
         <!-- First, copy the text prior to the first subquestion -->
         <xsl:value-of select="substring-before($cloze_string, $cloze_start_delimiter)" disable-output-escaping="yes"/>
-        
+
         <!-- Next, identify the first subquestion, and figure out what is its type and default mark -->
         <xsl:variable name="this_subquestion_string" select="substring-before(substring-after($cloze_string, $cloze_start_delimiter), $cloze_end_delimiter)"/>
         <xsl:variable name="this_subquestion_defaultmark">

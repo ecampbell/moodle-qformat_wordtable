@@ -39,6 +39,7 @@
 <xsl:param name="moodle_language" select="'en'"/> <!-- Interface language for user -->
 <xsl:param name="moodle_textdirection"/> <!-- Current text direction ltr or rtl -->
 <xsl:param name="moodle_release"/>  <!-- 1.9 or 2.x -->
+<xsl:param name="moodle_version"/>  <!-- Datestamp of release -->
 <xsl:param name="moodle_url"/>      <!-- Location of Moodle site -->
 <xsl:param name="moodle_username"/> <!-- Username for login -->
 <xsl:param name="debug_flag" select="'0'"/>      <!-- Debugging on or off -->
@@ -139,7 +140,7 @@
     <xsl:comment>Author ID: <xsl:value-of select="$author_id"/></xsl:comment>
     <xsl:comment>Author username: <xsl:value-of select="$moodle_username"/></xsl:comment>
     <xsl:comment>Contains embedded images: <xsl:value-of select="$contains_embedded_images"/></xsl:comment>
-    
+
     <!-- Handle the question tables -->
     <xsl:apply-templates select="$data/htm:html/htm:body/*"/>
     <!-- Check that the content has been successfully read in: if the title is empty, include an error message in the Word file rather than leave it blank -->
@@ -367,7 +368,7 @@
     <xsl:variable name="image_data">
         <xsl:choose>
         <xsl:when test="contains(@src, $pluginfiles_string)">
-            <!-- Image exported from Moodle 2.x, i.e. 
+            <!-- Image exported from Moodle 2.x, i.e.
                  <img src="@@PLUGINFILE@@/filename.gif"/> <file name="filename.gif" encoding="base64">{base64 data}</file> -->
             <xsl:value-of select="substring-after(ancestor::htm:td//htm:div[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ',')"/>
         </xsl:when>
@@ -381,7 +382,7 @@
     <xsl:variable name="image_format">
         <xsl:choose>
         <xsl:when test="contains(@src, $pluginfiles_string)">
-            <!-- Image exported from Moodle 2.x, i.e. 
+            <!-- Image exported from Moodle 2.x, i.e.
                  <img src="@@PLUGINFILE@@/filename.gif"/> <file name="filename.gif" encoding="base64">{base64 data}</file> -->
             <xsl:value-of select="substring-after(substring-before(ancestor::htm:td//htm:div[@class = 'ImageFile' and htm:img/@title = $image_file_name]/htm:img/@src, ';'), 'data:image/')"/>
         </xsl:when>
@@ -510,12 +511,12 @@
     ISO-8859-1 based URL-encoding demo
     Written by Mike J. Brown, mike@skew.org.
     Updated 2002-05-20.
- 
+
     No license; use freely, but credit me if reproducing in print.
- 
+
     Also see http://skew.org/xml/misc/URI-i18n/ for a discussion of
     non-ASCII characters in URIs.
- 
+
 Copied from: https://gist.github.com/nils-werner/721650
 -->
 

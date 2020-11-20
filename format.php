@@ -40,8 +40,8 @@ require_once("$CFG->libdir/xmlize.php");
 require_once($CFG->dirroot.'/lib/uploadlib.php');
 
 // Development: turn on all debug messages and strict warnings.
-// define('DEBUG_WORDTABLE', E_ALL | E_STRICT);.
-define('DEBUG_WORDTABLE', DEBUG_NONE);
+define('DEBUG_WORDTABLE', E_ALL | E_STRICT);
+// define('DEBUG_WORDTABLE', DEBUG_NONE);
 
 // The wordtable plugin just extends XML import/export.
 require_once("$CFG->dirroot/question/format/xml/format.php");
@@ -155,6 +155,7 @@ class qformat_wordtable extends qformat_xml {
             'moodle_language' => current_language(),
             'moodle_textdirection' => (right_to_left()) ? 'rtl' : 'ltr',
             'moodle_release' => $CFG->release,
+            'moodle_release' => $CFG->version,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
             'pluginname' => 'qformat_wordtable',
@@ -226,7 +227,7 @@ class qformat_wordtable extends qformat_xml {
                             case "word/_rels/footnotes.xml.rels" . $xmlfiledata . "</footnoteLinks>\n";
                                 break;
                             // @codingStandardsIgnoreLine case "word/_rels/settings.xml.rels":
-                                // @codingStandardsIgnoreLine $wordmldata .= "<settingsLinks>" . $xmlfiledata . 
+                                // @codingStandardsIgnoreLine $wordmldata .= "<settingsLinks>" . $xmlfiledata .
                                 // @codingStandardsIgnoreLine "</settingsLinks>\n";
                                 // @codingStandardsIgnoreLine break;
                         }
@@ -510,57 +511,28 @@ class qformat_wordtable extends qformat_xml {
                             'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions',
                             'transformationfailed', 'unsupported_instructions'),
             'qtype_description' => array('pluginnamesummary'),
-            'qtype_essay' => array('allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker',
-                            'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat'),
-            'qtype_match' => array('filloutthreeqsandtwoas'),
+            'qtype_essay' => array('acceptedfiletypes', 'allowattachments', 'attachmentsrequired',
+                            'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatnoinline',
+                            'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat', 'responseisrequired',
+                            'responsenotrequired', 'responserequired', 'responsetemplate', 'responsetemplate_help'
+                            ),
+            'qtype_match' => array('blanksforxmorequestions', 'filloutthreeqsandtwoas'),
             'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback',
-                            'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
+                            'partiallycorrectfeedback', 'pluginnamesummary', 'showstandardinstruction', 'shuffleanswers'),
             'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
             'qtype_truefalse' => array('false', 'true'),
-            'question' => array('category', 'clearwrongparts', 'defaultmark', 'generalfeedback', 'hintn',
-                            'penaltyforeachincorrecttry', 'questioncategory', 'shownumpartscorrect',
-                            'shownumpartscorrectwhenfinished'),
+            'question' => array('addmorechoiceblanks', 'category', 'clearwrongparts', 'correctfeedbackdefault', 'defaultmark',
+                            'generalfeedback', 'hintn', 'hintnoptions', 'idnumber', 'incorrectfeedbackdefault',
+                            'partiallycorrectfeedbackdefault', 'penaltyforeachincorrecttry', 'questioncategory',
+                            'shownumpartscorrect', 'shownumpartscorrectwhenfinished'),
             'quiz' => array('answer', 'answers', 'casesensitive', 'correct', 'correctanswers',
                             'defaultgrade', 'incorrect', 'shuffle')
             );
 
-        // Append Moodle release-specific text strings, to avoid PHP errors when absent strings are requested.
-        if ($CFG->release < '2.0') {
-            $textstrings['quiz'][] = 'choice';
-            $textstrings['quiz'][] = 'penaltyfactor';
-        } else if ($CFG->release >= '2.5') {
-            // Add support for new Essay fields added in Moodle 2.5.
-            $textstrings['qtype_essay'][] = 'responsetemplate';
-            $textstrings['qtype_essay'][] = 'responsetemplate_help';
-            $textstrings['qtype_match'][] = 'blanksforxmorequestions';
-            // Add support for new generic question fields added in Moodle 2.5.
-            $textstrings['question'][] = 'addmorechoiceblanks';
-            $textstrings['question'][] = 'correctfeedbackdefault';
-            $textstrings['question'][] = 'hintnoptions';
-            $textstrings['question'][] = 'incorrectfeedbackdefault';
-            $textstrings['question'][] = 'partiallycorrectfeedbackdefault';
-        }
-        if ($CFG->release >= '2.7') {
-            // Add support for new Essay fields added in Moodle 2.7.
-            $textstrings['qtype_essay'][] = 'attachmentsrequired';
-            $textstrings['qtype_essay'][] = 'responserequired';
-            $textstrings['qtype_essay'][] = 'responseisrequired';
-            $textstrings['qtype_essay'][] = 'responsenotrequired';
-            $textstrings['qtype_essay'][] = 'formatnoinline';
-
-        }
-        if ($CFG->release >= '3.5') {
-            // Add support for new Essay accepted file type added in Moodle 3.5.
-            $textstrings['qtype_essay'][] = 'acceptedfiletypes';
-        }
-        if ($CFG->release >= '3.6') {
-            // Add support for new optional ID number field added in Moodle 3.6.
-            $textstrings['question'][] = 'idnumber';
-        }
-
         // Add All-or-Nothing MCQ question type strings if present.
         if (is_object(question_bank::get_qtype('multichoiceset', false))) {
-            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
+            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback',
+                            'showstandardinstruction');
         }
         // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('gapselect', false))) {
