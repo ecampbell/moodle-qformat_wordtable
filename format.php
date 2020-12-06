@@ -518,7 +518,7 @@ class qformat_wordtable extends qformat_xml {
                             ),
             'qtype_match' => array('blanksforxmorequestions', 'filloutthreeqsandtwoas'),
             'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback',
-                            'partiallycorrectfeedback', 'pluginnamesummary', 'showstandardinstruction', 'shuffleanswers'),
+                            'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
             'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
             'qtype_truefalse' => array('false', 'true'),
             'question' => array('addmorechoiceblanks', 'category', 'clearwrongparts', 'correctfeedbackdefault', 'defaultmark',
@@ -531,8 +531,7 @@ class qformat_wordtable extends qformat_xml {
 
         // Add All-or-Nothing MCQ question type strings if present.
         if (is_object(question_bank::get_qtype('multichoiceset', false))) {
-            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback',
-                            'showstandardinstruction');
+            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
         }
         // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
         if (is_object(question_bank::get_qtype('gapselect', false))) {

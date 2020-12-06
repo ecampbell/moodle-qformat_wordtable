@@ -1209,7 +1209,7 @@
         <selectoption>
             <text><xsl:value-of select="normalize-space($plain_text)"/></text>
             <!-- Fraction value contains the group number in MW questions -->
-            <group><xsl:value-of select="$fraction_value"/></group>
+            <group><xsl:value-of select="translate($fraction_value, 'ABCDEFGHI', '123456789')"/></group>
         </selectoption>
     </xsl:when>
     <xsl:when test="$qtype = 'DDI'">
