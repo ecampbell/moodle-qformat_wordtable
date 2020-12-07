@@ -1706,7 +1706,13 @@
         <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
         <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
         <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-        <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="translate(group, '123456789', 'ABCDEFGHI')"/></p></td>
+        <td style="width: 1.0cm"><p class="QFGrade">
+            <xsl:choose>
+            <xsl:when test="group &lt; 10"><xsl:value-of select="translate(group, '123456789', 'ABCDEFGHI')"/></xsl:when>
+            <xsl:when test="group &lt; 19"><xsl:value-of select="translate(group - 9, '123456789', 'JKLMNOPQR')"/></xsl:when>
+            <xsl:when test="group &gt;= 19"><xsl:value-of select="translate(group - 18, '12', 'ST')"/></xsl:when>
+            </xsl:choose>
+        </p></td>
     </tr>
 </xsl:template>
 

@@ -40,8 +40,7 @@ require_once("$CFG->libdir/xmlize.php");
 require_once($CFG->dirroot.'/lib/uploadlib.php');
 
 // Development: turn on all debug messages and strict warnings.
-define('DEBUG_WORDTABLE', E_ALL | E_STRICT);
-// define('DEBUG_WORDTABLE', DEBUG_NONE);
+define('DEBUG_WORDTABLE', DEBUG_NONE);
 
 // The wordtable plugin just extends XML import/export.
 require_once("$CFG->dirroot/question/format/xml/format.php");
@@ -155,7 +154,7 @@ class qformat_wordtable extends qformat_xml {
             'moodle_language' => current_language(),
             'moodle_textdirection' => (right_to_left()) ? 'rtl' : 'ltr',
             'moodle_release' => $CFG->release,
-            'moodle_release' => $CFG->version,
+            'moodle_version' => $CFG->version,
             'moodle_url' => $CFG->wwwroot . "/",
             'moodle_username' => $USER->username,
             'pluginname' => 'qformat_wordtable',
@@ -510,15 +509,23 @@ class qformat_wordtable extends qformat_xml {
                             'cloze_mcformat_label', 'description_instructions', 'essay_instructions',
                             'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions',
                             'transformationfailed', 'unsupported_instructions'),
+            'qtype_ddimageortext' => array('pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
+                            'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop'),
+            'qtype_ddmarker' => array('pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
+                            'dropbackground', 'dropzoneheader', 'infinite', 'marker', 'noofdrags', 'shape_circle',
+                            'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced'),
+            'qtype_ddwtos' => array('pluginnamesummary', 'infinite'),
             'qtype_description' => array('pluginnamesummary'),
             'qtype_essay' => array('acceptedfiletypes', 'allowattachments', 'attachmentsrequired',
                             'graderinfo', 'formateditor', 'formateditorfilepicker', 'formatmonospaced', 'formatnoinline',
                             'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat', 'responseisrequired',
                             'responsenotrequired', 'responserequired', 'responsetemplate', 'responsetemplate_help'
                             ),
+            'qtype_gapselect' => array('pluginnamesummary', 'errornoslots', 'group', 'shuffle'),
             'qtype_match' => array('blanksforxmorequestions', 'filloutthreeqsandtwoas'),
             'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback',
                             'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
+            'qtype_multichoiceset' => array(), // Dummy entry in case we need it later.
             'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
             'qtype_truefalse' => array('false', 'true'),
             'question' => array('addmorechoiceblanks', 'category', 'clearwrongparts', 'correctfeedbackdefault', 'defaultmark',
@@ -530,27 +537,8 @@ class qformat_wordtable extends qformat_xml {
             );
 
         // Add All-or-Nothing MCQ question type strings if present.
-        if (is_object(question_bank::get_qtype('multichoiceset', false))) {
+        if (question_bank::is_qtype_installed('multichoiceset')) {
             $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
-        }
-        // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('gapselect', false))) {
-            $textstrings['qtype_gapselect'] = array('pluginnamesummary', 'errornoslots', 'group', 'shuffle');
-        }
-        // Add 'Drag and drop onto image' question type, added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('ddimageortext', false))) {
-            $textstrings['qtype_ddimageortext'] = array('pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
-                    'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop');
-        }
-        // Add 'Drag and drop markers' question type, added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('ddmarker', false))) {
-            $textstrings['qtype_ddmarker'] = array('pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
-                'dropbackground', 'dropzoneheader', 'infinite', 'marker', 'noofdrags', 'shape_circle',
-                'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced');
-        }
-        // Add 'Drag and drop into text' question type, added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('ddwtos', false))) {
-            $textstrings['qtype_ddwtos'] = array('pluginnamesummary', 'infinite');
         }
 
         $expout = "<moodlelabels>\n";
