@@ -33,11 +33,14 @@
 
 <!-- Top Level Parameters -->
 <xsl:param name="debug_flag" select="0" />
+<xsl:param name="moodle_release"/>  <!-- The release number of the current Moodle server -->
 <xsl:param name="moodle_language"/>  <!-- The current language interface selected by the user -->
 
 <!-- Top Level Variables derived from input -->
 <xsl:variable name="metadata" select="//x:html/x:head"/>
 <xsl:variable name="courseID" select="$metadata/x:meta[@name='moodleCourseID']/@content" />
+<!-- Get the Moodle version as a simple 2-digit number, e.g. 2.6.5 => 26 -->
+<xsl:variable name="moodleReleaseNumber" select="substring(translate($moodle_release, '.', ''), 1, 3)"/>
 
 <xsl:variable name="fileLanguage">
     <xsl:variable name="moodleLanguage" select="$metadata/x:meta[@name='moodleLanguage']/@content" />
