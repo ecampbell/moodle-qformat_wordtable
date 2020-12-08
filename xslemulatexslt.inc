@@ -34,6 +34,8 @@
 // Note that not everything is implemented.
 // In particular, only the bare minimum to support the BB conversion is here.
 
+defined('MOODLE_INTERNAL') || die;
+
 // This silliness is required to prevent PHP from evaluating the function() blocks before processing the return;s.
 if (true) {
 

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Word table question import format for Moodle 3.9+
+ * Word table question import format
  *
  * This fragment is called by moodle_needs_upgrading() and /admin/index.php
  *
@@ -28,8 +28,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020120701;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2020120800;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
-$plugin->release  = '3.7.1 (Build: 2020120701)';  // The current module release in human-readable form (x.y).
+$plugin->release  = '3.7.1 (Build: 2020120800)';  // The current module release in human-readable form (x.y).
 $plugin->requires = 2019051100;  // Requires Moodle 3.7 or later.
