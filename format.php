@@ -451,76 +451,40 @@ class qformat_wordtable extends qformat_xml {
                             'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions',
                             'transformationfailed', 'unsupported_instructions'),
             'qtype_description' => array('pluginnamesummary'),
-            'qtype_essay' => array('allowattachments', 'graderinfo', 'formateditor', 'formateditorfilepicker',
-                            'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat'),
-            'qtype_match' => array('filloutthreeqsandtwoas'),
+            'qtype_ddimageortext' => array('pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
+                    'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop'),
+            'qtype_ddmarker' => array('pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
+                'dropbackground', 'dropzoneheader', 'infinite', 'marker', 'noofdrags', 'shape_circle',
+                'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced'),
+            'qtype_ddwtos' => array('pluginnamesummary', 'infinite'),
+            'qtype_essay' => array('acceptedfiletypes', 'allowattachments', 'attachmentsrequired', 'formatnoinline',
+                            'graderinfo', 'formateditor', 'formateditorfilepicker',
+                            'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat',
+                            'responseisrequired', 'responsenotrequired',
+                            'responserequired', 'responsetemplate', 'responsetemplate_help'),
+            'qtype_gapselect' => array('pluginnamesummary', 'errornoslots', 'group', 'shuffle'),
+            'qtype_match' => array('blanksforxmorequestions', 'filloutthreeqsandtwoas'),
             'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback',
                             'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
             'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
             'qtype_truefalse' => array('false', 'true'),
-            'question' => array('category', 'clearwrongparts', 'defaultmark', 'generalfeedback', 'hintn',
+            'question' => array('addmorechoiceblanks', 'category', 'clearwrongparts', 'correctfeedbackdefault',
+                            'defaultmark', 'generalfeedback', 'hintn', 'hintnoptions',
+                            'incorrectfeedbackdefault', 'partiallycorrectfeedbackdefault',
                             'penaltyforeachincorrecttry', 'questioncategory', 'shownumpartscorrect',
                             'shownumpartscorrectwhenfinished'),
             'quiz' => array('answer', 'answers', 'casesensitive', 'correct', 'correctanswers',
                             'defaultgrade', 'incorrect', 'shuffle')
             );
 
-        // Append Moodle release-specific text strings, to avoid PHP errors when absent strings are requested.
-        if ($CFG->release < '2.0') {
-            $textstrings['quiz'][] = 'choice';
-            $textstrings['quiz'][] = 'penaltyfactor';
-        } else if ($CFG->release >= '2.5') {
-            // Add support for new Essay fields added in Moodle 2.5.
-            $textstrings['qtype_essay'][] = 'responsetemplate';
-            $textstrings['qtype_essay'][] = 'responsetemplate_help';
-            $textstrings['qtype_match'][] = 'blanksforxmorequestions';
-            // Add support for new generic question fields added in Moodle 2.5.
-            $textstrings['question'][] = 'addmorechoiceblanks';
-            $textstrings['question'][] = 'correctfeedbackdefault';
-            $textstrings['question'][] = 'hintnoptions';
-            $textstrings['question'][] = 'incorrectfeedbackdefault';
-            $textstrings['question'][] = 'partiallycorrectfeedbackdefault';
-        }
-        if ($CFG->release >= '2.7') {
-            // Add support for new Essay fields added in Moodle 2.7.
-            $textstrings['qtype_essay'][] = 'attachmentsrequired';
-            $textstrings['qtype_essay'][] = 'responserequired';
-            $textstrings['qtype_essay'][] = 'responseisrequired';
-            $textstrings['qtype_essay'][] = 'responsenotrequired';
-            $textstrings['qtype_essay'][] = 'formatnoinline';
-
-        }
-        if ($CFG->release >= '3.5') {
-            // Add support for new Essay accepted file type added in Moodle 3.5.
-            $textstrings['qtype_essay'][] = 'acceptedfiletypes';
-        }
         if ($CFG->release >= '3.6') {
             // Add support for new optional ID number field added in Moodle 3.6.
             $textstrings['question'][] = 'idnumber';
         }
 
         // Add All-or-Nothing MCQ question type strings if present.
-        if (is_object(question_bank::get_qtype('multichoiceset', false))) {
+        if (question_bank::is_qtype_installed('multichoiceset')) {
             $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
-        }
-        // Add 'Select missing word' question type (not the Missing Word format), added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('gapselect', false))) {
-            $textstrings['qtype_gapselect'] = array('pluginnamesummary', 'errornoslots', 'group', 'shuffle');
-        }
-        // Add 'Drag and drop onto image' question type, added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('ddimageortext', false))) {
-            $textstrings['qtype_ddimageortext'] = array('pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
-                    'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop');
-        }
-        // Add 'Drag and drop markers' question type, added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('ddmarker', false))) {
-            $textstrings['qtype_ddmarker'] = array('pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
-                'dropbackground', 'dropzoneheader', 'infinite', 'marker', 'noofdrags', 'shape_circle',
-                'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced');
-        }
-        // Add 'Drag and drop into text' question type, added to core in 2.9, downloadable before then.
-        if (is_object(question_bank::get_qtype('ddwtos', false))) {
-            $textstrings['qtype_ddwtos'] = array('pluginnamesummary', 'infinite');
         }
 
         $expout = "<moodlelabels>\n";
