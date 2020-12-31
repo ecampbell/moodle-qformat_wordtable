@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2020/12/29    3.7.0     Use Book wordconverter class to reduce duplicated code.
 2020/07/10    3.6.3     Stop leaving temporary files lying around.
 2020/07/10    3.6.2     Add support for Office MML m:deg element, which caused an error.
 2020/06/18    3.6.1     Add support for 'No online text' responses and accepted file types.

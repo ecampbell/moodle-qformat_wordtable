@@ -20,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
- * XSLT stylesheet to transform XHTML tables derived from Word 2010 files  into Moodle Question XML questions 
+ * XSLT stylesheet to transform XHTML tables derived from Word 2010 files  into Moodle Question XML questions
  *
  * @package qformat_wordtable
  * @copyright 2010-2015 Eoin Campbell
@@ -223,7 +223,7 @@
 
 <!-- Template Matches -->
 <xsl:template match="/">
-    
+
     <quiz>
     <!--
     <xsl:for-each select="$moodle_labels">
@@ -258,7 +258,7 @@
                 <xsl:if test="position() = $moodlePreviewQuestion">
                     <xsl:variable name="table_root" select="."/>
                     <xsl:variable name="qtype" select="translate(normalize-space($table_root/x:thead/x:tr[1]/x:th[position() = $flag_value_colnum]), $lcase, $ucase)" />
-                    
+
                     <xsl:comment>preview question[<xsl:value-of select="position()"/>] type = <xsl:value-of select="$qtype"/></xsl:comment>
 
                     <xsl:call-template name="itemAssessment">
@@ -269,8 +269,8 @@
                 </xsl:if>
             </xsl:for-each>
         </xsl:when>
+            <!-- The Moodle user interface language doesn't match the documents template language, so the question labels won't match: report an error in a dummy question that will display on the screen
         <xsl:when test="$fileLanguage != $moodle_language">
-            <!-- The Moodle user interface language doesn't match the documents template language, so the question labels won't match: report an error in a dummy question that will display on the screen -->
             <xsl:variable name="language_mismatch_error_message" select="concat($interface_language_mismatch, ' &quot;', $fileLanguage, '&quot; != &quot;', $moodle_language, '&quot;')"/>
             <question type="category">
                 <category><text><xsl:value-of select="'$course$/zzPreview'"/></text></category>
@@ -286,9 +286,10 @@
                 <shuffleanswers>false</shuffleanswers>
             </question>
         </xsl:when>
+         -->
         <xsl:otherwise>
             <!-- Not a preview, so import all questions -->
-            <xsl:for-each select="//x:table[@class='moodleQuestion']">
+            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
                 <xsl:variable name="qtype" select="translate(normalize-space(./x:thead/x:tr[1]/x:th[position() = $flag_value_colnum]), $lcase, $ucase)" />
                 <xsl:variable name="table_root" select="."/>
                 <xsl:variable name="id_quest" select="position()"/>
@@ -779,7 +780,7 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- Get the text value of the case sensitive flag, to compare it with Yes or No in the required language --> 
+    <!-- Get the text value of the case sensitive flag, to compare it with Yes or No in the required language -->
     <xsl:variable name="casesensitive_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $casesensitive_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
     <xsl:variable name="casesensitive_value">
         <xsl:choose>
@@ -790,7 +791,7 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- Get the text value of the shuffle answers flag, to compare it with Yes or No in the required language --> 
+    <!-- Get the text value of the shuffle answers flag, to compare it with Yes or No in the required language -->
     <xsl:variable name="shuffleAnswers_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $shuffle_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
     <!-- Shuffle the answers (MA/MC/MAT): Use the values true/false for Moodle 2.x and 0/1 for Moodle 1.9 -->
     <xsl:variable name="shuffleAnswers_value">
@@ -943,7 +944,7 @@
     </text></name>
         <!--
         <xsl:comment><xsl:value-of select="concat('raw_qname: ', $raw_qname, '; qseqnum: ', $qseqnum, '; qname: ',  $qname)"/></xsl:comment>
-        <xsl:message><xsl:value-of select="concat('itemStem name: ', $qname, '; qtype: ', $qtype)"/></xsl:message> 
+        <xsl:message><xsl:value-of select="concat('itemStem name: ', $qname, '; qtype: ', $qtype)"/></xsl:message>
         -->
 
     <xsl:text>&#x0a;</xsl:text>
@@ -1117,7 +1118,7 @@
         <xsl:text>&#x0a;</xsl:text>
         <xsl:comment>
             <xsl:value-of select="concat('showNumCorrect_flag: ', $showNumCorrect_flag, '; showNumCorrect_value: ', $showNumCorrect_value)"/>
-            <xsl:value-of select="concat('&#x0a;showNumCorrect_label: ', $showNumCorrect_label, 
+            <xsl:value-of select="concat('&#x0a;showNumCorrect_label: ', $showNumCorrect_label,
                 ';&#x0a;flag: ', $table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $showNumCorrect_label)]/x:th[2])"/>
         </xsl:comment>
         <xsl:text>&#x0a;</xsl:text>
@@ -1159,7 +1160,7 @@
 
     <!--<xsl:comment>td[2]: <xsl:value-of select="x:tr[1]/x:td[2]"/>; td[3]: <xsl:value-of select="x:tr[1]/x:td[3]"/>; td[4]: <xsl:value-of select="x:tr[1]/x:td[4]"/></xsl:comment>-->
 
-    <!-- Get plain text option for MW, SA and TF question types 
+    <!-- Get plain text option for MW, SA and TF question types
         TF can contain only 'true' or 'false', while MW and SA anwsers must be matchable strings -->
     <xsl:variable name="plain_text">
         <xsl:choose>
@@ -1201,7 +1202,7 @@
         <xsl:when test="$qtype = 'SA'"><xsl:value-of select="'100'"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$fraction_value"/></xsl:otherwise>
         </xsl:choose>
-    </xsl:variable>    
+    </xsl:variable>
 
     <xsl:variable name="answer_format">
         <xsl:choose>
@@ -1325,7 +1326,7 @@
                 </xsl:call-template>
             </xsl:otherwise>
             </xsl:choose>
-            
+
             <!-- Specific feedback for the current answer -->
             <feedback>
                 <xsl:if test="$moodleReleaseNumber &gt; '19'">
@@ -1445,7 +1446,7 @@
 <!-- Handle text, removing text before tabs, deleting non-significant newlines between elements, etc. -->
 <xsl:template name="convertUnicode">
     <xsl:param name="txt"/>
-    
+
     <xsl:variable name="cloze_answer_sep_nl" select="concat($cloze_cloze_answer_delimiter, '&#x0a;')"/>
     <xsl:choose>
         <!-- If empty (or newline), do nothing: needed to stop newlines between block elements being turned into br elements -->
@@ -1460,7 +1461,7 @@
         <!-- If a | followed by newline, remove the newline -->
         <xsl:when test="contains($txt, $cloze_answer_sep_nl)">
             <xsl:value-of select="concat(substring-before($txt, $cloze_answer_sep_nl), $cloze_answer_delimiter)"/>
-            
+
             <xsl:call-template name="convertUnicode">
                 <xsl:with-param name="txt" select="substring-after($txt, $cloze_answer_sep_nl)"/>
             </xsl:call-template>
@@ -1814,11 +1815,11 @@
     <!-- Process the Cloze bold item if it doesn't contain ':MC' or ':MULTICHOICE' already -->
     <xsl:variable name="correct_option" select="normalize-space(.)"/>
     <xsl:choose>
-    <xsl:when test="contains($mctext_string, $cloze_mc_keyword1) or 
-            contains($mctext_string, $cloze_mc_keyword2) or 
-            contains($mctext_string, $cloze_mch_keyword1) or 
-            contains($mctext_string, $cloze_mch_keyword2) or 
-            contains($mctext_string, $cloze_mcv_keyword1) or 
+    <xsl:when test="contains($mctext_string, $cloze_mc_keyword1) or
+            contains($mctext_string, $cloze_mc_keyword2) or
+            contains($mctext_string, $cloze_mch_keyword1) or
+            contains($mctext_string, $cloze_mch_keyword2) or
+            contains($mctext_string, $cloze_mcv_keyword1) or
             contains($mctext_string, $cloze_mcv_keyword2)">
         <!-- MC subquestion contains Moodle keywords, so no need to process it further -->
         <xsl:call-template name="debugComment">
@@ -1827,8 +1828,8 @@
         </xsl:call-template>
         <xsl:value-of select="$mctext_string"/>
     </xsl:when>
-    <xsl:when test="starts-with($mctext_string, $cloze_percent) or 
-            starts-with($mctext_string, $cloze_correct_prefix2) or 
+    <xsl:when test="starts-with($mctext_string, $cloze_percent) or
+            starts-with($mctext_string, $cloze_correct_prefix2) or
             contains($mctext_string, $cloze_answer_delimiter)">
         <!-- Text starts with grade indicator (percent or '='), so just wrap the content with the keyword prefix and suffix, omitting distractors -->
         <xsl:call-template name="debugComment">
@@ -1837,8 +1838,8 @@
         </xsl:call-template>
         <xsl:value-of select="concat($cloze_mc_prefix, $mctext_string, $cloze_end_delimiter)"/>
     </xsl:when>
-    <xsl:when test="contains($mctext_string, $cloze_answer_delimiter) and 
-            (not(starts-with($mctext_string, $cloze_percent)) or 
+    <xsl:when test="contains($mctext_string, $cloze_answer_delimiter) and
+            (not(starts-with($mctext_string, $cloze_percent)) or
              not(starts-with($mctext_string, $cloze_correct_prefix2)))">
         <!-- Text doesn't starts with grade indicator ('%' or '='), but does contain distractors delimited by ~, so prefix the first entry with a correct indicator -->
         <xsl:call-template name="debugComment">
@@ -1977,7 +1978,7 @@
     </xsl:apply-templates>
 </xsl:template>
 
-<!-- Handle images in Moodle 2.x to use PLUGINFILE--> 
+<!-- Handle images in Moodle 2.x to use PLUGINFILE-->
 <xsl:template match="x:img" mode="cloze">
 
     <xsl:apply-templates select="."/>
@@ -1988,7 +1989,7 @@
     <xsl:param name="answer_string"/>
     <xsl:param name="first" select="'0'"/>
     <xsl:param name="cloze_type" select="'SA'"/>
-    
+
     <!-- If its not the first item, insert a separator before the next answer-->
     <xsl:if test="$first != '1'">
         <xsl:text>~</xsl:text>
@@ -1998,7 +1999,7 @@
     <xsl:when test="contains($answer_string, $cloze_answer_delimiter)">
         <!-- More than one answer, so split out the first one  -->
         <xsl:variable name="first_answer" select="normalize-space(substring-before($answer_string, $cloze_answer_delimiter))"/>
-        
+
         <xsl:call-template name="format_cloze_answer">
             <xsl:with-param name="answer_string" select="$first_answer"/>
             <xsl:with-param name="cloze_type" select="$cloze_type"/>
@@ -2096,7 +2097,7 @@
             </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        
+
         <!-- Compose a full item string for this answer option, containing the ~ delimiter, the grade and the distractor -->
         <xsl:if test="$distractor_text != ''">
             <xsl:value-of select="concat($cloze_answer_delimiter, $distractor_grade, $distractor_text)"/>
@@ -2181,7 +2182,7 @@
             </xsl:if>
         </img>
     </xsl:if>
-    
+
 </xsl:template>
 
 
