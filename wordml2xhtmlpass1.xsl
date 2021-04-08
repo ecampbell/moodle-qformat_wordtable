@@ -2,7 +2,7 @@
     xmlns="http://www.w3.org/1999/xhtml"
     xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
     xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:o="urn:schemas-microsoft-com:office:office"
     xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
     xmlns:rels="http://schemas.openxmlformats.org/package/2006/relationships"
@@ -26,7 +26,7 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     exclude-result-prefixes="a cp dc dcterms dcmitype xsi o r v ve w wne wp wx w10 xs rels vt customProps"
     version="1.0">
-    
+
     <!-- This stylesheet is adapted from code by Oleg Tkachenko. The original copyright notice
          is reproduced below -->
     <!--
@@ -34,31 +34,31 @@
         http://www.xmllab.net
         All rights reserved.
 
-        Redistribution and use in source and binary forms, with or without 
-        modification, are permitted provided that the following conditions are 
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are
         met:
 
-        1. Redistributions of source code must retain the above copyright 
-             notice, this list of conditions and the following disclaimer. 
-        2. Redistributions in binary form must reproduce the above copyright 
-             notice, this list of conditions and the following disclaimer in 
-             the documentation and/or other materials provided with the 
-             distribution. 
+        1. Redistributions of source code must retain the above copyright
+             notice, this list of conditions and the following disclaimer.
+        2. Redistributions in binary form must reproduce the above copyright
+             notice, this list of conditions and the following disclaimer in
+             the documentation and/or other materials provided with the
+             distribution.
         3. Neither the name of Oleg Tkachenko nor the names of its contributors
-             may be used to endorse or promote products derived from this software 
-             without specific prior written permission. 
+             may be used to endorse or promote products derived from this software
+             without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-        "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-        LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-        FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-        COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-        INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-        BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS 
-        OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
-        AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
-        THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+        "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+        LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+        FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+        COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+        INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+        BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+        OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+        AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+        THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
         DAMAGE.
     -->
 
@@ -2683,7 +2683,7 @@
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <xsl:value-of select="$hyperLinks[@Id = $current_rId]/@Target"/>
-                                </xsl:otherwise>    
+                                </xsl:otherwise>
                             </xsl:choose>
                         </xsl:variable>
                         <xsl:choose>
@@ -2972,6 +2972,10 @@
 
     <xsl:template name="GetPStyleId">
         <xsl:choose>
+            <!-- Treat all formatted but not styled lists as Bullet Lists -->
+            <xsl:when test="w:pPr/w:pStyle/@w:val = 'ListParagraph' and w:pPr/w:numPr/w:numId/@w:val">
+                <xsl:value-of select="'ListBullet'"/>
+            </xsl:when>
             <xsl:when test="w:pPr/w:pStyle/@w:val">
                 <xsl:value-of select="w:pPr/w:pStyle/@w:val"/>
             </xsl:when>
@@ -4607,7 +4611,7 @@
     </xsl:template>
 
     <xsl:template match="//wordmlContainer/w:document">
-    
+
         <html>
             <head>
                 <!-- Dublin Core properties from file docProps/core.xml-->
@@ -4726,7 +4730,7 @@
             </xsl:if>
         </html>
     </xsl:template>
-    
+
 
     <!-- Handle images -->
     <xsl:template match="w:p/w:r/w:drawing">
@@ -4759,8 +4763,8 @@
 
         <!-- Map title field to alt attribute -->
         <xsl:variable name="img_alt" select="wp:inline/wp:docPr/@title"/>
-        <!-- The wp:extent/@cx and @cy attributes define the size of the image. They are denominated in 
-             EMUs (English Metric Units); 1 inch = 914400, therefore 1 pixel = 914400 / 96 (dpi) = 9525 
+        <!-- The wp:extent/@cx and @cy attributes define the size of the image. They are denominated in
+             EMUs (English Metric Units); 1 inch = 914400, therefore 1 pixel = 914400 / 96 (dpi) = 9525
              cf. http://polymathprogrammer.com/2009/10/22/english-metric-units-and-open-xml/ -->
         <!-- Map wp:extent/@cx and @cy fields to width/height, and round to integers -->
         <xsl:variable name="img_width" select="substring-before(wp:inline/wp:extent/@cx div 9525, '.')"/>
@@ -4827,7 +4831,7 @@
         </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-    
+
     <xsl:template match="w:p/w:r/w:pict">
         <xsl:choose>
             <xsl:when test="v:shape/@alt">
@@ -4873,7 +4877,7 @@
         <xsl:apply-templates select="//wordmlContainer/w:document"/>
     </xsl:template>
 
-    <!-- Roll up adjacent w:instrText elements to avoid splitting of Word field code 
+    <!-- Roll up adjacent w:instrText elements to avoid splitting of Word field code
     <xsl:template match="/">
         <xsl:variable name="instrText">
             <xsl:apply-templates mode="instrText"/>
