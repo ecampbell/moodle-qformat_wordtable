@@ -238,7 +238,7 @@
                 <category><text><xsl:value-of select="'$course$/zzPreview'"/></text></category>
             </question>
 
-            <xsl:for-each select="//x:table[@class='moodleQuestion']">
+            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
                 <!-- <xsl:comment>div position() = <xsl:value-of select="position()"/></xsl:comment> -->
 
                 <xsl:if test="position() = $moodlePreviewQuestion">
@@ -274,7 +274,7 @@
         </xsl:when>
         <xsl:otherwise>
             <!-- Not a preview, so import all questions -->
-            <xsl:for-each select="//x:table[@class='moodleQuestion']">
+            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
                 <xsl:variable name="qtype" select="translate(normalize-space(./x:thead/x:tr[1]/x:th[position() = $flag_value_colnum]), $lcase, $ucase)" />
                 <xsl:variable name="table_root" select="."/>
                 <xsl:variable name="id_quest" select="position()"/>
@@ -895,7 +895,7 @@
     <xsl:variable name="acceptedfiletypes_flag" select="translate(normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $acceptedfiletypes_label)]/x:th[position() = $flag_value_colnum]), $ucase, $lcase)"/>
 
     <!-- Get the name of the question, which is in the h2 preceding the table -->
-    <xsl:variable name="qseqnum" select="count(preceding::x:table[@class = 'moodleQuestion'])"/>
+    <xsl:variable name="qseqnum" select="count(preceding::x:table[contains(@class, 'moodleQuestion')])"/>
     <xsl:variable name="raw_qname" select="../x:h2"/>
     <xsl:variable name="qname">
         <xsl:choose>
