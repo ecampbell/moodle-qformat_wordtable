@@ -979,8 +979,9 @@
     </xsl:call-template>
     <penalty><xsl:value-of select="$questionPenalty_value"/></penalty>
     <hidden>0</hidden>
-    <!-- Moodle 3.6+ -->
-    <idnumber><xsl:value-of select="$idnumber_value"/></idnumber>
+    <xsl:if test="$moodleReleaseNumber &gt;= '36'">
+        <idnumber><xsl:value-of select="$idnumber_value"/></idnumber>
+    </xsl:if>
 
     <!-- Specific metadata for each question type -->
     <xsl:choose>

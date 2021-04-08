@@ -2972,10 +2972,6 @@
 
     <xsl:template name="GetPStyleId">
         <xsl:choose>
-            <!-- Treat all formatted but not styled lists as Bullet Lists -->
-            <xsl:when test="w:pPr/w:pStyle/@w:val = 'ListParagraph' and w:pPr/w:numPr/w:numId/@w:val">
-                <xsl:value-of select="'ListBullet'"/>
-            </xsl:when>
             <xsl:when test="w:pPr/w:pStyle/@w:val">
                 <xsl:value-of select="w:pPr/w:pStyle/@w:val"/>
             </xsl:when>
