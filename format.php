@@ -33,7 +33,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
  */
 
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/xmlize.php");
@@ -58,10 +57,16 @@ use \booktool_wordimport\wordconverter;
  */
 class qformat_wordtable extends qformat_xml {
     /** @var string Stylesheet to export Moodle Question XML into XHTML */
-    private $mqxml2wordstylesheet1 = 'mqxml2wordpass1.xsl';
+    private $mqxml2wordstylesheet1 = 'mqxml2xhtml.xsl';
 
     /** @var string Stylesheet to import XHTML into question XML */
     private $word2mqxmlstylesheet3 = 'xhtml2mqxml.xsl';
+
+    /** @var array Overrides to default XSLT parameters used for conversion */
+    private $xsltparameters = array('pluginname' => 'qformat_wordtable',
+            'heading1stylelevel' => 1, // Map "Heading 1" style to <h1> element.
+            'imagehandling' => 'embedded' // Embed image data directly into the generated Moodle Question XML.
+        );
 
     /**
      * Define required MIME-Type
@@ -83,12 +88,9 @@ class qformat_wordtable extends qformat_xml {
      * @return bool Success
      */
     public function importpreprocess() {
-        global $CFG, $USER, $COURSE, $OUTPUT;
+        global $CFG, $OUTPUT;
         $realfilename = "";
         $filename = "";
-
-        // Trace class.
-        $trace = new html_progress_trace();
 
         // Handle question imports in Lesson module by using mform, not the question/format.php qformat_default class.
         if (property_exists('qformat_default', 'realfilename')) {
@@ -121,50 +123,21 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
 
-        // Set common parameters for all XSLT transformations. Note that the XSLT processor doesn't support $arguments.
-        $parameters = array(
-            'course_id' => $COURSE->id,
-            'course_name' => $COURSE->fullname,
-            'author_name' => $USER->firstname . ' ' . $USER->lastname,
-            'moodle_country' => $USER->country,
-            'moodle_language' => current_language(),
-            'moodle_textdirection' => (right_to_left()) ? 'rtl' : 'ltr',
-            'moodle_release' => $CFG->release,
-            'moodle_url' => $CFG->wwwroot . "/",
-            'moodle_username' => $USER->username,
-            'username' => $USER->firstname . ' ' . $USER->lastname,
-            'pluginname' => 'qformat_wordtable',
-            'heading1stylelevel' => '1', // Default HTML heading element level for 'Heading 1' Word style.
-            'imagehandling' => 'embedded', // Are images embedded or referenced.
-            'debug_flag' => (debugging(null, DEBUG_DEVELOPER)) ? '1' : '0'
-            );
-
         // Import the Word file into XHTML and an array of images.
         $imagesforzipping = array();
-        $word2xml = new wordconverter();
-        $word2xml->set_heading1styleoffset(1);
-        $word2xml->set_imagehandling('embedded');
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
+        $word2xml->set_heading1styleoffset($this->xsltparameters['heading1stylelevel']);
+        $word2xml->set_imagehandling($this->xsltparameters['imagehandling']);
         $xsltoutput = $word2xml->import($filename, $imagesforzipping);
 
-        // Get a temporary file and store the output.
-        if (debugging(null, DEBUG_DEVELOPER)) {
-            if (!($tempxmlfilename = tempnam($CFG->tempdir, "wcx")) || (file_put_contents($tempxmlfilename, $xsltoutput)) == 0) {
-                throw new \moodle_exception(get_string('cannotopentempfile', 'qformat_wordtable', $tempxmlfilename));
-            }
-            $trace->output("file: $tempxmlfilename", 0);
-
-        }
         // Pass 3 - convert XHTML into Moodle Question XML.
         // Prepare for Import Pass 3 XSLT transformation.
         $stylesheet = __DIR__ . "/" . $this->word2mqxmlstylesheet3;
         $xsltoutput = "<pass3Container>\n" . $xsltoutput . $this->get_text_labels() . "\n</pass3Container>";
-        $mqxmldata = $word2xml->convert($xsltoutput, $stylesheet, $parameters);
+        $mqxmldata = $word2xml->convert($xsltoutput, $stylesheet, $this->xsltparameters);
 
         if ((strpos($mqxmldata, "</question>") === false)) {
             throw new \moodle_exception(get_string('noquestionsinfile', 'question'));
-        }
-        if (debugging(null, DEBUG_DEVELOPER)) {
-            $trace->output("Question XML: " . substr($mqxmldata, 0, 1000), 0);
         }
 
         // Now over-write the original Word file with the XML file, so that default XML file handling will work.
@@ -178,7 +151,6 @@ class qformat_wordtable extends qformat_xml {
         return true;
     }   // End importpreprocess function.
 
-
     // EXPORT FUNCTIONS START HERE.
 
     /**
@@ -188,7 +160,6 @@ class qformat_wordtable extends qformat_xml {
     public function export_file_extension() {
         return ".doc";
     }
-
 
     /**
      * Convert the Moodle Question XML into Word-compatible XHTML format
@@ -202,41 +173,29 @@ class qformat_wordtable extends qformat_xml {
      */
     public function presave_process( $content ) {
         // Override method to allow us convert to Word-compatible XHTML format.
-        global $CFG, $USER, $COURSE;
         global $OUTPUT;
 
-        // Stylesheet to convert Moodle Question XML into Word-compatible XHTML format.
+        // Stylesheet to convert Moodle Question XML into XHTML tables.
         $stylesheet = __DIR__ . "/" . $this->mqxml2wordstylesheet1;
 
-        // Check that there is some content to convert into Word.
-        if (!strlen($content)) {
+        // Check that there are questions to convert.
+        if (strpos($content, "</question>") === false) {
             echo $OUTPUT->notification(get_string('noquestions', 'qformat_wordtable'));
+            return $content;
         }
 
+        // Fields within a question may contain badly formatted HTML inside CDATA sections, so fix them up.
         $cleancontent = $this->clean_all_questions($content);
 
-        // Set parameters for XSLT transformation. Note that we cannot use $arguments though.
-        $parameters = array (
-            'course_id' => $COURSE->id,
-            'course_name' => $COURSE->fullname,
-            'author_name' => $USER->firstname . ' ' . $USER->lastname,
-            'moodle_country' => $USER->country,
-            'moodle_language' => current_language(),
-            'moodle_textdirection' => (right_to_left()) ? 'rtl' : 'ltr',
-            'moodle_release' => $CFG->release,
-            'moodle_url' => $CFG->wwwroot . "/",
-            'moodle_username' => $USER->username,
-            'debug_flag' => (debugging(null, DEBUG_DEVELOPER)) ? '1' : '0'
-        );
+        // Wrap the Moodle Question XML and the labels data in a single XML container for processing into XHTML tables.
+        $moodlelabels = $this->get_text_labels();
+        $questionxml = "<container>\n<quiz>" . $cleancontent . "</quiz>\n" . $moodlelabels . "\n</container>";
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
+        $xhtmldata = $word2xml->convert($questionxml, $stylesheet);
+        $xhtmldata = "<html><head><title>Fred</title></head><body>" . $word2xml->body_only($xhtmldata) . "</body></html>";
 
-        // Wrap the Moodle Question XML output in a container, along with the labels data, to get initial the XHTML.
-        $questionxml = "<container>\n<quiz>" . $cleancontent . "</quiz>\n" . $this->get_text_labels() . "\n</container>";
-        $word2xml = new wordconverter();
-        $xhtmldata = $word2xml->convert($questionxml, $stylesheet, $parameters);
-
-        // Now embed the the XHTML into a Word-compatible template.
-        $content = $word2xml->export($xhtmldata, 'question', $this->get_text_labels(), 'embedded');
-
+        // Embed the XHTML tables into a Word-compatible template document with styling information, etc.
+        $content = $word2xml->export($xhtmldata, 'question', $moodlelabels, 'embedded');
         return $content;
     }   // End presave_process function.
 
@@ -296,17 +255,18 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
         }
 
-        $word2xml = new wordconverter();
         $expout = "<moodlelabels>\n";
         foreach ($textstrings as $typegroup => $grouparray) {
             foreach ($grouparray as $stringid) {
                 $namestring = $typegroup . '_' . $stringid;
                 // Clean up question type explanation, in case the default text has been overridden on the site.
-                $cleantext = $word2xml->convert_to_xml(get_string($stringid, $typegroup));
+                $cleantext = get_string($stringid, $typegroup);
                 $expout .= '<data name="' . $namestring . '"><value>' . $cleantext . "</value></data>\n";
             }
         }
         $expout .= "</moodlelabels>";
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
+        $expout = $word2xml->convert_to_xml($expout);
         $expout = str_replace("<br>", "<br/>", $expout);
 
         return $expout;
@@ -323,7 +283,7 @@ class qformat_wordtable extends qformat_xml {
     private function clean_all_questions($questionxmlstring) {
         // Start assembling the cleaned output string, starting with empty.
         $cleanquestionxml = "";
-        $word2xml = new wordconverter();
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
 
         // Split the string into questions in order to check the text fields for clean HTML.
         $foundquestions = preg_match_all('~(.*?)<question type="([^"]*)"[^>]*>(.*?)</question>~s', $questionxmlstring,

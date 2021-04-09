@@ -20,7 +20,7 @@
  * This fragment is called by moodle_needs_upgrading() and /admin/index.php
  *
  * @package    qformat_wordtable
- * @copyright  2010-2016 Eoin Campbell
+ * @copyright  2010-2021 Eoin Campbell
  * @author     Eoin Campbell
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
  **/
@@ -28,8 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021040800;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2021040900;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
-$plugin->release  = '4.0.0 (Build: 2021040800)';  // The current module release in human-readable form (x.y).
-$plugin->requires = 2019051100;  // Requires Moodle 3.7 or later.
+$plugin->release  = '4.0.0 (Build: 2021040900)';  // The current module release in human-readable form (x.y).
+$plugin->requires = 2018051700;  // Requires Moodle 3.5 or later.
+$plugin->dependencies = array('booktool_wordimport' => 2021040900);

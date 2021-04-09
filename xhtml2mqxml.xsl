@@ -33,14 +33,13 @@
 
 <!-- Top Level Parameters -->
 <xsl:param name="debug_flag" select="0" />
-<xsl:param name="moodle_release"/>  <!-- The release number of the current Moodle server -->
+<xsl:param name="moodle_release"/>  <!-- The version number of the current Moodle release -->
+<xsl:param name="moodle_release_date"/>  <!-- The major release date of the current release -->
 <xsl:param name="moodle_language"/>  <!-- The current language interface selected by the user -->
 
 <!-- Top Level Variables derived from input -->
 <xsl:variable name="metadata" select="//x:html/x:head"/>
 <xsl:variable name="courseID" select="$metadata/x:meta[@name='moodleCourseID']/@content" />
-<!-- Get the Moodle version as a simple 2-digit number, e.g. 2.6.5 => 26 -->
-<xsl:variable name="moodleReleaseNumber" select="substring(translate($moodle_release, '.', ''), 1, 3)"/>
 
 <xsl:variable name="fileLanguage">
     <xsl:variable name="moodleLanguage" select="$metadata/x:meta[@name='moodleLanguage']/@content" />
@@ -228,7 +227,7 @@
         <xsl:value-of select="'&#x0a;'"/>
         <xsl:comment>fileLanguage: <xsl:value-of select="$fileLanguage"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
-         <xsl:comment>moodleReleaseNumber: <xsl:value-of select="$moodleReleaseNumber"/></xsl:comment>
+         <xsl:comment>moodle_release_date: <xsl:value-of select="$moodle_release_date"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
         <!-- 3 cases to handle: a) 1 preview question; b) language mismatch; c) all questions -->
         <xsl:choose>
@@ -979,7 +978,7 @@
     </xsl:call-template>
     <penalty><xsl:value-of select="$questionPenalty_value"/></penalty>
     <hidden>0</hidden>
-    <xsl:if test="$moodleReleaseNumber &gt;= '36'">
+    <xsl:if test="$moodle_release_date &gt;= '20181203'"> <!-- Moodle 3.6 or higher -->
         <idnumber><xsl:value-of select="$idnumber_value"/></idnumber>
     </xsl:if>
 
