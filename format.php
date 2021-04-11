@@ -57,10 +57,10 @@ use \booktool_wordimport\wordconverter;
  */
 class qformat_wordtable extends qformat_xml {
     /** @var string Stylesheet to export Moodle Question XML into XHTML */
-    private $mqxml2wordstylesheet1 = 'mqxml2xhtml.xsl';
+    private $mqxml2xhtmlstylesheet = 'mqxml2xhtml.xsl';
 
     /** @var string Stylesheet to import XHTML into question XML */
-    private $word2mqxmlstylesheet3 = 'xhtml2mqxml.xsl';
+    private $xhtml2mqxmlstylesheet = 'xhtml2mqxml.xsl';
 
     /** @var array Overrides to default XSLT parameters used for conversion */
     private $xsltparameters = array('pluginname' => 'qformat_wordtable',
@@ -132,8 +132,8 @@ class qformat_wordtable extends qformat_xml {
 
         // Pass 3 - convert XHTML into Moodle Question XML.
         // Prepare for Import Pass 3 XSLT transformation.
-        $stylesheet = __DIR__ . "/" . $this->word2mqxmlstylesheet3;
-        $xsltoutput = "<pass3Container>\n" . $xsltoutput . $this->get_text_labels() . "\n</pass3Container>";
+        $stylesheet = __DIR__ . "/" . $this->xhtml2mqxmlstylesheet;
+        $xsltoutput = "<pass3Container>\n" . $xsltoutput . $this->get_question_labels() . "\n</pass3Container>";
         $mqxmldata = $word2xml->convert($xsltoutput, $stylesheet, $this->xsltparameters);
 
         if ((strpos($mqxmldata, "</question>") === false)) {
@@ -176,7 +176,7 @@ class qformat_wordtable extends qformat_xml {
         global $OUTPUT;
 
         // Stylesheet to convert Moodle Question XML into XHTML tables.
-        $stylesheet = __DIR__ . "/" . $this->mqxml2wordstylesheet1;
+        $stylesheet = __DIR__ . "/" . $this->mqxml2xhtmlstylesheet;
 
         // Check that there are questions to convert.
         if (strpos($content, "</question>") === false) {
@@ -188,7 +188,7 @@ class qformat_wordtable extends qformat_xml {
         $cleancontent = $this->clean_all_questions($content);
 
         // Wrap the Moodle Question XML and the labels data in a single XML container for processing into XHTML tables.
-        $moodlelabels = $this->get_text_labels();
+        $moodlelabels = $this->get_question_labels();
         $questionxml = "<container>\n<quiz>" . $cleancontent . "</quiz>\n" . $moodlelabels . "\n</container>";
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
         $xhtmldata = $word2xml->convert($questionxml, $stylesheet);
@@ -200,13 +200,31 @@ class qformat_wordtable extends qformat_xml {
     }   // End presave_process function.
 
     /**
-     * Get all the text strings needed to fill in the Word file labels in a language-dependent way
+     * Get the XSLT stylesheet for converting XHTML tables into Moodle Question XML
+     *
+     * @return string Path to stylesheet
+     */
+    public function get_import_stylesheet() {
+        return __DIR__ . "/" . $this->xhtml2mqxmlstylesheet;
+    }
+
+    /**
+     * Get the XSLT stylesheet for converting Moodle Question XML into XHTML tables
+     *
+     * @return string Path to stylesheet
+     */
+    public function get_export_stylesheet() {
+        return __DIR__ . "/" . $this->mqxml2xhtmlstylesheet;
+    }
+
+    /**
+     * Get the core question text strings needed to fill in table labels
      *
      * A string containing XML data, populated from the language folders, is returned
      *
      * @return string
      */
-    private function get_text_labels() {
+    public function get_core_question_labels() {
         global $CFG;
 
         // Release-independent list of all strings required in the XSLT stylesheets for labels etc.
@@ -250,12 +268,42 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['question'][] = 'idnumber';
         }
 
+        $expout = "<moodlelabels>\n";
+        foreach ($textstrings as $typegroup => $grouparray) {
+            foreach ($grouparray as $stringid) {
+                $namestring = $typegroup . '_' . $stringid;
+                // Clean up question type explanation, in case the default text has been overridden on the site.
+                $cleantext = get_string($stringid, $typegroup);
+                $expout .= '<data name="' . $namestring . '"><value>' . $cleantext . "</value></data>\n";
+            }
+        }
+        $expout .= "</moodlelabels>";
+
+        // Ensure the XML is well-formed, as the standard clean text strings may have been overwritten on some sites.
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
+        $expout = $word2xml->convert_to_xml($expout);
+        $expout = str_replace("<br>", "<br/>", $expout);
+
+        return $expout;
+    }
+
+    /**
+     * Get the core and contributed question text strings needed to fill in table labels
+     *
+     * A string containing XML data, populated from the language folders, is returned
+     *
+     * @return string
+     */
+    private function get_question_labels() {
+        global $CFG;
+
         // Add All-or-Nothing MCQ question type strings if present.
-        if (question_bank::is_qtype_installed('multichoiceset')) {
-            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
+        if (is_object(question_bank::get_qtype('multichoiceset', false))) {
+           $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
         }
 
-        $expout = "<moodlelabels>\n";
+        // Get the core question labels, and strip out the closing element so more can be added.
+        $expout = str_replace("</moodlelabels>", "", get_contributed_question_labels());
         foreach ($textstrings as $typegroup => $grouparray) {
             foreach ($grouparray as $stringid) {
                 $namestring = $typegroup . '_' . $stringid;
