@@ -1,6 +1,11 @@
 # Change log
 
 Date          Version   Comment
+<<<<<<< HEAD
+=======
+2021/04/08    4.0.0     Use Book Word import wordconverter class for import/export.
+2020/12/08    3.7.1     Add support for letter-groups in Select Missing Word questions.
+>>>>>>> MOODLE_39_STABLE
 2020/07/10    3.6.3     Stop leaving temporary files lying around.
 2020/07/10    3.6.2     Add support for Office MML m:deg element, which caused an error.
 2020/06/18    3.6.1     Add support for 'No online text' responses and accepted file types.

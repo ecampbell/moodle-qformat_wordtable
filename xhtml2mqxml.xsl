@@ -20,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
- * XSLT stylesheet to transform XHTML tables derived from Word 2010 files  into Moodle Question XML questions 
+ * XSLT stylesheet to transform XHTML tables derived from Word 2010 files  into Moodle Question XML questions
  *
  * @package qformat_wordtable
  * @copyright 2010-2015 Eoin Campbell
@@ -33,14 +33,13 @@
 
 <!-- Top Level Parameters -->
 <xsl:param name="debug_flag" select="0" />
-<xsl:param name="moodle_release"/>  <!-- The release number of the current Moodle server -->
+<xsl:param name="moodle_release"/>  <!-- The version number of the current Moodle release -->
+<xsl:param name="moodle_release_date"/>  <!-- The major release date of the current release -->
 <xsl:param name="moodle_language"/>  <!-- The current language interface selected by the user -->
 
 <!-- Top Level Variables derived from input -->
 <xsl:variable name="metadata" select="//x:html/x:head"/>
 <xsl:variable name="courseID" select="$metadata/x:meta[@name='moodleCourseID']/@content" />
-<!-- Get the Moodle version as a simple 2-digit number, e.g. 2.6.5 => 26 -->
-<xsl:variable name="moodleReleaseNumber" select="substring(translate($moodle_release, '.', ''), 1, 2)"/>
 
 <xsl:variable name="fileLanguage">
     <xsl:variable name="moodleLanguage" select="$metadata/x:meta[@name='moodleLanguage']/@content" />
@@ -95,26 +94,12 @@
 <xsl:variable name="interface_language_mismatch" select="$moodle_labels/data[@name = 'qformat_wordtable_interface_language_mismatch']"/>
 
 <xsl:variable name="categoryname_label" select="$moodle_labels/data[@name = 'moodle_categoryname']"/>
-<xsl:variable name="defaultmark_label">
-    <xsl:choose>
-    <xsl:when test="$moodleReleaseNumber = '1'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'quiz_defaultgrade']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="normalize-space($moodle_labels/data[@name = 'question_defaultmark'])"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="defaultmark_label" select="normalize-space($moodle_labels/data[@name = 'question_defaultmark'])"/>
 <xsl:variable name="grade_label" select="$moodle_labels/data[@name = 'moodle_grade']"/>
 <xsl:variable name="no_label" select="normalize-space(translate($moodle_labels/data[@name = 'moodle_no'], $ucase, $lcase))"/>
 <xsl:variable name="yes_label" select="normalize-space(translate($moodle_labels/data[@name = 'moodle_yes'], $ucase, $lcase))"/>
 <xsl:variable name="item_label" select="$moodle_labels/data[@name = 'grades_item']"/>
-<xsl:variable name="penalty_label">
-    <xsl:choose>
-    <xsl:when test="$moodleReleaseNumber = '1'">
-        <xsl:value-of select="$moodle_labels/data[@name = 'quiz_penaltyfactor']"/>
-    </xsl:when>
-    <xsl:otherwise><xsl:value-of select="$moodle_labels/data[@name = 'question_penaltyforeachincorrecttry']"/></xsl:otherwise>
-    </xsl:choose>
-</xsl:variable>
+<xsl:variable name="penalty_label" select="$moodle_labels/data[@name = 'question_penaltyforeachincorrecttry']"/>
 <xsl:variable name="hint_clearwrongparts_label" select="$moodle_labels/data[@name = 'question_clearwrongparts']"/>
 <xsl:variable name="hint_shownumcorrect_label" select="$moodle_labels/data[@name = 'question_shownumpartscorrect']"/>
 
@@ -223,7 +208,7 @@
 
 <!-- Template Matches -->
 <xsl:template match="/">
-    
+
     <quiz>
     <!--
     <xsl:for-each select="$moodle_labels">
@@ -242,7 +227,7 @@
         <xsl:value-of select="'&#x0a;'"/>
         <xsl:comment>fileLanguage: <xsl:value-of select="$fileLanguage"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
-         <xsl:comment>moodleReleaseNumber: <xsl:value-of select="$moodleReleaseNumber"/></xsl:comment>
+         <xsl:comment>moodle_release_date: <xsl:value-of select="$moodle_release_date"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
         <!-- 3 cases to handle: a) 1 preview question; b) language mismatch; c) all questions -->
         <xsl:choose>
@@ -252,13 +237,13 @@
                 <category><text><xsl:value-of select="'$course$/zzPreview'"/></text></category>
             </question>
 
-            <xsl:for-each select="//x:table[@class='moodleQuestion']">
+            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
                 <!-- <xsl:comment>div position() = <xsl:value-of select="position()"/></xsl:comment> -->
 
                 <xsl:if test="position() = $moodlePreviewQuestion">
                     <xsl:variable name="table_root" select="."/>
                     <xsl:variable name="qtype" select="translate(normalize-space($table_root/x:thead/x:tr[1]/x:th[position() = $flag_value_colnum]), $lcase, $ucase)" />
-                    
+
                     <xsl:comment>preview question[<xsl:value-of select="position()"/>] type = <xsl:value-of select="$qtype"/></xsl:comment>
 
                     <xsl:call-template name="itemAssessment">
@@ -288,7 +273,7 @@
         </xsl:when>
         <xsl:otherwise>
             <!-- Not a preview, so import all questions -->
-            <xsl:for-each select="//x:table[@class='moodleQuestion']">
+            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
                 <xsl:variable name="qtype" select="translate(normalize-space(./x:thead/x:tr[1]/x:th[position() = $flag_value_colnum]), $lcase, $ucase)" />
                 <xsl:variable name="table_root" select="."/>
                 <xsl:variable name="id_quest" select="position()"/>
@@ -422,9 +407,7 @@
 
             <xsl:for-each select="$table_root/x:tbody/x:tr[count(x:td) = $nColumns]">
                 <subquestion>
-                    <xsl:if test="$moodleReleaseNumber &gt; '19'">
-                        <xsl:attribute name="format"><xsl:text>html</xsl:text></xsl:attribute>
-                    </xsl:if>
+                    <xsl:attribute name="format"><xsl:text>html</xsl:text></xsl:attribute>
 
                     <xsl:call-template name="rich_text_content">
                         <xsl:with-param name="content" select="x:td[position() = $option_colnum]"/>
@@ -596,93 +579,91 @@
         </xsl:choose>
 
         <!-- Handle any hints that are included, 3 or 4 (MS, DDM) rows for each successive hint -->
-        <xsl:if test="$moodleReleaseNumber &gt; '19'">
-            <xsl:variable name="hintn_prefix" select="normalize-space(substring-before($hintn_label, '{no}'))"/>
-            <xsl:for-each select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $hintn_prefix)]">
-                <xsl:variable name="current_hint_row_num" select="position()"/>
-                <xsl:variable name="hint_text_norm" select="normalize-space(x:td[position() = $hints_colnum])"/>
-                <xsl:if test="$hint_text_norm != '' and $hint_text_norm != '&#160;' and $hint_text_norm != '_'">
-                    <hint format="html">
-                        <xsl:call-template name="rich_text_content">
-                            <xsl:with-param name="content" select="x:td[position() = $hints_colnum]"/>
-                        </xsl:call-template>
+        <xsl:variable name="hintn_prefix" select="normalize-space(substring-before($hintn_label, '{no}'))"/>
+        <xsl:for-each select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $hintn_prefix)]">
+            <xsl:variable name="current_hint_row_num" select="position()"/>
+            <xsl:variable name="hint_text_norm" select="normalize-space(x:td[position() = $hints_colnum])"/>
+            <xsl:if test="$hint_text_norm != '' and $hint_text_norm != '&#160;' and $hint_text_norm != '_'">
+                <hint format="html">
+                    <xsl:call-template name="rich_text_content">
+                        <xsl:with-param name="content" select="x:td[position() = $hints_colnum]"/>
+                    </xsl:call-template>
 
-                        <!-- Get the 1st row following the hint, check that it has the correct label, defining the handling of the hint (show number of parts correct) -->
-                        <xsl:variable name="hint_sncf_cell" select="normalize-space(following-sibling::x:tr[1]/x:th)"/>
-                        <xsl:variable name="hint_sncf_cell_lc" select="translate($hint_sncf_cell, $ucase, $lcase)"/>
-                        <xsl:variable name="current_hint_shownumcorrect_flag">
-                            <xsl:if test="starts-with($hint_sncf_cell_lc, translate($hint_shownumcorrect_label, $ucase, $lcase))">
-                                <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[1]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
-                            </xsl:if>
-                            <!--
-                            <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[1]/x:td[2]), $ucase, $lcase), translate($hint_shownumcorrect_label, $ucase, $lcase))">
-                                <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[1]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
-                            </xsl:if>
-                            -->
-                        </xsl:variable>
-                        <xsl:if test="contains($current_hint_shownumcorrect_flag, $yes_label)">
-                            <shownumcorrect/>
+                    <!-- Get the 1st row following the hint, check that it has the correct label, defining the handling of the hint (show number of parts correct) -->
+                    <xsl:variable name="hint_sncf_cell" select="normalize-space(following-sibling::x:tr[1]/x:th)"/>
+                    <xsl:variable name="hint_sncf_cell_lc" select="translate($hint_sncf_cell, $ucase, $lcase)"/>
+                    <xsl:variable name="current_hint_shownumcorrect_flag">
+                        <xsl:if test="starts-with($hint_sncf_cell_lc, translate($hint_shownumcorrect_label, $ucase, $lcase))">
+                            <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[1]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
                         </xsl:if>
+                        <!--
+                        <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[1]/x:td[2]), $ucase, $lcase), translate($hint_shownumcorrect_label, $ucase, $lcase))">
+                            <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[1]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
+                        </xsl:if>
+                        -->
+                    </xsl:variable>
+                    <xsl:if test="contains($current_hint_shownumcorrect_flag, $yes_label)">
+                        <shownumcorrect/>
+                    </xsl:if>
 
-                        <!-- Get the 2nd row following the hint, check that it has the correct label, defining the handling of the hint (clear wrong parts or move incorrect markers (DDM)) -->
-                        <xsl:variable name="clearwrongparts_label">
+                    <!-- Get the 2nd row following the hint, check that it has the correct label, defining the handling of the hint (clear wrong parts or move incorrect markers (DDM)) -->
+                    <xsl:variable name="clearwrongparts_label">
+                        <xsl:choose>
+                        <xsl:when test="$qtype = 'DDM'">
+                            <xsl:value-of select="$ddm_hint_clearwrongparts_label"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="$hint_clearwrongparts_label"/>
+                        </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:variable>
+
+                    <xsl:variable name="current_hint_clearwrongparts_flag">
+                        <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[2]/x:th), $ucase, $lcase), translate($clearwrongparts_label, $ucase, $lcase))">
+                            <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[2]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
+                        </xsl:if>
+                    </xsl:variable>
+                    <!--
+                    <xsl:comment><xsl:value-of select="concat('current_row: ', $current_hint_row_num, '; clearwrongparts: ', $current_hint_clearwrongparts_flag, '; following-sibling::x:tr[2]/x:td[1]: ', following-sibling::x:tr[2]/x:td[1])"/></xsl:comment>
+                     -->
+                    <xsl:if test="contains($current_hint_clearwrongparts_flag, $yes_label)">
+                        <clearwrong/>
+                    </xsl:if>
+
+                    <!-- Get the 3rd row following the hint, check if it has a MS/DDM-specific label -->
+                    <!--DDM: State which markers are incorrectly placed; MS: Show the feedback for the selected responses-->
+                    <xsl:if test="$qtype = 'MS' or $qtype = 'DDM'">
+                        <xsl:variable name="current_hint_options_label">
                             <xsl:choose>
                             <xsl:when test="$qtype = 'DDM'">
-                                <xsl:value-of select="$ddm_hint_clearwrongparts_label"/>
+                                <xsl:value-of select="$ddm_hint_stateincorrectlyplaced_label"/>
                             </xsl:when>
                             <xsl:otherwise>
-                                <xsl:value-of select="$hint_clearwrongparts_label"/>
+                                <xsl:value-of select="$multichoiceset_showeachanswerfeedback_label"/>
                             </xsl:otherwise>
                             </xsl:choose>
                         </xsl:variable>
-
-                        <xsl:variable name="current_hint_clearwrongparts_flag">
-                            <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[2]/x:th), $ucase, $lcase), translate($clearwrongparts_label, $ucase, $lcase))">
-                                <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[2]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
+                        <xsl:variable name="current_hint_options_flag">
+                            <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[3]/x:th), $ucase, $lcase), translate($current_hint_options_label, $ucase, $lcase))">
+                                <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[3]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
                             </xsl:if>
                         </xsl:variable>
-                        <!--
-                        <xsl:comment><xsl:value-of select="concat('current_row: ', $current_hint_row_num, '; clearwrongparts: ', $current_hint_clearwrongparts_flag, '; following-sibling::x:tr[2]/x:td[1]: ', following-sibling::x:tr[2]/x:td[1])"/></xsl:comment>
-                         -->
-                        <xsl:if test="contains($current_hint_clearwrongparts_flag, $yes_label)">
-                            <clearwrong/>
+                        <xsl:call-template name="debugComment">
+                            <xsl:with-param name="comment_text" select="concat('current_hint_options_label: ', $current_hint_options_label, '; current_hint_options_flag: ', $current_hint_options_flag)"/>
+                            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
+                        </xsl:call-template>
+                        <xsl:if test="contains($current_hint_options_flag, $yes_label)">
+                            <options>1</options>
                         </xsl:if>
+                    </xsl:if>
 
-                        <!-- Get the 3rd row following the hint, check if it has a MS/DDM-specific label -->
-                        <!--DDM: State which markers are incorrectly placed; MS: Show the feedback for the selected responses-->
-                        <xsl:if test="$qtype = 'MS' or $qtype = 'DDM'">
-                            <xsl:variable name="current_hint_options_label">
-                                <xsl:choose>
-                                <xsl:when test="$qtype = 'DDM'">
-                                    <xsl:value-of select="$ddm_hint_stateincorrectlyplaced_label"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="$multichoiceset_showeachanswerfeedback_label"/>
-                                </xsl:otherwise>
-                                </xsl:choose>
-                            </xsl:variable>
-                            <xsl:variable name="current_hint_options_flag">
-                                <xsl:if test="starts-with(translate(normalize-space(following-sibling::x:tr[3]/x:th), $ucase, $lcase), translate($current_hint_options_label, $ucase, $lcase))">
-                                    <xsl:value-of select="translate(normalize-space(following-sibling::x:tr[3]/x:td[position() = $hints_colnum]), $ucase, $lcase)"/>
-                                </xsl:if>
-                            </xsl:variable>
-                            <xsl:call-template name="debugComment">
-                                <xsl:with-param name="comment_text" select="concat('current_hint_options_label: ', $current_hint_options_label, '; current_hint_options_flag: ', $current_hint_options_flag)"/>
-                                <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
-                            </xsl:call-template>
-                            <xsl:if test="contains($current_hint_options_flag, $yes_label)">
-                                <options>1</options>
-                            </xsl:if>
-                        </xsl:if>
-
-                    </hint>
-                </xsl:if>
-            </xsl:for-each>
-        </xsl:if>
+                </hint>
+            </xsl:if>
+        </xsl:for-each>
 
         <!-- Handle any tags that are included - all in one cell, comma-separated, no distinction between pre-defined and free tags -->
         <xsl:variable name="tags_row" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), $tags_label)]/x:td[position() = $tags_colnum]/*"/>
-        <xsl:if test="$moodleReleaseNumber &gt; '19' and normalize-space($tags_row) != '' and normalize-space($tags_row) != '&#160;' and normalize-space($tags_row) != '_'">
+        <xsl:if test="normalize-space($tags_row) != '' and normalize-space($tags_row) != '&#160;' and normalize-space($tags_row) != '_'">
             <tags>
                 <xsl:choose>
                 <xsl:when test="contains($tags_row, ',')">
@@ -779,7 +760,7 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- Get the text value of the case sensitive flag, to compare it with Yes or No in the required language --> 
+    <!-- Get the text value of the case sensitive flag, to compare it with Yes or No in the required language -->
     <xsl:variable name="casesensitive_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $casesensitive_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
     <xsl:variable name="casesensitive_value">
         <xsl:choose>
@@ -790,17 +771,11 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- Get the text value of the shuffle answers flag, to compare it with Yes or No in the required language --> 
+    <!-- Get the text value of the shuffle answers flag, to compare it with Yes or No in the required language -->
     <xsl:variable name="shuffleAnswers_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $shuffle_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
     <!-- Shuffle the answers (MA/MC/MAT): Use the values true/false for Moodle 2.x and 0/1 for Moodle 1.9 -->
     <xsl:variable name="shuffleAnswers_value">
         <xsl:choose>
-        <xsl:when test="$moodleReleaseNumber = '1' and starts-with($shuffleAnswers_flag, $yes_label)">
-            <xsl:text>1</xsl:text>
-        </xsl:when>
-        <xsl:when test="$moodleReleaseNumber = '1' and starts-with($shuffleAnswers_flag, $no_label)">
-            <xsl:text>0</xsl:text>
-        </xsl:when>
         <xsl:when test="starts-with($shuffleAnswers_flag, $yes_label)">
             <xsl:text>true</xsl:text>
         </xsl:when>
@@ -919,7 +894,7 @@
     <xsl:variable name="acceptedfiletypes_flag" select="translate(normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $acceptedfiletypes_label)]/x:th[position() = $flag_value_colnum]), $ucase, $lcase)"/>
 
     <!-- Get the name of the question, which is in the h2 preceding the table -->
-    <xsl:variable name="qseqnum" select="count(preceding::x:table[@class = 'moodleQuestion'])"/>
+    <xsl:variable name="qseqnum" select="count(preceding::x:table[contains(@class, 'moodleQuestion')])"/>
     <xsl:variable name="raw_qname" select="../x:h2"/>
     <xsl:variable name="qname">
         <xsl:choose>
@@ -943,7 +918,7 @@
     </text></name>
         <!--
         <xsl:comment><xsl:value-of select="concat('raw_qname: ', $raw_qname, '; qseqnum: ', $qseqnum, '; qname: ',  $qname)"/></xsl:comment>
-        <xsl:message><xsl:value-of select="concat('itemStem name: ', $qname, '; qtype: ', $qtype)"/></xsl:message> 
+        <xsl:message><xsl:value-of select="concat('itemStem name: ', $qname, '; qtype: ', $qtype)"/></xsl:message>
         -->
 
     <xsl:text>&#x0a;</xsl:text>
@@ -1003,46 +978,38 @@
     </xsl:call-template>
     <penalty><xsl:value-of select="$questionPenalty_value"/></penalty>
     <hidden>0</hidden>
-    <xsl:if test="$moodleReleaseNumber &gt;= '36'">
+    <xsl:if test="$moodle_release_date &gt;= '20181203'"> <!-- Moodle 3.6 or higher -->
         <idnumber><xsl:value-of select="$idnumber_value"/></idnumber>
     </xsl:if>
 
     <!-- Specific metadata for each question type -->
     <xsl:choose>
     <!-- If the type is Essay, and it is generated from Moodle 2.x, it might have a response template -->
-    <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber = '19'">
-    </xsl:when>
-    <xsl:when test="$qtype = 'ES' and $moodleReleaseNumber &gt; '19'">
-        <xsl:if test="$moodleReleaseNumber &gt;= '25'">
-            <responseformat><xsl:value-of select="$response_format_value"/></responseformat>
+    <xsl:when test="$qtype = 'ES'">
+        <responseformat><xsl:value-of select="$response_format_value"/></responseformat>
 
-            <!-- Essays (2.7+): Is text response required? -->
-            <xsl:if test="$moodleReleaseNumber &gt;= '27'">
-                <xsl:variable name="responseRequired_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responserequired_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
-                <!-- 0 = not required, 1 = required -->
-                <xsl:variable name="responseRequired_value">
-                    <xsl:choose>
-                    <xsl:when test="starts-with($responseRequired_flag, $yes_label)">
-                        <xsl:text>1</xsl:text>
-                    </xsl:when>
-                    <xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
-                    </xsl:choose>
-                </xsl:variable>
-                <xsl:call-template name="debugComment">
-                    <xsl:with-param name="comment_text" select="concat('$responseRequired_value: ', $responseRequired_value, ', $responserequired_label: ', $responserequired_label, '; $responseRequired_flag: ', $responseRequired_flag)"/>
-                    <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
-                </xsl:call-template>
-                <responserequired><xsl:value-of select="$responseRequired_value"/></responserequired>
-            </xsl:if>
+        <!-- Essays (2.7+): Is text response required? -->
+        <xsl:variable name="responseRequired_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responserequired_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
+        <!-- 0 = not required, 1 = required -->
+        <xsl:variable name="responseRequired_value">
+            <xsl:choose>
+            <xsl:when test="starts-with($responseRequired_flag, $yes_label)">
+                <xsl:text>1</xsl:text>
+            </xsl:when>
+            <xsl:otherwise><xsl:text>0</xsl:text></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:call-template name="debugComment">
+            <xsl:with-param name="comment_text" select="concat('$responseRequired_value: ', $responseRequired_value, ', $responserequired_label: ', $responserequired_label, '; $responseRequired_flag: ', $responseRequired_flag)"/>
+            <xsl:with-param name="condition" select="$debug_flag &gt; 1"/>
+        </xsl:call-template>
+        <responserequired><xsl:value-of select="$responseRequired_value"/></responserequired>
 
-            <responsefieldlines><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responsefieldlines_label)]/x:th[position() = $flag_value_colnum])"/></responsefieldlines>
-            <attachments><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $allowattachments_label)]/x:th[position() = $flag_value_colnum])"/></attachments>
-        </xsl:if>
+        <responsefieldlines><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $responsefieldlines_label)]/x:th[position() = $flag_value_colnum])"/></responsefieldlines>
+        <attachments><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $allowattachments_label)]/x:th[position() = $flag_value_colnum])"/></attachments>
 
         <!-- Essays: How many attachments required? -->
-        <xsl:if test="$moodleReleaseNumber &gt;= '27'">
-           <attachmentsrequired><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $attachmentsrequired_label)]/x:th[position() = $flag_value_colnum])"/></attachmentsrequired>
-        </xsl:if>
+       <attachmentsrequired><xsl:value-of select="normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $attachmentsrequired_label)]/x:th[position() = $flag_value_colnum])"/></attachmentsrequired>
         <graderinfo format="html">
             <xsl:call-template name="rich_text_content">
                 <xsl:with-param name="content" select="$table_root/x:tbody/x:tr[1]/x:td[position() = $graderinfo_colnum]"/>
@@ -1088,7 +1055,7 @@
     </xsl:choose>
 
     <!-- Handle the Correct/Incorrect/Partially Correct feedback -->
-    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT' or $qtype = 'MW' or ($qtype = 'MAT' and $moodleReleaseNumber &gt; '19')">
+    <xsl:if test="$qtype = 'MA' or $qtype = 'MC' or $qtype = 'MS' or $qtype = 'DDI' or $qtype = 'DDM' or $qtype = 'DDT' or $qtype = 'MW' or ($qtype = 'MAT')">
         <xsl:variable name="cfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Correct') or starts-with(normalize-space(x:th), $correctfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="ifb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Incorrect') or starts-with(normalize-space(x:th), $incorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
         <xsl:variable name="pcfb" select="$table_root/x:tbody/x:tr[starts-with(normalize-space(x:th), 'Partial') or starts-with(normalize-space(x:th), $pcorrectfeedback_label)]/x:td[position() = $generic_feedback_colnum]"/>
@@ -1117,7 +1084,7 @@
         <xsl:text>&#x0a;</xsl:text>
         <xsl:comment>
             <xsl:value-of select="concat('showNumCorrect_flag: ', $showNumCorrect_flag, '; showNumCorrect_value: ', $showNumCorrect_value)"/>
-            <xsl:value-of select="concat('&#x0a;showNumCorrect_label: ', $showNumCorrect_label, 
+            <xsl:value-of select="concat('&#x0a;showNumCorrect_label: ', $showNumCorrect_label,
                 ';&#x0a;flag: ', $table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $showNumCorrect_label)]/x:th[2])"/>
         </xsl:comment>
         <xsl:text>&#x0a;</xsl:text>
@@ -1159,7 +1126,7 @@
 
     <!--<xsl:comment>td[2]: <xsl:value-of select="x:tr[1]/x:td[2]"/>; td[3]: <xsl:value-of select="x:tr[1]/x:td[3]"/>; td[4]: <xsl:value-of select="x:tr[1]/x:td[4]"/></xsl:comment>-->
 
-    <!-- Get plain text option for MW, SA and TF question types 
+    <!-- Get plain text option for MW, SA and TF question types
         TF can contain only 'true' or 'false', while MW and SA anwsers must be matchable strings -->
     <xsl:variable name="plain_text">
         <xsl:choose>
@@ -1201,7 +1168,7 @@
         <xsl:when test="$qtype = 'SA'"><xsl:value-of select="'100'"/></xsl:when>
         <xsl:otherwise><xsl:value-of select="$fraction_value"/></xsl:otherwise>
         </xsl:choose>
-    </xsl:variable>    
+    </xsl:variable>
 
     <xsl:variable name="answer_format">
         <xsl:choose>
@@ -1226,7 +1193,30 @@
         <selectoption>
             <text><xsl:value-of select="normalize-space($plain_text)"/></text>
             <!-- Fraction value contains the group number in MW questions -->
-            <group><xsl:value-of select="$fraction_value"/></group>
+            <group>
+                <xsl:choose>
+                <xsl:when test="$fraction_value = 'A'"><xsl:value-of select="1"/></xsl:when>
+                <xsl:when test="$fraction_value = 'B'"><xsl:value-of select="2"/></xsl:when>
+                <xsl:when test="$fraction_value = 'C'"><xsl:value-of select="3"/></xsl:when>
+                <xsl:when test="$fraction_value = 'D'"><xsl:value-of select="4"/></xsl:when>
+                <xsl:when test="$fraction_value = 'E'"><xsl:value-of select="5"/></xsl:when>
+                <xsl:when test="$fraction_value = 'F'"><xsl:value-of select="6"/></xsl:when>
+                <xsl:when test="$fraction_value = 'G'"><xsl:value-of select="7"/></xsl:when>
+                <xsl:when test="$fraction_value = 'H'"><xsl:value-of select="8"/></xsl:when>
+                <xsl:when test="$fraction_value = 'I'"><xsl:value-of select="9"/></xsl:when>
+                <xsl:when test="$fraction_value = 'J'"><xsl:value-of select="10"/></xsl:when>
+                <xsl:when test="$fraction_value = 'K'"><xsl:value-of select="11"/></xsl:when>
+                <xsl:when test="$fraction_value = 'L'"><xsl:value-of select="12"/></xsl:when>
+                <xsl:when test="$fraction_value = 'M'"><xsl:value-of select="13"/></xsl:when>
+                <xsl:when test="$fraction_value = 'N'"><xsl:value-of select="14"/></xsl:when>
+                <xsl:when test="$fraction_value = 'O'"><xsl:value-of select="15"/></xsl:when>
+                <xsl:when test="$fraction_value = 'P'"><xsl:value-of select="16"/></xsl:when>
+                <xsl:when test="$fraction_value = 'Q'"><xsl:value-of select="17"/></xsl:when>
+                <xsl:when test="$fraction_value = 'R'"><xsl:value-of select="18"/></xsl:when>
+                <xsl:when test="$fraction_value = 'S'"><xsl:value-of select="19"/></xsl:when>
+                <xsl:when test="$fraction_value = 'T'"><xsl:value-of select="20"/></xsl:when>
+                </xsl:choose>
+            </group>
         </selectoption>
     </xsl:when>
     <xsl:when test="$qtype = 'DDI'">
@@ -1325,12 +1315,10 @@
                 </xsl:call-template>
             </xsl:otherwise>
             </xsl:choose>
-            
+
             <!-- Specific feedback for the current answer -->
             <feedback>
-                <xsl:if test="$moodleReleaseNumber &gt; '19'">
-                    <xsl:attribute name="format"><xsl:text>html</xsl:text></xsl:attribute>
-                </xsl:if>
+                <xsl:attribute name="format"><xsl:text>html</xsl:text></xsl:attribute>
                 <xsl:call-template name="rich_text_content">
                     <xsl:with-param name="content" select="x:td[position() = $specific_feedback_colnum]"/>
                 </xsl:call-template>
@@ -1445,7 +1433,7 @@
 <!-- Handle text, removing text before tabs, deleting non-significant newlines between elements, etc. -->
 <xsl:template name="convertUnicode">
     <xsl:param name="txt"/>
-    
+
     <xsl:variable name="cloze_answer_sep_nl" select="concat($cloze_cloze_answer_delimiter, '&#x0a;')"/>
     <xsl:choose>
         <!-- If empty (or newline), do nothing: needed to stop newlines between block elements being turned into br elements -->
@@ -1460,7 +1448,7 @@
         <!-- If a | followed by newline, remove the newline -->
         <xsl:when test="contains($txt, $cloze_answer_sep_nl)">
             <xsl:value-of select="concat(substring-before($txt, $cloze_answer_sep_nl), $cloze_answer_delimiter)"/>
-            
+
             <xsl:call-template name="convertUnicode">
                 <xsl:with-param name="txt" select="substring-after($txt, $cloze_answer_sep_nl)"/>
             </xsl:call-template>
@@ -1500,9 +1488,7 @@
         </xsl:if>
     </text>
     <!-- Handle embedded images: do nothing in Moodle 1.9, and move to file element in Moodle 2.x -->
-    <xsl:if test="$moodleReleaseNumber &gt;= '20'">
-        <xsl:apply-templates select="$content//x:img" mode="moodle2pluginfile"/>
-    </xsl:if>
+    <xsl:apply-templates select="$content//x:img" mode="moodle2pluginfile"/>
 </xsl:template>
 
 <!-- Copy elements as is -->
@@ -1814,11 +1800,11 @@
     <!-- Process the Cloze bold item if it doesn't contain ':MC' or ':MULTICHOICE' already -->
     <xsl:variable name="correct_option" select="normalize-space(.)"/>
     <xsl:choose>
-    <xsl:when test="contains($mctext_string, $cloze_mc_keyword1) or 
-            contains($mctext_string, $cloze_mc_keyword2) or 
-            contains($mctext_string, $cloze_mch_keyword1) or 
-            contains($mctext_string, $cloze_mch_keyword2) or 
-            contains($mctext_string, $cloze_mcv_keyword1) or 
+    <xsl:when test="contains($mctext_string, $cloze_mc_keyword1) or
+            contains($mctext_string, $cloze_mc_keyword2) or
+            contains($mctext_string, $cloze_mch_keyword1) or
+            contains($mctext_string, $cloze_mch_keyword2) or
+            contains($mctext_string, $cloze_mcv_keyword1) or
             contains($mctext_string, $cloze_mcv_keyword2)">
         <!-- MC subquestion contains Moodle keywords, so no need to process it further -->
         <xsl:call-template name="debugComment">
@@ -1827,8 +1813,8 @@
         </xsl:call-template>
         <xsl:value-of select="$mctext_string"/>
     </xsl:when>
-    <xsl:when test="starts-with($mctext_string, $cloze_percent) or 
-            starts-with($mctext_string, $cloze_correct_prefix2) or 
+    <xsl:when test="starts-with($mctext_string, $cloze_percent) or
+            starts-with($mctext_string, $cloze_correct_prefix2) or
             contains($mctext_string, $cloze_answer_delimiter)">
         <!-- Text starts with grade indicator (percent or '='), so just wrap the content with the keyword prefix and suffix, omitting distractors -->
         <xsl:call-template name="debugComment">
@@ -1837,8 +1823,8 @@
         </xsl:call-template>
         <xsl:value-of select="concat($cloze_mc_prefix, $mctext_string, $cloze_end_delimiter)"/>
     </xsl:when>
-    <xsl:when test="contains($mctext_string, $cloze_answer_delimiter) and 
-            (not(starts-with($mctext_string, $cloze_percent)) or 
+    <xsl:when test="contains($mctext_string, $cloze_answer_delimiter) and
+            (not(starts-with($mctext_string, $cloze_percent)) or
              not(starts-with($mctext_string, $cloze_correct_prefix2)))">
         <!-- Text doesn't starts with grade indicator ('%' or '='), but does contain distractors delimited by ~, so prefix the first entry with a correct indicator -->
         <xsl:call-template name="debugComment">
@@ -1977,7 +1963,7 @@
     </xsl:apply-templates>
 </xsl:template>
 
-<!-- Handle images in Moodle 2.x to use PLUGINFILE--> 
+<!-- Handle images in Moodle 2.x to use PLUGINFILE-->
 <xsl:template match="x:img" mode="cloze">
 
     <xsl:apply-templates select="."/>
@@ -1988,7 +1974,7 @@
     <xsl:param name="answer_string"/>
     <xsl:param name="first" select="'0'"/>
     <xsl:param name="cloze_type" select="'SA'"/>
-    
+
     <!-- If its not the first item, insert a separator before the next answer-->
     <xsl:if test="$first != '1'">
         <xsl:text>~</xsl:text>
@@ -1998,7 +1984,7 @@
     <xsl:when test="contains($answer_string, $cloze_answer_delimiter)">
         <!-- More than one answer, so split out the first one  -->
         <xsl:variable name="first_answer" select="normalize-space(substring-before($answer_string, $cloze_answer_delimiter))"/>
-        
+
         <xsl:call-template name="format_cloze_answer">
             <xsl:with-param name="answer_string" select="$first_answer"/>
             <xsl:with-param name="cloze_type" select="$cloze_type"/>
@@ -2096,7 +2082,7 @@
             </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        
+
         <!-- Compose a full item string for this answer option, containing the ~ delimiter, the grade and the distractor -->
         <xsl:if test="$distractor_text != ''">
             <xsl:value-of select="concat($cloze_answer_delimiter, $distractor_grade, $distractor_text)"/>
@@ -2133,55 +2119,53 @@
         </xsl:choose>
     </xsl:variable>
 
-    <xsl:if test="$moodleReleaseNumber &gt;= '20'">
-        <!-- Moodle 2 images have the data component moved to the file element -->
+    <!-- Moodle 2 images have the data component moved to the file element -->
 
-        <xsl:variable name="alt_text">
-            <xsl:choose>
-            <xsl:when test="@alt">
-                <xsl:value-of select="@alt"/>
-            </xsl:when>
-            <xsl:when test="@longdesc">
-                <xsl:value-of select="@longdesc"/>
-            </xsl:when>
-            <xsl:when test="@title">
-                <xsl:value-of select="@title"/>
-            </xsl:when>
-            </xsl:choose>
-        </xsl:variable>
+    <xsl:variable name="alt_text">
+        <xsl:choose>
+        <xsl:when test="@alt">
+            <xsl:value-of select="@alt"/>
+        </xsl:when>
+        <xsl:when test="@longdesc">
+            <xsl:value-of select="@longdesc"/>
+        </xsl:when>
+        <xsl:when test="@title">
+            <xsl:value-of select="@title"/>
+        </xsl:when>
+        </xsl:choose>
+    </xsl:variable>
 
-        <xsl:variable name="image_src_attr">
-            <xsl:choose>
-            <xsl:when test="$image_format != ''">
-                <!-- Image was embedded in Word file, so embed the data the way Question XML wants it  -->
-                <xsl:value-of select="concat($image_metafolder, '/', @id, '.', $real_image_format)"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <!-- Image was linked to (e.g. <img src="image.gif"...) rather than embedded in the Word file, so keep the path -->
-                <xsl:value-of select="@src"/>
-            </xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
+    <xsl:variable name="image_src_attr">
+        <xsl:choose>
+        <xsl:when test="$image_format != ''">
+            <!-- Image was embedded in Word file, so embed the data the way Question XML wants it  -->
+            <xsl:value-of select="concat($image_metafolder, '/', @id, '.', $real_image_format)"/>
+        </xsl:when>
+        <xsl:otherwise>
+            <!-- Image was linked to (e.g. <img src="image.gif"...) rather than embedded in the Word file, so keep the path -->
+            <xsl:value-of select="@src"/>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
 
-        <img src="{$image_src_attr}" alt="{$alt_text}">
-        <!--
-            <xsl:if test="@class">
-                <xsl:attribute name="class"><xsl:value-of select="@class"/></xsl:attribute>
-            </xsl:if>
-            -->
-            <xsl:if test="@title and (@alt or @longdesc)">
-                <xsl:attribute name="title"><xsl:value-of select="@title"/></xsl:attribute>
-            </xsl:if>
-            <!-- Set the width and height if present -->
-            <xsl:if test="@width">
-                <xsl:attribute name="width"><xsl:value-of select="@width"/></xsl:attribute>
-            </xsl:if>
-            <xsl:if test="@height">
-                <xsl:attribute name="height"><xsl:value-of select="@height"/></xsl:attribute>
-            </xsl:if>
-        </img>
-    </xsl:if>
-    
+    <img src="{$image_src_attr}" alt="{$alt_text}">
+    <!--
+        <xsl:if test="@class">
+            <xsl:attribute name="class"><xsl:value-of select="@class"/></xsl:attribute>
+        </xsl:if>
+        -->
+        <xsl:if test="@title and (@alt or @longdesc)">
+            <xsl:attribute name="title"><xsl:value-of select="@title"/></xsl:attribute>
+        </xsl:if>
+        <!-- Set the width and height if present -->
+        <xsl:if test="@width">
+            <xsl:attribute name="width"><xsl:value-of select="@width"/></xsl:attribute>
+        </xsl:if>
+        <xsl:if test="@height">
+            <xsl:attribute name="height"><xsl:value-of select="@height"/></xsl:attribute>
+        </xsl:if>
+    </img>
+
 </xsl:template>
 
 
