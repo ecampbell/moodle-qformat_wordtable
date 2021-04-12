@@ -33,14 +33,13 @@
 
 <!-- Top Level Parameters -->
 <xsl:param name="debug_flag" select="0" />
-<xsl:param name="moodle_release"/>  <!-- The release number of the current Moodle server -->
+<xsl:param name="moodle_release"/>  <!-- The version number of the current Moodle release -->
+<xsl:param name="moodle_release_date"/>  <!-- The major release date of the current release -->
 <xsl:param name="moodle_language"/>  <!-- The current language interface selected by the user -->
 
 <!-- Top Level Variables derived from input -->
 <xsl:variable name="metadata" select="//x:html/x:head"/>
 <xsl:variable name="courseID" select="$metadata/x:meta[@name='moodleCourseID']/@content" />
-<!-- Get the Moodle version as a simple 2-digit number, e.g. 2.6.5 => 26 -->
-<xsl:variable name="moodleReleaseNumber" select="substring(translate($moodle_release, '.', ''), 1, 2)"/>
 
 <xsl:variable name="fileLanguage">
     <xsl:variable name="moodleLanguage" select="$metadata/x:meta[@name='moodleLanguage']/@content" />
@@ -111,7 +110,6 @@
 <xsl:variable name="mcq_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_multichoice_shuffleanswers']"/>
 <xsl:variable name="quiz_shuffle_label" select="$moodle_labels/data[@name = 'quiz_shuffle']"/>
 <xsl:variable name="answernumbering_label" select="$moodle_labels/data[@name = 'qtype_multichoice_answernumbering']"/>
-<xsl:variable name="showstandardinstruction_label" select="$moodle_labels/data[@name = 'qtype_multichoice_showstandardinstruction']"/>
 
 <!-- ID Number (Moodle 3.6+) -->
 <xsl:variable name="idnumber_label" select="$moodle_labels/data[@name = 'question_idnumber']"/>
@@ -229,7 +227,7 @@
         <xsl:value-of select="'&#x0a;'"/>
         <xsl:comment>fileLanguage: <xsl:value-of select="$fileLanguage"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
-         <xsl:comment>moodleReleaseNumber: <xsl:value-of select="$moodleReleaseNumber"/></xsl:comment>
+         <xsl:comment>moodle_release_date: <xsl:value-of select="$moodle_release_date"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
         <!-- 3 cases to handle: a) 1 preview question; b) language mismatch; c) all questions -->
         <xsl:choose>
@@ -239,7 +237,7 @@
                 <category><text><xsl:value-of select="'$course$/zzPreview'"/></text></category>
             </question>
 
-            <xsl:for-each select="//x:table[@class='moodleQuestion']">
+            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
                 <!-- <xsl:comment>div position() = <xsl:value-of select="position()"/></xsl:comment> -->
 
                 <xsl:if test="position() = $moodlePreviewQuestion">
@@ -275,7 +273,7 @@
         </xsl:when>
         <xsl:otherwise>
             <!-- Not a preview, so import all questions -->
-            <xsl:for-each select="//x:table[@class='moodleQuestion']">
+            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
                 <xsl:variable name="qtype" select="translate(normalize-space(./x:thead/x:tr[1]/x:th[position() = $flag_value_colnum]), $lcase, $ucase)" />
                 <xsl:variable name="table_root" select="."/>
                 <xsl:variable name="id_quest" select="position()"/>
@@ -811,19 +809,6 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- Get the text value of the show standard instruction flag, to compare it with Yes or No in the required language -->
-    <xsl:variable name="showstandardinstruction_flag" select="normalize-space(translate($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $showstandardinstruction_label)]/x:th[position() = $flag_value_colnum], $ucase, $lcase))"/>
-    <xsl:variable name="showstandardinstruction_value">
-        <xsl:choose>
-        <xsl:when test="starts-with($showstandardinstruction_flag, $yes_label)">
-            <xsl:text>1</xsl:text>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:text>0</xsl:text>
-        </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-
     <!-- Case sensitivity: used in Short Answer and Cloze (Short Answer subquestions) -->
     <xsl:variable name="cloze_sa_keyword_string">
         <xsl:if test="$qtype = 'CL'">
@@ -909,7 +894,7 @@
     <xsl:variable name="acceptedfiletypes_flag" select="translate(normalize-space($table_root/x:thead/x:tr[starts-with(normalize-space(x:th[1]), $acceptedfiletypes_label)]/x:th[position() = $flag_value_colnum]), $ucase, $lcase)"/>
 
     <!-- Get the name of the question, which is in the h2 preceding the table -->
-    <xsl:variable name="qseqnum" select="count(preceding::x:table[@class = 'moodleQuestion'])"/>
+    <xsl:variable name="qseqnum" select="count(preceding::x:table[contains(@class, 'moodleQuestion')])"/>
     <xsl:variable name="raw_qname" select="../x:h2"/>
     <xsl:variable name="qname">
         <xsl:choose>
@@ -993,8 +978,9 @@
     </xsl:call-template>
     <penalty><xsl:value-of select="$questionPenalty_value"/></penalty>
     <hidden>0</hidden>
-    <!-- Moodle 3.6+ -->
-    <idnumber><xsl:value-of select="$idnumber_value"/></idnumber>
+    <xsl:if test="$moodle_release_date &gt;= '20181203'"> <!-- Moodle 3.6 or higher -->
+        <idnumber><xsl:value-of select="$idnumber_value"/></idnumber>
+    </xsl:if>
 
     <!-- Specific metadata for each question type -->
     <xsl:choose>
@@ -1053,13 +1039,11 @@
         <single>false</single>
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
         <answernumbering><xsl:value-of select="$answerNumbering_value"/></answernumbering>
-        <showstandardinstruction><xsl:value-of select="$showstandardinstruction_value"/></showstandardinstruction>
     </xsl:when>
     <xsl:when test="$qtype = 'MC'">
         <single>true</single>
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
         <answernumbering><xsl:value-of select="$answerNumbering_value"/></answernumbering>
-        <showstandardinstruction><xsl:value-of select="$showstandardinstruction_value"/></showstandardinstruction>
     </xsl:when>
     <xsl:when test="$qtype = 'MAT' or $qtype = 'MW'">
         <shuffleanswers><xsl:value-of select="$shuffleAnswers_value"/></shuffleanswers>
@@ -1209,7 +1193,30 @@
         <selectoption>
             <text><xsl:value-of select="normalize-space($plain_text)"/></text>
             <!-- Fraction value contains the group number in MW questions -->
-            <group><xsl:value-of select="$fraction_value"/></group>
+            <group>
+                <xsl:choose>
+                <xsl:when test="$fraction_value = 'A'"><xsl:value-of select="1"/></xsl:when>
+                <xsl:when test="$fraction_value = 'B'"><xsl:value-of select="2"/></xsl:when>
+                <xsl:when test="$fraction_value = 'C'"><xsl:value-of select="3"/></xsl:when>
+                <xsl:when test="$fraction_value = 'D'"><xsl:value-of select="4"/></xsl:when>
+                <xsl:when test="$fraction_value = 'E'"><xsl:value-of select="5"/></xsl:when>
+                <xsl:when test="$fraction_value = 'F'"><xsl:value-of select="6"/></xsl:when>
+                <xsl:when test="$fraction_value = 'G'"><xsl:value-of select="7"/></xsl:when>
+                <xsl:when test="$fraction_value = 'H'"><xsl:value-of select="8"/></xsl:when>
+                <xsl:when test="$fraction_value = 'I'"><xsl:value-of select="9"/></xsl:when>
+                <xsl:when test="$fraction_value = 'J'"><xsl:value-of select="10"/></xsl:when>
+                <xsl:when test="$fraction_value = 'K'"><xsl:value-of select="11"/></xsl:when>
+                <xsl:when test="$fraction_value = 'L'"><xsl:value-of select="12"/></xsl:when>
+                <xsl:when test="$fraction_value = 'M'"><xsl:value-of select="13"/></xsl:when>
+                <xsl:when test="$fraction_value = 'N'"><xsl:value-of select="14"/></xsl:when>
+                <xsl:when test="$fraction_value = 'O'"><xsl:value-of select="15"/></xsl:when>
+                <xsl:when test="$fraction_value = 'P'"><xsl:value-of select="16"/></xsl:when>
+                <xsl:when test="$fraction_value = 'Q'"><xsl:value-of select="17"/></xsl:when>
+                <xsl:when test="$fraction_value = 'R'"><xsl:value-of select="18"/></xsl:when>
+                <xsl:when test="$fraction_value = 'S'"><xsl:value-of select="19"/></xsl:when>
+                <xsl:when test="$fraction_value = 'T'"><xsl:value-of select="20"/></xsl:when>
+                </xsl:choose>
+            </group>
         </selectoption>
     </xsl:when>
     <xsl:when test="$qtype = 'DDI'">

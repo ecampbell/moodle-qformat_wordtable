@@ -124,7 +124,6 @@
 <xsl:variable name="mcq_shuffleanswers_label" select="$moodle_labels/data[@name = 'qtype_multichoice_shuffleanswers']"/>
 <xsl:variable name="gapselect_shuffle_label" select="concat($moodle_labels/data[@name = 'qtype_gapselect_shuffle'], $colon_string)"/>
 <xsl:variable name="answernumbering_label" select="$moodle_labels/data[@name = 'qtype_multichoice_answernumbering']"/>
-<xsl:variable name="showstandardinstruction_label" select="$moodle_labels/data[@name = 'qtype_multichoice_showstandardinstruction']"/>
 
 <!-- Per-question feedback labels -->
 <xsl:variable name="correctfeedback_label" select="concat($moodle_labels/data[@name = 'qtype_multichoice_correctfeedback'], $colon_string)"/>
@@ -347,16 +346,6 @@
         <xsl:choose>
         <xsl:when test="answernumbering = 'none'">0</xsl:when>
         <xsl:when test="answernumbering"><xsl:value-of select="substring(answernumbering, 1, 1)"/></xsl:when>
-        </xsl:choose>
-    </xsl:variable>
-
-    <!-- Show standard instruction new field in 3.9 for MC and MS -->
-    <xsl:variable name="showstandardinstruction_flag">
-        <xsl:choose>
-        <xsl:when test="showstandardinstruction = '1'">
-            <xsl:value-of select="$yes_label"/>
-        </xsl:when>
-        <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
 
@@ -688,15 +677,6 @@
             <xsl:text>&#x0a;</xsl:text>
         </xsl:if>
 
-        <!-- Show standard instructions? New 3.9 feature -->
-        <xsl:if test="$qtype = 'MC' or $qtype = 'MA' or $qtype = 'MS'">
-            <tr>
-                <td colspan="3" style="width: 12.0cm"><p class="TableRowHead" style="text-align: right"><xsl:value-of select="$showstandardinstruction_label"/></p></td>
-                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$showstandardinstruction_flag"/></p></td>
-            </tr>
-            <xsl:text>&#x0a;</xsl:text>
-        </xsl:if>
-
         <!-- Essay questions in Moodle 2.x have 3 specific fields, for Response field format, Attachments, and Number of lines -->
         <xsl:if test="$qtype = 'ES'">
             <tr>
@@ -959,7 +939,7 @@
                 <!-- Essay questions in Moodle 1.9 to 2.3 have no response template, so leave it out -->
                     <xsl:choose>
                     <xsl:when test="responsetemplate and normalize-space(responsetemplate) = ''">
-                        <p class="Cell"><xsl:value-of select="$responsetemplate_help_label"/></p>
+                        <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
                     <xsl:when test="responsetemplate and responsetemplate/@format and responsetemplate/@format = 'html'">
                         <xsl:apply-templates select="responsetemplate/*"/>
@@ -1067,7 +1047,7 @@
                 <td style="{$col3_width}">
                     <xsl:choose>
                     <xsl:when test="normalize-space(correctfeedback/text) = ''">
-                        <p class="Cell"><xsl:value-of select="$correctfeedback_default"/></p>
+                        <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
                     <xsl:otherwise><xsl:apply-templates select="correctfeedback/*"/></xsl:otherwise>
                     </xsl:choose>
@@ -1081,7 +1061,7 @@
                 <td style="{$col3_width}">
                     <xsl:choose>
                     <xsl:when test="normalize-space(incorrectfeedback/text) = ''">
-                        <p class="Cell"><xsl:value-of select="$incorrectfeedback_default"/></p>
+                        <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
                     <xsl:otherwise><xsl:apply-templates select="incorrectfeedback/*"/></xsl:otherwise>
                     </xsl:choose>
@@ -1098,7 +1078,7 @@
                 <td style="{$col3_width}">
                     <xsl:choose>
                     <xsl:when test="normalize-space(partiallycorrectfeedback/text) = ''">
-                        <p class="Cell"><xsl:value-of select="$pcorrectfeedback_default"/></p>
+                        <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
                     <xsl:otherwise><xsl:apply-templates select="partiallycorrectfeedback/*"/></xsl:otherwise>
                     </xsl:choose>
@@ -1726,7 +1706,13 @@
         <td style="width: 1.0cm"><p class="MsoListNumber"><xsl:value-of select="$blank_cell"/></p></td>
         <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
         <td style="{$col3_width}"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-        <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="group"/></p></td>
+        <td style="width: 1.0cm"><p class="QFGrade">
+            <xsl:choose>
+            <xsl:when test="group &lt; 10"><xsl:value-of select="translate(group, '123456789', 'ABCDEFGHI')"/></xsl:when>
+            <xsl:when test="group &lt; 19"><xsl:value-of select="translate(group - 9, '123456789', 'JKLMNOPQR')"/></xsl:when>
+            <xsl:when test="group &gt;= 19"><xsl:value-of select="translate(group - 18, '12', 'ST')"/></xsl:when>
+            </xsl:choose>
+        </p></td>
     </tr>
 </xsl:template>
 
