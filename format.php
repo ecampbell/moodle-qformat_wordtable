@@ -298,27 +298,29 @@ class qformat_wordtable extends qformat_xml {
     private function get_question_labels() {
         global $CFG;
 
-        // Add All-or-Nothing MCQ question type strings if present.
-        if (is_object(question_bank::get_qtype('multichoiceset', false))) {
-           $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
-        }
-
         // Get the core question labels, and strip out the closing element so more can be added.
-        $expout = str_replace("</moodlelabels>", "", get_contributed_question_labels());
-        foreach ($textstrings as $typegroup => $grouparray) {
-            foreach ($grouparray as $stringid) {
-                $namestring = $typegroup . '_' . $stringid;
-                // Clean up question type explanation, in case the default text has been overridden on the site.
-                $cleantext = get_string($stringid, $typegroup);
-                $expout .= '<data name="' . $namestring . '"><value>' . $cleantext . "</value></data>\n";
-            }
-        }
-        $expout .= "</moodlelabels>";
-        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $expout = $word2xml->convert_to_xml($expout);
-        $expout = str_replace("<br>", "<br/>", $expout);
+        $questionlabels = $this->get_core_question_labels();
 
-        return $expout;
+        // Add All-or-Nothing MCQ question type strings if present.
+        if (question_bank::is_qtype_installed('multichoiceset')) {
+            $questionlabels = str_replace("</moodlelabels>", "", $questionlabels);
+
+            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
+            foreach ($textstrings as $typegroup => $grouparray) {
+                foreach ($grouparray as $stringid) {
+                    $namestring = $typegroup . '_' . $stringid;
+                    // Clean up question type explanation, in case the default text has been overridden on the site.
+                    $cleantext = get_string($stringid, $typegroup);
+                    $questionlabels .= '<data name="' . $namestring . '"><value>' . $cleantext . "</value></data>\n";
+                }
+            }
+            $questionlabels .= "</moodlelabels>";
+        }
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
+        $questionlabels = $word2xml->convert_to_xml($questionlabels);
+        $questionlabels = str_replace("<br>", "<br/>", $questionlabels);
+
+        return $questionlabels;
     }
 
     /**

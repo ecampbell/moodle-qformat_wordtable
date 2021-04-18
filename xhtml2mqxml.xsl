@@ -1,4 +1,4 @@
-<xsl:stylesheet version="1.0"
+:<xsl:stylesheet version="1.0"
     xmlns:x="http://www.w3.org/1999/xhtml"
     xmlns:mml="http://www.w3.org/1998/Math/MathML"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
