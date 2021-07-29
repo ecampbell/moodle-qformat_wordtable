@@ -94,6 +94,9 @@
      <!-- Delete superfluous spans that wrap the complete para content -->
     <xsl:template match="x:span[count(.//node()[self::x:span]) = count(.//node())]" priority="2"/>
 
+     <!-- Delete dangerous script element that can contain JavaScript -->
+    <xsl:template match="x:script"/>
+
     <!-- Out go horizontal bars -->
     <xsl:template match="x:p[@class='horizontalbar']"/>
 

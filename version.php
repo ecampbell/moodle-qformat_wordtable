@@ -28,9 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020071101;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2021072900;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->maturity  = MATURITY_STABLE;  // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
-$plugin->release  = '3.6.3 (Build: 2020071101)';  // The current module release in human-readable form (x.y).
-$plugin->requires = 2011070100.03;  // Requires Moodle 2.1 or later.
+$plugin->release  = '3.6.4 (Build: 2021072900)';  // The current module release in human-readable form (x.y).
+$plugin->requires = 2018051712;  // Requires Moodle 3.5 or later.
 $plugin->cron     = 0;           // Period for cron to check this module (secs).
