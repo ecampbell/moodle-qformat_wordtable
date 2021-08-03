@@ -1,4 +1,4 @@
-:<xsl:stylesheet version="1.0"
+<xsl:stylesheet version="1.0"
     xmlns:x="http://www.w3.org/1999/xhtml"
     xmlns:mml="http://www.w3.org/1998/Math/MathML"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -50,6 +50,7 @@
 </xsl:variable>
 
 <xsl:variable name="moodle_labels" select="//moodlelabels" />
+<xsl:variable name="imagesContainer" select="//imagesContainer"/>
 
 <!-- Default column numbers-->
 <xsl:variable name="nColumns" select="4"/>
@@ -938,7 +939,7 @@
                 </xsl:apply-templates>
                 <xsl:value-of select="']]&gt;'" disable-output-escaping="yes"/>
             </text>
-            <xsl:apply-templates select="$table_root/x:thead/x:tr[1]/x:th[1]//x:img" mode="moodle2pluginfile"/>
+            <xsl:apply-templates select="$table_root/x:thead/x:tr[1]/x:th[1]//x:img" mode="embedded"/>
         </xsl:when>
         <xsl:otherwise>
             <!-- Standard question type, so stem is from heading -->
@@ -1112,7 +1113,7 @@
         </xsl:if>
 
         <xsl:if test="$qtype = 'DDI' or $qtype = 'DDM'">
-            <xsl:apply-templates select="$table_root/x:thead/x:tr[2]/x:th" mode="moodle2pluginfile"/>
+            <xsl:apply-templates select="$table_root/x:thead/x:tr[2]/x:th" mode="embedded"/>
         </xsl:if>
 
     </xsl:if>
@@ -1237,7 +1238,7 @@
                 <text>
                     <xsl:value-of select="x:td[position() = $option_colnum]//x:img/@longdesc"/>
                 </text>
-                <xsl:apply-templates select="x:td[position() = $option_colnum]" mode="moodle2pluginfile"/>
+                <xsl:apply-templates select="x:td[position() = $option_colnum]" mode="embedded"/>
             </xsl:when>
             <xsl:otherwise>
                 <text><xsl:value-of select="normalize-space($plain_text)"/></text>
@@ -1487,8 +1488,9 @@
             <xsl:value-of select="']]&gt;'" disable-output-escaping="yes"/>
         </xsl:if>
     </text>
+    <xsl:comment><xsl:value-of select="concat('n images = ', $contains_image)"/></xsl:comment>
     <!-- Handle embedded images: do nothing in Moodle 1.9, and move to file element in Moodle 2.x -->
-    <xsl:apply-templates select="$content//x:img" mode="moodle2pluginfile"/>
+    <xsl:apply-templates select="$content//x:img" mode="embedded"/>
 </xsl:template>
 
 <!-- Copy elements as is -->
@@ -2099,28 +2101,6 @@
 
 <!-- Handle images by replacing the @src attribute with a reference to the base64-encoded data in the file element -->
 <xsl:template match="x:img" mode="rich_text">
-    <xsl:variable name="image_format">
-        <xsl:if test="contains(@src, $image_encoding)">
-            <xsl:value-of select="substring-after(substring-before(@src, concat(';', $image_encoding)), '/')"/>
-        </xsl:if>
-    </xsl:variable>
-
-    <xsl:variable name="real_image_format">
-        <xsl:choose>
-        <xsl:when test="$image_format != ''">
-                <xsl:value-of select="$image_format"/>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:call-template name="substring-after-last">
-                <xsl:with-param name="text_string" select="@src"/>
-                <xsl:with-param name="delimiter_string" select="'.'"/>
-            </xsl:call-template>
-        </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-
-    <!-- Moodle 2 images have the data component moved to the file element -->
-
     <xsl:variable name="alt_text">
         <xsl:choose>
         <xsl:when test="@alt">
@@ -2135,18 +2115,7 @@
         </xsl:choose>
     </xsl:variable>
 
-    <xsl:variable name="image_src_attr">
-        <xsl:choose>
-        <xsl:when test="$image_format != ''">
-            <!-- Image was embedded in Word file, so embed the data the way Question XML wants it  -->
-            <xsl:value-of select="concat($image_metafolder, '/', @id, '.', $real_image_format)"/>
-        </xsl:when>
-        <xsl:otherwise>
-            <!-- Image was linked to (e.g. <img src="image.gif"...) rather than embedded in the Word file, so keep the path -->
-            <xsl:value-of select="@src"/>
-        </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
+    <xsl:variable name="image_src_attr" select="concat($image_metafolder, '/', @name)"/>
 
     <img src="{$image_src_attr}" alt="{$alt_text}">
     <!--
@@ -2168,26 +2137,14 @@
 
 </xsl:template>
 
+<!-- Handle images by replacing the @src attribute with a reference to the base64-encoded data in the file element -->
+<xsl:template match="x:img" mode="embedded">
+    <xsl:variable name="image_name" select="@name"/>
+    <xsl:variable name="image_src_data" select="$imagesContainer/img[@title = $image_name]/@src"/>
+    <xsl:variable name="image_data" select="substring-after($image_src_data, concat($image_encoding, ','))"/>
 
-<xsl:template match="x:img" mode="moodle2pluginfile">
-    <xsl:variable name="image_format" select="substring-after(substring-before(@src, ';'), '/')"/>
-
-    <xsl:variable name="real_image_format">
-        <xsl:choose>
-        <xsl:when test="$image_format != ''">
-                <xsl:value-of select="$image_format"/>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:call-template name="substring-after-last">
-                <xsl:with-param name="text_string" select="@src"/>
-                <xsl:with-param name="delimiter_string" select="'.'"/>
-            </xsl:call-template>
-        </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-
-    <file name="{concat(@id, '.', $real_image_format)}" encoding="base64">
-        <xsl:value-of select="substring-after(@src, 'base64,')"/>
+    <file name="{@name}" encoding="base64">
+        <xsl:value-of select="$image_data"/>
     </file>
 </xsl:template>
 

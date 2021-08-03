@@ -123,7 +123,6 @@ class qformat_wordtable extends qformat_xml {
             return false;
         }
 
-
         // Import the Word file into XHTML and an array of images.
         $imagesforzipping = array();
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
@@ -131,11 +130,22 @@ class qformat_wordtable extends qformat_xml {
         $word2xml->set_imagehandling($this->xsltparameters['imagehandling']);
         $xsltoutput = $word2xml->import($filename, $imagesforzipping);
 
-        // Pass 3 - convert XHTML into Moodle Question XML.
-        // Prepare for Import Pass 3 XSLT transformation.
+        // Convert the returned array of images, if any, into a string.
+        $imagestring = "";
+        foreach ($imagesforzipping as $imagename => $imagedata) {
+            $filetype = strtolower(pathinfo($imagename, PATHINFO_EXTENSION));
+            $base64data = base64_encode($imagedata);
+            $filedata = 'data:image/' . $filetype . ';base64,' . $base64data;
+            // Embed the image name and data into the HTML.
+            $imagestring .= '<img title="' . $imagename . '" src="' . $filedata . '"/>';
+        }
+
+        // Convert XHTML into Moodle Question XML.
         $stylesheet = __DIR__ . "/" . $this->xhtml2mqxmlstylesheet;
-        $xsltoutput = "<pass3Container>\n" . $xsltoutput . $this->get_question_labels() . "\n</pass3Container>";
-        $mqxmldata = $word2xml->convert($xsltoutput, $stylesheet, $this->xsltparameters);
+        $pass3input = "<pass3Container>\n" . $xsltoutput .
+            "<imagesContainer>\n" . $imagestring . "</imagesContainer>\n" .
+            $this->get_question_labels() . "\n</pass3Container>";
+        $mqxmldata = $word2xml->convert($pass3input, $stylesheet, $this->xsltparameters);
 
         if ((strpos($mqxmldata, "</question>") === false)) {
             throw new \moodle_exception(get_string('noquestionsinfile', 'question'));
@@ -269,53 +279,57 @@ class qformat_wordtable extends qformat_xml {
             $textstrings['question'][] = 'idnumber';
         }
 
-        $expout = "<moodlelabels>\n";
+        $questionlabels = "<moodlelabels>\n";
         foreach ($textstrings as $typegroup => $grouparray) {
             foreach ($grouparray as $stringid) {
                 $namestring = $typegroup . '_' . $stringid;
-                // Clean up question type explanation, in case the default text has been overridden on the site.
-                $cleantext = get_string($stringid, $typegroup);
-                $expout .= '<data name="' . $namestring . '"><value>' . $cleantext . "</value></data>\n";
+                // Get the question type field label text.
+                $labeltext = get_string($stringid, $typegroup);
+                $questionlabels .= '<data name="' . $namestring . '"><value>' . $labeltext . "</value></data>\n";
             }
         }
-        $expout .= "</moodlelabels>";
+        $questionlabels .= "</moodlelabels>";
 
-        // Ensure the XML is well-formed, as the standard clean text strings may have been overwritten on some sites.
+        // Ensure the XML is well-formed, as the standard label and help text strings may have been overridden on some sites.
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $expout = $word2xml->convert_to_xml($expout);
-        $expout = str_replace("<br>", "<br/>", $expout);
+        $questionlabels = $word2xml->convert_to_xml($questionlabels);
+        $questionlabels = str_replace("<br>", "<br/>", $questionlabels);
 
-        return $expout;
+        return $questionlabels;
     }
 
     /**
      * Get the core and contributed question text strings needed to fill in table labels
      *
-     * A string containing XML data, populated from the language folders, is returned
+     * A string containing XML data, populated from the language folders, is returned.
+     * We need to split core from contributed questions to support the Core questions in Lessons.
      *
      * @return string
      */
     private function get_question_labels() {
         global $CFG;
 
-        // Get the core question labels, and strip out the closing element so more can be added.
+        // Get the core question labels first.
         $questionlabels = $this->get_core_question_labels();
 
-        // Add All-or-Nothing MCQ question type strings if present.
+        // Append All-or-Nothing MCQ question type strings if present.
         if (question_bank::is_qtype_installed('multichoiceset')) {
+            // Strip out the closing element first so that we can insert the extra labels.
             $questionlabels = str_replace("</moodlelabels>", "", $questionlabels);
 
             $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
             foreach ($textstrings as $typegroup => $grouparray) {
                 foreach ($grouparray as $stringid) {
                     $namestring = $typegroup . '_' . $stringid;
-                    // Clean up question type explanation, in case the default text has been overridden on the site.
-                    $cleantext = get_string($stringid, $typegroup);
-                    $questionlabels .= '<data name="' . $namestring . '"><value>' . $cleantext . "</value></data>\n";
+                    // Get the question type field label text.
+                    $labeltext = get_string($stringid, $typegroup);
+                    $questionlabels .= '<data name="' . $namestring . '"><value>' . $labeltext . "</value></data>\n";
                 }
             }
             $questionlabels .= "</moodlelabels>";
         }
+
+        // Ensure the XML is well-formed, as the standard label and help text strings may have been overridden on some sites.
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
         $questionlabels = $word2xml->convert_to_xml($questionlabels);
         $questionlabels = str_replace("<br>", "<br/>", $questionlabels);
