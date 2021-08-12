@@ -50,7 +50,6 @@
 </xsl:variable>
 
 <xsl:variable name="moodle_labels" select="//moodlelabels" />
-<xsl:variable name="imagesContainer" select="//imagesContainer"/>
 
 <!-- Default column numbers-->
 <xsl:variable name="nColumns" select="4"/>
@@ -1488,7 +1487,6 @@
             <xsl:value-of select="']]&gt;'" disable-output-escaping="yes"/>
         </xsl:if>
     </text>
-    <xsl:comment><xsl:value-of select="concat('n images = ', $contains_image)"/></xsl:comment>
     <!-- Handle embedded images: do nothing in Moodle 1.9, and move to file element in Moodle 2.x -->
     <xsl:apply-templates select="$content//x:img" mode="embedded"/>
 </xsl:template>
@@ -2118,7 +2116,7 @@
     <xsl:variable name="image_src_attr" select="concat($image_metafolder, '/', @name)"/>
 
     <img src="{$image_src_attr}" alt="{$alt_text}">
-    <!--
+        <!--
         <xsl:if test="@class">
             <xsl:attribute name="class"><xsl:value-of select="@class"/></xsl:attribute>
         </xsl:if>
@@ -2139,12 +2137,8 @@
 
 <!-- Handle images by replacing the @src attribute with a reference to the base64-encoded data in the file element -->
 <xsl:template match="x:img" mode="embedded">
-    <xsl:variable name="image_name" select="@name"/>
-    <xsl:variable name="image_src_data" select="$imagesContainer/img[@title = $image_name]/@src"/>
-    <xsl:variable name="image_data" select="substring-after($image_src_data, concat($image_encoding, ','))"/>
-
     <file name="{@name}" encoding="base64">
-        <xsl:value-of select="$image_data"/>
+        <xsl:value-of select="@src"/>
     </file>
 </xsl:template>
 

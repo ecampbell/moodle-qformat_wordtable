@@ -549,20 +549,20 @@
         <!-- 1st heading row: question stem/description and type cells -->
         <xsl:text>&#x0a;</xsl:text>
         <tr>
-            <td colspan="3" style="width: 12.0cm">
+            <td colspan="3" style="width: 12.0cm"><div class="chapter"> <!-- Wrap cells in a div in case an image is present -->
                 <xsl:choose>
-                <xsl:when test="$qtype = 'CL'">
-                    <!-- Put Cloze text into the first option table cell, and convert subquestion markup too-->
-                    <xsl:apply-templates select="questiontext/text" mode="cloze">
-                        <xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
-                        <xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
-                        <xsl:with-param name="cloze_defaultmark_value" select="$defaultmark_value"/>
-                    </xsl:apply-templates>
-                    <xsl:apply-templates select="questiontext/file"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:apply-templates select="questiontext/*"/>
-                </xsl:otherwise>
+                    <xsl:when test="$qtype = 'CL'">
+                        <!-- Put Cloze text into the first option table cell, and convert subquestion markup too-->
+                        <xsl:apply-templates select="questiontext/text" mode="cloze">
+                            <xsl:with-param name="cloze_sa_casesensitive_flag" select="$cloze_sa_casesensitive_flag"/>
+                            <xsl:with-param name="cloze_mc_formatting_flag" select="$cloze_mc_formatting_flag"/>
+                            <xsl:with-param name="cloze_defaultmark_value" select="$defaultmark_value"/>
+                        </xsl:apply-templates>
+                        <xsl:apply-templates select="questiontext/file"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:apply-templates select="questiontext/*"/>
+                    </xsl:otherwise>
                 </xsl:choose>
 
                 <!-- Handle supplementary image for question text, as implemented in Moodle 1.9 -->
@@ -584,7 +584,7 @@
                     <!-- Emit the image in the supplementary format, to be removed later -->
                     <div class="ImageFile"><img id="{$image_id}" title="{image}" src="{concat($image_format, normalize-space(image_base64))}"/></div>
                 </xsl:if>
-            </td>
+            </div></td>
             <td style="width: 1.0cm"><p class="QFType"><xsl:value-of select="$qtype" /></p></td>
         </tr>
         <xsl:text>&#x0a;</xsl:text>
@@ -935,8 +935,7 @@
             <!-- Essay questions in Moodle 2.5+ have a response template and information for graders, so put in a row for these -->
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                <td style="{$col2_width}">
-                <!-- Essay questions in Moodle 1.9 to 2.3 have no response template, so leave it out -->
+                <td style="{$col2_width}"><div class="chapter">
                     <xsl:choose>
                     <xsl:when test="responsetemplate and normalize-space(responsetemplate) = ''">
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
@@ -952,8 +951,8 @@
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:otherwise>
                     </xsl:choose>
-                </td>
-                <td style="{$col3_width}">
+                </div></td>
+                <td style="{$col3_width}"><div class="chapter">
                     <xsl:choose>
                     <xsl:when test="graderinfo and graderinfo = ''">
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
@@ -969,7 +968,7 @@
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:otherwise>
                     </xsl:choose>
-                </td>
+                </div></td>
                 <!-- No grade info used in essays -->
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
@@ -1023,7 +1022,7 @@
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$generalfeedback_label"/></p></th>
-                <td style="{$col3_width}">
+                <td style="{$col3_width}"><div class="chapter">
                     <xsl:choose>
                     <xsl:when test="generalfeedback/text = ''">
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
@@ -1032,8 +1031,7 @@
                         <xsl:apply-templates select="generalfeedback/*"/>
                     </xsl:otherwise>
                     </xsl:choose>
-
-                </td>
+                </div></td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
         <xsl:text>&#x0a;</xsl:text>
@@ -1044,28 +1042,28 @@
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$correctfeedback_label"/></p></th>
-                <td style="{$col3_width}">
+                <td style="{$col3_width}"><div class="chapter">
                     <xsl:choose>
                     <xsl:when test="normalize-space(correctfeedback/text) = ''">
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
                     <xsl:otherwise><xsl:apply-templates select="correctfeedback/*"/></xsl:otherwise>
                     </xsl:choose>
-                </td>
+                </div></td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$incorrectfeedback_label"/></p></th>
-                <td style="{$col3_width}">
+                <td style="{$col3_width}"><div class="chapter">
                     <xsl:choose>
                     <xsl:when test="normalize-space(incorrectfeedback/text) = ''">
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
                     <xsl:otherwise><xsl:apply-templates select="incorrectfeedback/*"/></xsl:otherwise>
                     </xsl:choose>
-                </td>
+                </div></td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
@@ -1075,14 +1073,14 @@
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="$pcorrectfeedback_label"/></p></th>
-                <td style="{$col3_width}">
+                <td style="{$col3_width}"><div class="chapter">
                     <xsl:choose>
                     <xsl:when test="normalize-space(partiallycorrectfeedback/text) = ''">
                         <p class="Cell"><xsl:value-of select="$blank_cell"/></p>
                     </xsl:when>
                     <xsl:otherwise><xsl:apply-templates select="partiallycorrectfeedback/*"/></xsl:otherwise>
                     </xsl:choose>
-                </td>
+                </div></td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
@@ -1095,14 +1093,28 @@
             <tr>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_number_label, $colon_string)"/></p></th>
-                <td style="{$col3_width}">
+                <td style="{$col3_width}"><div class="chapter">
                     <xsl:apply-templates/>
-                </td>
+                </div></td>
                 <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
             </tr>
             <xsl:text>&#x0a;</xsl:text>
-            <!-- Most question types allow for some fields on the behaviour of hints, but SA doesn't, and CL only in 2.4+ -->
-            <xsl:if test="($qtype != 'CL') or ($qtype = 'CL')">
+            <!-- Most question types allow for some qualifier fields on the behaviour of hints -->
+            <xsl:if test="$qtype != 'SA'">
+                <tr>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                    <td style="{$col3_width}"><p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="options and options = '1'">
+                            <xsl:value-of select="$yes_label"/>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                        </xsl:choose>
+                    </p></td>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                </tr>
+                <xsl:text>&#x0a;</xsl:text>
                 <tr>
                     <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                     <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($hint_shownumpartscorrect_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
@@ -1117,23 +1129,39 @@
                     <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 </tr>
                 <xsl:text>&#x0a;</xsl:text>
+            </xsl:if>
+            <tr>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                <th style="{$col2_width}">
+                    <p class="TableRowHead">
+                        <xsl:choose>
+                        <xsl:when test="$qtype = 'DDM'">
+                            <xsl:value-of select="concat($ddm_hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
+                        </xsl:otherwise>
+                        </xsl:choose>
+                    </p>
+                </th>
+                <td style="{$col3_width}"><p class="Cell">
+                    <xsl:choose>
+                    <xsl:when test="clearwrong">
+                        <xsl:value-of select="$yes_label"/>
+                    </xsl:when>
+                    <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                    </xsl:choose>
+                </p></td>
+                <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+            </tr>
+            <xsl:text>&#x0a;</xsl:text>
+            <xsl:if test="$qtype = 'MS'">
                 <tr>
                     <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    <th style="{$col2_width}">
-                        <p class="TableRowHead">
-                            <xsl:choose>
-                            <xsl:when test="$qtype = 'DDM'">
-                                <xsl:value-of select="concat($ddm_hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="concat($hint_clearwrongparts_label, ' (', $hint_number_label, ')', $colon_string)"/>
-                            </xsl:otherwise>
-                            </xsl:choose>
-                        </p>
-                    </th>
+                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
                     <td style="{$col3_width}"><p class="Cell">
                         <xsl:choose>
-                        <xsl:when test="clearwrong">
+                        <xsl:when test="options and options = '1'">
                             <xsl:value-of select="$yes_label"/>
                         </xsl:when>
                         <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
@@ -1142,39 +1170,23 @@
                     <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
                 </tr>
                 <xsl:text>&#x0a;</xsl:text>
-                <xsl:if test="$qtype = 'MS'">
-                    <tr>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($multichoiceset_showeachfeedback_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                        <td style="{$col3_width}"><p class="Cell">
-                            <xsl:choose>
-                            <xsl:when test="options and options = '1'">
-                                <xsl:value-of select="$yes_label"/>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
-                            </xsl:choose>
-                        </p></td>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    </tr>
-                    <xsl:text>&#x0a;</xsl:text>
-                </xsl:if>
+            </xsl:if>
+            <xsl:text>&#x0a;</xsl:text>
+            <xsl:if test="$qtype = 'DDM'">
+                <tr>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                    <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($ddm_stateincorrectlyplaced_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
+                    <td style="{$col3_width}"><p class="Cell">
+                        <xsl:choose>
+                        <xsl:when test="options and options = '1'">
+                            <xsl:value-of select="$yes_label"/>
+                        </xsl:when>
+                        <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
+                        </xsl:choose>
+                    </p></td>
+                    <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
+                </tr>
                 <xsl:text>&#x0a;</xsl:text>
-                <xsl:if test="$qtype = 'DDM'">
-                    <tr>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                        <th style="{$col2_width}"><p class="TableRowHead"><xsl:value-of select="concat($ddm_stateincorrectlyplaced_label, ' (', $hint_number_label, ')', $colon_string)"/></p></th>
-                        <td style="{$col3_width}"><p class="Cell">
-                            <xsl:choose>
-                            <xsl:when test="options and options = '1'">
-                                <xsl:value-of select="$yes_label"/>
-                            </xsl:when>
-                            <xsl:otherwise><xsl:value-of select="$no_label"/></xsl:otherwise>
-                            </xsl:choose>
-                        </p></td>
-                        <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
-                    </tr>
-                    <xsl:text>&#x0a;</xsl:text>
-                </xsl:if>
             </xsl:if>
         </xsl:for-each>
 
@@ -1336,10 +1348,10 @@
         <td style="width: 1.0cm"><p class="{$numbercolumn_class}"><xsl:value-of select="$blank_cell"/></p></td>
         <xsl:choose>
         <xsl:when test="$qtype = 'SA'">
-            <td style="{$col2_width}"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></td>
+            <td style="{$col2_width}"><div class="chapter"><p class="Cell"><xsl:value-of select="normalize-space(text)"/></p></div></td>
         </xsl:when>
         <xsl:otherwise>
-            <td style="{$col2_width}"><xsl:apply-templates select="text|file"/></td>
+            <td style="{$col2_width}"><div class="chapter"><xsl:apply-templates select="text|file"/></div></td>
         </xsl:otherwise>
         </xsl:choose>
 
@@ -1350,7 +1362,7 @@
             <td style="width: 1.0cm"><p class="Cell"><xsl:value-of select="$blank_cell"/></p></td>
         </xsl:when>
         <xsl:otherwise>
-            <td style="{$col3_width}"><p class="QFFeedback"><xsl:apply-templates select="feedback/*"/></p></td>
+            <td style="{$col3_width}"><div class="chapter"><p class="QFFeedback"><xsl:apply-templates select="feedback/*"/></p></div></td>
             <td style="width: 1.0cm"><p class="QFGrade"><xsl:value-of select="$grade_value"/></p></td>
         </xsl:otherwise>
         </xsl:choose>
