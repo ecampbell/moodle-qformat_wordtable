@@ -1,7 +1,7 @@
 # Change log
 
 Date          Version   Comment
-2021/08/12    3.9.0     Use Book Word import wordconverter class for import/export of Word files.
+2021/08/13    3.9.0     Use Book Word import wordconverter class for import/export of Word files.
 2020/12/08    3.7.1     Add support for letter-groups in Select Missing Word questions.
 2020/07/10    3.6.3     Stop leaving temporary files lying around.
 2020/07/10    3.6.2     Add support for Office MML m:deg element, which caused an error.

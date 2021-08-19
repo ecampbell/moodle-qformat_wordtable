@@ -206,7 +206,7 @@ class qformat_wordtable extends qformat_xml {
         $xhtmldata = "<html><head><title>Fred</title></head><body>" . $word2xml->body_only($xhtmldata) . "</body></html>";
 
         // Embed the XHTML tables into a Word-compatible template document with styling information, etc.
-        $content = $word2xml->export($xhtmldata, 'question', $moodlelabels, 'embedded');
+        $content = $word2xml->export($xhtmldata, 'qformat_wordtable', $moodlelabels, 'embedded');
         return $content;
     }   // End presave_process function.
 
