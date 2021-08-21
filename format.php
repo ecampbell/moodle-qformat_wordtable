@@ -128,7 +128,7 @@ class qformat_wordtable extends qformat_xml {
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
         $word2xml->set_heading1styleoffset($this->xsltparameters['heading1stylelevel']);
         $word2xml->set_imagehandling($this->xsltparameters['imagehandling']);
-        $xsltoutput = $word2xml->import($filename, $imagesforzipping);
+        $xsltoutput = $word2xml->import($filename, $imagesforzipping, true);
 
         // Convert the returned array of images, if any, into a string.
         $imagestring = "";
