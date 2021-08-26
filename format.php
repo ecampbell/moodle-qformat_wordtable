@@ -43,8 +43,8 @@ require_once($CFG->dirroot.'/lib/uploadlib.php');
 require_once("$CFG->dirroot/question/format/xml/format.php");
 
 // Include Book tool Word import plugin wordconverter class and utility functions.
-require_once($CFG->dirroot . '/mod/book/tool/wordimport/locallib.php');
 use \booktool_wordimport\wordconverter;
+use \qformat_wordtable\mqxmlconverter;
 
 /**
  * Importer for Microsoft Word table question format.
@@ -56,12 +56,6 @@ use \booktool_wordimport\wordconverter;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
  */
 class qformat_wordtable extends qformat_xml {
-    /** @var string Stylesheet to export Moodle Question XML into XHTML */
-    private $mqxml2xhtmlstylesheet = 'mqxml2xhtml.xsl';
-
-    /** @var string Stylesheet to import XHTML into question XML */
-    private $xhtml2mqxmlstylesheet = 'xhtml2mqxml.xsl';
-
     /** @var array Overrides to default XSLT parameters used for conversion */
     private $xsltparameters = array('pluginname' => 'qformat_wordtable',
             'heading1stylelevel' => 1, // Map "Heading 1" style to <h1> element.
@@ -88,7 +82,7 @@ class qformat_wordtable extends qformat_xml {
      * @return bool Success
      */
     public function importpreprocess() {
-        global $CFG, $OUTPUT;
+        global $CFG;
         $realfilename = "";
         $filename = "";
 
@@ -110,16 +104,16 @@ class qformat_wordtable extends qformat_xml {
 
         // Check that the file is in Word 2010 format, not HTML, XML, or Word 2003.
         if ((substr($realfilename, -3, 3) == 'doc')) {
-            echo $OUTPUT->notification(get_string('docnotsupported', 'qformat_wordtable', $baserealfilename));
+            throw new \moodle_exception(get_string('docnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         } else if ((substr($realfilename, -3, 3) == 'xml')) {
-            echo $OUTPUT->notification(get_string('xmlnotsupported', 'qformat_wordtable', $baserealfilename));
+            throw new \moodle_exception(get_string('xmlnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         } else if ((stripos($realfilename, 'htm'))) {
-            echo $OUTPUT->notification(get_string('htmlnotsupported', 'qformat_wordtable', $baserealfilename));
+            throw new \moodle_exception(get_string('htmlnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         } else if ((stripos(file_get_contents($filename, 0, null, 0, 100), 'html'))) {
-            echo $OUTPUT->notification(get_string('htmldocnotsupported', 'qformat_wordtable', $baserealfilename));
+            throw new \moodle_exception(get_string('htmldocnotsupported', 'qformat_wordtable', $baserealfilename));
             return false;
         }
 
@@ -128,7 +122,7 @@ class qformat_wordtable extends qformat_xml {
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
         $word2xml->set_heading1styleoffset($this->xsltparameters['heading1stylelevel']);
         $word2xml->set_imagehandling($this->xsltparameters['imagehandling']);
-        $xsltoutput = $word2xml->import($filename, $imagesforzipping, true);
+        $xhtmldata = $word2xml->import($filename, $imagesforzipping, true);
 
         // Convert the returned array of images, if any, into a string.
         $imagestring = "";
@@ -141,11 +135,8 @@ class qformat_wordtable extends qformat_xml {
         }
 
         // Convert XHTML into Moodle Question XML.
-        $stylesheet = __DIR__ . "/" . $this->xhtml2mqxmlstylesheet;
-        $pass3input = "<pass3Container>\n" . $xsltoutput .
-            "<imagesContainer>\n" . $imagestring . "</imagesContainer>\n" .
-            $this->get_question_labels() . "\n</pass3Container>";
-        $mqxmldata = $word2xml->convert($pass3input, $stylesheet, $this->xsltparameters);
+        $xhtml2mqxml = new mqxmlconverter($this->xsltparameters['pluginname']);
+        $mqxmldata = $xhtml2mqxml->import($xhtmldata, $imagestring, $this->xsltparameters);
 
         if ((strpos($mqxmldata, "</question>") === false)) {
             throw new \moodle_exception(get_string('noquestionsinfile', 'question'));
@@ -182,211 +173,16 @@ class qformat_wordtable extends qformat_xml {
      * @param string $content Question XML text
      * @return string Word-compatible XHTML text
      */
-    public function presave_process( $content ) {
-        // Override method to allow us convert to Word-compatible XHTML format.
-        global $OUTPUT;
-
-        // Stylesheet to convert Moodle Question XML into XHTML tables.
-        $stylesheet = __DIR__ . "/" . $this->mqxml2xhtmlstylesheet;
-
+    public function presave_process($content) {
         // Check that there are questions to convert.
         if (strpos($content, "</question>") === false) {
-            echo $OUTPUT->notification(get_string('noquestions', 'qformat_wordtable'));
+            throw new moodle_exception(get_string('noquestions', 'qformat_wordtable'));
             return $content;
         }
 
-        // Fields within a question may contain badly formatted HTML inside CDATA sections, so fix them up.
-        $cleancontent = $this->clean_all_questions($content);
-
-        // Wrap the Moodle Question XML and the labels data in a single XML container for processing into XHTML tables.
-        $moodlelabels = $this->get_question_labels();
-        $questionxml = "<container>\n<quiz>" . $cleancontent . "</quiz>\n" . $moodlelabels . "\n</container>";
-        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $xhtmldata = $word2xml->convert($questionxml, $stylesheet);
-        $xhtmldata = "<html><head><title>Fred</title></head><body>" . $word2xml->body_only($xhtmldata) . "</body></html>";
-
-        // Embed the XHTML tables into a Word-compatible template document with styling information, etc.
-        $content = $word2xml->export($xhtmldata, 'qformat_wordtable', $moodlelabels, 'embedded');
-        return $content;
+        // Convert the Moodle Question XML into Word-compatible XHTML.
+        $mqxml2xhtml = new mqxmlconverter($this->xsltparameters['pluginname']);
+        $xhtmldata = $mqxml2xhtml->export($content, $this->xsltparameters['pluginname'], $this->xsltparameters['imagehandling']);
+        return $xhtmldata;
     }   // End presave_process function.
-
-    /**
-     * Get the XSLT stylesheet for converting XHTML tables into Moodle Question XML
-     *
-     * @return string Path to stylesheet
-     */
-    public function get_import_stylesheet() {
-        return __DIR__ . "/" . $this->xhtml2mqxmlstylesheet;
-    }
-
-    /**
-     * Get the XSLT stylesheet for converting Moodle Question XML into XHTML tables
-     *
-     * @return string Path to stylesheet
-     */
-    public function get_export_stylesheet() {
-        return __DIR__ . "/" . $this->mqxml2xhtmlstylesheet;
-    }
-
-    /**
-     * Get the core question text strings needed to fill in table labels
-     *
-     * A string containing XML data, populated from the language folders, is returned
-     *
-     * @return string
-     */
-    public function get_core_question_labels() {
-        global $CFG;
-
-        // Release-independent list of all strings required in the XSLT stylesheets for labels etc.
-        $textstrings = array(
-            'grades' => array('item'),
-            'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown',
-                            'formatplain', 'formattext', 'grade', 'question', 'tags'),
-            'qformat_wordtable' => array('cloze_instructions', 'cloze_distractor_column_label', 'cloze_feedback_column_label',
-                            'cloze_mcformat_label', 'description_instructions', 'essay_instructions',
-                            'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions',
-                            'transformationfailed', 'unsupported_instructions'),
-            'qtype_description' => array('pluginnamesummary'),
-            'qtype_ddimageortext' => array('pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
-                    'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop'),
-            'qtype_ddmarker' => array('pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
-                'dropbackground', 'dropzoneheader', 'infinite', 'marker', 'noofdrags', 'shape_circle',
-                'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced'),
-            'qtype_ddwtos' => array('pluginnamesummary', 'infinite'),
-            'qtype_essay' => array('acceptedfiletypes', 'allowattachments', 'attachmentsrequired', 'formatnoinline',
-                            'graderinfo', 'formateditor', 'formateditorfilepicker',
-                            'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat',
-                            'responseisrequired', 'responsenotrequired',
-                            'responserequired', 'responsetemplate', 'responsetemplate_help'),
-            'qtype_gapselect' => array('pluginnamesummary', 'errornoslots', 'group', 'shuffle'),
-            'qtype_match' => array('blanksforxmorequestions', 'filloutthreeqsandtwoas'),
-            'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback',
-                            'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
-            'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
-            'qtype_truefalse' => array('false', 'true'),
-            'question' => array('addmorechoiceblanks', 'category', 'clearwrongparts', 'correctfeedbackdefault',
-                            'defaultmark', 'generalfeedback', 'hintn', 'hintnoptions',
-                            'incorrectfeedbackdefault', 'partiallycorrectfeedbackdefault',
-                            'penaltyforeachincorrecttry', 'questioncategory', 'shownumpartscorrect',
-                            'shownumpartscorrectwhenfinished'),
-            'quiz' => array('answer', 'answers', 'casesensitive', 'correct', 'correctanswers',
-                            'defaultgrade', 'incorrect', 'shuffle')
-            );
-
-        if ($CFG->release >= '3.6') {
-            // Add support for new optional ID number field added in Moodle 3.6.
-            $textstrings['question'][] = 'idnumber';
-        }
-
-        $questionlabels = "<moodlelabels>\n";
-        foreach ($textstrings as $typegroup => $grouparray) {
-            foreach ($grouparray as $stringid) {
-                $namestring = $typegroup . '_' . $stringid;
-                // Get the question type field label text.
-                $labeltext = get_string($stringid, $typegroup);
-                $questionlabels .= '<data name="' . $namestring . '"><value>' . $labeltext . "</value></data>\n";
-            }
-        }
-        $questionlabels .= "</moodlelabels>";
-
-        // Ensure the XML is well-formed, as the standard label and help text strings may have been overridden on some sites.
-        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $questionlabels = $word2xml->convert_to_xml($questionlabels);
-        $questionlabels = str_replace("<br>", "<br/>", $questionlabels);
-
-        return $questionlabels;
-    }
-
-    /**
-     * Get the core and contributed question text strings needed to fill in table labels
-     *
-     * A string containing XML data, populated from the language folders, is returned.
-     * We need to split core from contributed questions to support the Core questions in Lessons.
-     *
-     * @return string
-     */
-    private function get_question_labels() {
-        global $CFG;
-
-        // Get the core question labels first.
-        $questionlabels = $this->get_core_question_labels();
-
-        // Append All-or-Nothing MCQ question type strings if present.
-        if (question_bank::is_qtype_installed('multichoiceset')) {
-            // Strip out the closing element first so that we can insert the extra labels.
-            $questionlabels = str_replace("</moodlelabels>", "", $questionlabels);
-
-            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
-            foreach ($textstrings as $typegroup => $grouparray) {
-                foreach ($grouparray as $stringid) {
-                    $namestring = $typegroup . '_' . $stringid;
-                    // Get the question type field label text.
-                    $labeltext = get_string($stringid, $typegroup);
-                    $questionlabels .= '<data name="' . $namestring . '"><value>' . $labeltext . "</value></data>\n";
-                }
-            }
-            $questionlabels .= "</moodlelabels>";
-        }
-
-        // Ensure the XML is well-formed, as the standard label and help text strings may have been overridden on some sites.
-        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $questionlabels = $word2xml->convert_to_xml($questionlabels);
-        $questionlabels = str_replace("<br>", "<br/>", $questionlabels);
-
-        return $questionlabels;
-    }
-
-    /**
-     * Clean HTML markup inside question text element content
-     *
-     * A string containing Moodle Question XML with clean HTML inside the text elements is returned.
-     *
-     * @param string $questionxmlstring Question XML text
-     * @return string
-     */
-    private function clean_all_questions($questionxmlstring) {
-        // Start assembling the cleaned output string, starting with empty.
-        $cleanquestionxml = "";
-        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-
-        // Split the string into questions in order to check the text fields for clean HTML.
-        $foundquestions = preg_match_all('~(.*?)<question type="([^"]*)"[^>]*>(.*?)</question>~s', $questionxmlstring,
-                            $questionmatches, PREG_SET_ORDER);
-        $numquestions = count($questionmatches);
-        if ($foundquestions === false or $foundquestions == 0) {
-            return $questionxmlstring;
-        }
-
-        // Split the questions into text strings to check the HTML.
-        for ($i = 0; $i < $numquestions; $i++) {
-            $qtype = $questionmatches[$i][2];
-            $questioncontent = $questionmatches[$i][3];
-            // Split the question into chunks at CDATA boundaries, using ungreedy (?) and matching across newlines (s modifier).
-            $foundcdatasections = preg_match_all('~(.*?)<\!\[CDATA\[(.*?)\]\]>~s', $questioncontent, $cdatamatches, PREG_SET_ORDER);
-            if ($foundcdatasections === false) {
-                $cleanquestionxml .= $questionmatches[$i][0];
-            } else if ($foundcdatasections != 0) {
-                $numcdatasections = count($cdatamatches);
-                // Found CDATA sections, so first add the question start tag and then process the body.
-                $cleanquestionxml .= '<question type="' . $qtype . '">';
-
-                // Process content of each CDATA section to clean the HTML.
-                for ($j = 0; $j < $numcdatasections; $j++) {
-                    $cleancdatacontent = $word2xml->clean_html_text($cdatamatches[$j][2]);
-
-                    // Add all the text before the first CDATA start boundary, and the cleaned string, to the output string.
-                    $cleanquestionxml .= $cdatamatches[$j][1] . '<![CDATA[' . $cleancdatacontent . ']]>';
-                } // End CDATA section loop.
-
-                // Add the text after the last CDATA section closing delimiter.
-                $textafterlastcdata = substr($questionmatches[$i][0], strrpos($questionmatches[$i][0], "]]>") + 3);
-                $cleanquestionxml .= $textafterlastcdata;
-            } else {
-                $cleanquestionxml .= $questionmatches[$i][0];
-            }
-        } // End question element loop.
-
-        return $cleanquestionxml;
-    }
 }
