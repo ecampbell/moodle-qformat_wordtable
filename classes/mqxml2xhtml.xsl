@@ -1299,6 +1299,10 @@
             <xsl:when test="text = 'false'">
                 <p class="Cell"><xsl:value-of select="$false_label"/></p>
             </xsl:when>
+            <xsl:otherwise>
+                <!-- Lesson True/False questions can contain any text -->
+                <xsl:apply-templates select="text"/>
+            </xsl:otherwise>
             </xsl:choose>
         </td>
         <td style="{$col3_width}"><p class="QFFeedback"><xsl:apply-templates select="feedback/*"/></p></td>

@@ -82,21 +82,21 @@ class mqxmlconverter {
 
         // Use the Book tool wordimport plugin to do the actual XSLT transformation.
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $mqxml = $word2xml->convert($xhtmldata, $this->xhtml2mqxmlstylesheet);
-        $word2xml->debug_write($mqxml, "mqx");
+        $mqxml = $word2xml->xsltransform($xhtmldata, $this->xhtml2mqxmlstylesheet);
         return $mqxml;
-    }
+    }  // End import function.
 
     /**
-     * Export Moodle Question XML into generic XHTML
+     * Export Moodle Question XML into Word-compatible XHTML
+     *
+     * This export function is for Question bank questions only, not for Lesson questions.
+     * It exports all questions in a category.
      *
      * @param string $mqxml Moodle Question XML
-     * @param string $module Where it is called from: lesson or question
      * @param string $imagehandling Embedded or encoded image data
      * @return string XHTML text
      */
     public function export(string $mqxml, string $imagehandling = 'embedded') {
-
         $this->xsltparameters['exportimagehandling'] = $imagehandling;
         // Check that the XSLT stylesheet exists.
         if (!file_exists($this->mqxml2xhtmlstylesheet)) {
@@ -112,16 +112,47 @@ class mqxmlconverter {
 
         // Use the Book tool wordimport plugin to do the actual XSLT transformation.
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $xhtmldata = $word2xml->convert($mqxml, $this->mqxml2xhtmlstylesheet);
-        $word2xml->debug_write($xhtmldata, "xht");
-
-        // Assemble the book contents, the HTML template and Moodle text labels to a single XML file for easier XSLT processing.
-        $xhtmldata = "<html><head><title>Fred</title></head><body>" . $word2xml->body_only($xhtmldata) . "</body></html>";
+        $xhtmldata = $word2xml->xsltransform($mqxml, $this->mqxml2xhtmlstylesheet);
 
         // Embed the XHTML tables into a Word-compatible template document with styling information, etc.
         $content = $word2xml->export($xhtmldata, $this->xsltparameters['pluginname'], $moodlelabels, 'embedded');
         return $content;
     }   // End export function.
+
+    /**
+     * Convert Moodle Question XML into generic XHTML
+     *
+     * This function converts a single Lesson question into generic XHTML.
+     *
+     * @param string $mqxml Moodle Question XML
+     * @param string $imagehandling Embedded or encoded image data
+     * @return string XHTML text
+     */
+    public function convert_mqx2htm(string $mqxml, string $imagehandling = 'embedded') {
+        $this->xsltparameters['exportimagehandling'] = $imagehandling;
+        // Check that the XML to XHTML conversion XSLT stylesheet exists.
+        if (!file_exists($this->mqxml2xhtmlstylesheet)) {
+            throw new \moodle_exception(get_string('stylesheetunavailable', 'qformat_wordtable', $this->mqxml2xhtmlstylesheet));
+        }
+
+        // Clean up the Question XML to ensure it is well-formed XML and won't break the XSLT processing.
+        $mqxml = $this->clean_all_questions($mqxml);
+
+        // Merge and wrap all the required input data into a single string to simplify XSLT processing.
+        $moodlelabels = $this->get_core_question_labels();
+        $mqxml = "<container>\n<quiz>" . $mqxml . "</quiz>\n" . $moodlelabels . "\n</container>";
+
+        // Use the Book tool wordimport plugin to do the actual XSLT transformation.
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
+        $xhtmldata = $word2xml->xsltransform($mqxml, $this->mqxml2xhtmlstylesheet, $this->xsltparameters);
+        $matches = null;
+        if (preg_match('/<div[^>]*>(.+)<\/div>/is', $xhtmldata, $matches)) {
+            $xhtmldata =  $matches[1];
+        }
+        // $word2xml->debug_write($mqxml, "mqx");
+        // $word2xml->debug_write($xhtmldata, "htb");
+        return $xhtmldata;
+    }   // End convert_mqx2htm function.
 
     /**
      * Get the core question text strings needed to fill in table labels
