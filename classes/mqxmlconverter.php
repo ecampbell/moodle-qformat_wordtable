@@ -149,10 +149,34 @@ class mqxmlconverter {
         if (preg_match('/<div[^>]*>(.+)<\/div>/is', $xhtmldata, $matches)) {
             $xhtmldata =  $matches[1];
         }
-        // $word2xml->debug_write($mqxml, "mqx");
-        // $word2xml->debug_write($xhtmldata, "htb");
         return $xhtmldata;
     }   // End convert_mqx2htm function.
+
+    /**
+     * Convert a question in a generic XHTML table into Moodle Question XML
+     *
+     * This function converts a single XHTML question table into a question.
+     *
+     * @param string $xhtmltable Question table
+     * @param string $imagehandling Embedded or encoded image data
+     * @return string XHTML text
+     */
+    public function convert_htm2mqx(string $xhtmltable, string $imagehandling = 'referenced') {
+        $this->xsltparameters['imagehandling'] = $imagehandling;
+        // Check that the XML to XHTML conversion XSLT stylesheet exists.
+        if (!file_exists($this->xhtml2mqxmlstylesheet)) {
+            throw new \moodle_exception(get_string('stylesheetunavailable', 'qformat_wordtable', $this->xhtml2mqxmlstylesheet));
+        }
+
+        // Merge and wrap all the required input data into a single string to simplify XSLT processing.
+        $moodlelabels = $this->get_core_question_labels();
+        $mqxml = "<container>\n" . $xhtmltable . "\n" . $moodlelabels . "\n</container>";
+
+        // Use the Book tool wordimport plugin to do the actual XSLT transformation.
+        $word2xml = new wordconverter($this->xsltparameters['pluginname']);
+        $mqxml = $word2xml->xsltransform($mqxml, $this->mqxml2xhtmlstylesheet, $this->xsltparameters);
+        return $mqxml;
+    }   // End convert_htm2mqx function.
 
     /**
      * Get the core question text strings needed to fill in table labels
