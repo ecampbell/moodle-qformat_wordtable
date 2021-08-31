@@ -64,9 +64,6 @@
 <xsl:variable name="graderinfo_colnum" select="3"/>
 <xsl:variable name="responsetemplate_colnum" select="2"/>
 
-<!-- Preview question: if 0, return all questions, otherwise just a single question -->
-<xsl:variable name="moodlePreviewQuestion" select="$metadata/x:meta[@name='moodlePreviewQuestion']/@content" />
-<xsl:variable name="moodlePreviewQuestionID" select="$metadata/x:meta[@name='moodlePreviewQuestionID']/@content" />
 <xsl:variable name="questionPenalty">
     <xsl:choose>
     <xsl:when test="$metadata/x:meta[@name='moodleDefaultPenalty']">
@@ -218,10 +215,7 @@
     -->
         <xsl:value-of select="'&#x0a;'"/>
         <xsl:comment>Course ID (Title): <xsl:value-of select="concat($courseID, ' (', //x:html/x:body/x:div/x:p[@class = 'title'], ')')"/></xsl:comment>
-        <xsl:value-of select="'&#x0a;'"/>
-        <xsl:comment>moodlePreviewQuestion: <xsl:value-of select="$moodlePreviewQuestion"/></xsl:comment>
-        <xsl:value-of select="'&#x0a;'"/>
-        <xsl:comment>moodlePreviewQuestionID: <xsl:value-of select="$moodlePreviewQuestionID"/></xsl:comment>
+        <xsl:comment>Page Title: <xsl:value-of select="//html/head/title"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
         <xsl:comment>moodle_language: <xsl:value-of select="$moodle_language"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
@@ -231,29 +225,6 @@
         <xsl:value-of select="'&#x0a;'"/>
         <!-- 3 cases to handle: a) 1 preview question; b) language mismatch; c) all questions -->
         <xsl:choose>
-        <!-- If preview flag set, return 1 question, and set the category to 'zzPreview' -->
-        <xsl:when test="$moodlePreviewQuestion != 0">
-            <question type="category">
-                <category><text><xsl:value-of select="'$course$/zzPreview'"/></text></category>
-            </question>
-
-            <xsl:for-each select="//x:table[contains(@class, 'moodleQuestion')]">
-                <!-- <xsl:comment>div position() = <xsl:value-of select="position()"/></xsl:comment> -->
-
-                <xsl:if test="position() = $moodlePreviewQuestion">
-                    <xsl:variable name="table_root" select="."/>
-                    <xsl:variable name="qtype" select="translate(normalize-space($table_root/x:thead/x:tr[1]/x:th[position() = $flag_value_colnum]), $lcase, $ucase)" />
-
-                    <xsl:comment>preview question[<xsl:value-of select="position()"/>] type = <xsl:value-of select="$qtype"/></xsl:comment>
-
-                    <xsl:call-template name="itemAssessment">
-                        <xsl:with-param name="qtype" select="$qtype" />
-                        <xsl:with-param name="table_root" select="$table_root" />
-                        <xsl:with-param name="category" select="'zzPreview'" />
-                    </xsl:call-template>
-                </xsl:if>
-            </xsl:for-each>
-        </xsl:when>
         <xsl:when test="$fileLanguage != $moodle_language">
             <!-- The Moodle user interface language doesn't match the documents template language, so the question labels won't match: report an error in a dummy question that will display on the screen -->
             <xsl:variable name="language_mismatch_error_message" select="concat($interface_language_mismatch, ' &quot;', $fileLanguage, '&quot; != &quot;', $moodle_language, '&quot;')"/>
@@ -898,10 +869,6 @@
     <xsl:variable name="raw_qname" select="../x:h2"/>
     <xsl:variable name="qname">
         <xsl:choose>
-        <!-- Override the Question name if its a preview question -->
-        <xsl:when test="$moodlePreviewQuestion != 0">
-            <xsl:value-of select="$moodlePreviewQuestionID"/>
-        </xsl:when>
         <xsl:when test="$raw_qname != '' and $raw_qname != ' ' and $raw_qname != '&#160;' and $raw_qname != '_'">
             <xsl:value-of select="$raw_qname"/>
         </xsl:when>

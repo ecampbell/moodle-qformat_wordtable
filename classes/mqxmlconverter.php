@@ -47,11 +47,23 @@ class mqxmlconverter {
      * @param string $plugin Name of plugin module
      */
     public function __construct(string $plugin = 'qformat_wordtable') {
+        global $CFG, $USER, $COURSE;
+
         // Set common parameters for all XSLT transformations.
         $this->xsltparameters = array(
-            'pluginname' => $plugin,
+            'course_id' => $COURSE->id,
+            'course_name' => $COURSE->fullname,
+            'author_name' => $USER->firstname . ' ' . $USER->lastname,
+            'moodle_country' => $USER->country,
+            'moodle_language' => current_language(),
+            'moodle_textdirection' => (right_to_left()) ? 'rtl' : 'ltr',
+            'moodle_release' => $CFG->release, // Moodle version, e.g. 3.5, 3.10.
+            'moodle_release_date' => substr($CFG->version, 0, 8), // The Moodle major version release date, for testing.
+            'moodle_url' => $CFG->wwwroot . "/",
+            'moodle_username' => $USER->username,
             'imagehandling' => 'embedded', // Question banks are embedded, Lessons are referenced.
             'heading1stylelevel' => 1, // Question banks are 1, Lessons should be overridden to 3.
+            'pluginname' => $plugin,
             'debug_flag' => (debugging(null, DEBUG_DEVELOPER)) ? '1' : '0'
             );
     }
@@ -170,11 +182,13 @@ class mqxmlconverter {
 
         // Merge and wrap all the required input data into a single string to simplify XSLT processing.
         $moodlelabels = $this->get_core_question_labels();
-        $mqxml = "<container>\n" . $xhtmltable . "\n" . $moodlelabels . "\n</container>";
+        $xhtmltable = "<pass3Container>\n" . $xhtmltable . "<imagesContainer></imagesContainer>\n" .
+                $moodlelabels . "\n</pass3Container>";
 
         // Use the Book tool wordimport plugin to do the actual XSLT transformation.
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
-        $mqxml = $word2xml->xsltransform($mqxml, $this->mqxml2xhtmlstylesheet, $this->xsltparameters);
+        $mqxml = $word2xml->xsltransform($xhtmltable, $this->xhtml2mqxmlstylesheet, $this->xsltparameters);
+        $word2xml->debug_write($mqxml,"mxo");
         return $mqxml;
     }   // End convert_htm2mqx function.
 
