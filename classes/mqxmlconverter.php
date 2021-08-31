@@ -159,7 +159,7 @@ class mqxmlconverter {
         $xhtmldata = $word2xml->xsltransform($mqxml, $this->mqxml2xhtmlstylesheet, $this->xsltparameters);
         $matches = null;
         if (preg_match('/<div[^>]*>(.+)<\/div>/is', $xhtmldata, $matches)) {
-            $xhtmldata =  $matches[1];
+            $xhtmldata = $matches[1];
         }
         return $xhtmldata;
     }   // End convert_mqx2htm function.
@@ -188,7 +188,6 @@ class mqxmlconverter {
         // Use the Book tool wordimport plugin to do the actual XSLT transformation.
         $word2xml = new wordconverter($this->xsltparameters['pluginname']);
         $mqxml = $word2xml->xsltransform($xhtmltable, $this->xhtml2mqxmlstylesheet, $this->xsltparameters);
-        $word2xml->debug_write($mqxml,"mxo");
         return $mqxml;
     }   // End convert_htm2mqx function.
 
