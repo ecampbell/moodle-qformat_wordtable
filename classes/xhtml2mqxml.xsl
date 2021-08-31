@@ -215,7 +215,7 @@
     -->
         <xsl:value-of select="'&#x0a;'"/>
         <xsl:comment>Course ID (Title): <xsl:value-of select="concat($courseID, ' (', //x:html/x:body/x:div/x:p[@class = 'title'], ')')"/></xsl:comment>
-        <xsl:comment>Page Title: <xsl:value-of select="//html/head/title"/></xsl:comment>
+        <xsl:comment>Page Title: <xsl:value-of select="//x:html/x:head/x:title"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
         <xsl:comment>moodle_language: <xsl:value-of select="$moodle_language"/></xsl:comment>
         <xsl:value-of select="'&#x0a;'"/>
