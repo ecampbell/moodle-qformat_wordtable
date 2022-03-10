@@ -205,7 +205,7 @@ class mqxmlconverter {
         $textstrings = array(
             'grades' => array('item'),
             'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown',
-                            'formatplain', 'formattext', 'grade', 'question', 'tags'),
+                            'formatplain', 'formattext', 'gradenoun', 'gradeverb', 'question', 'tags'),
             'qformat_wordtable' => array('cloze_instructions', 'cloze_distractor_column_label', 'cloze_feedback_column_label',
                             'cloze_mcformat_label', 'description_instructions', 'essay_instructions',
                             'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions',
