@@ -61,6 +61,8 @@ class qformat_wordtable extends qformat_xml {
             'heading1stylelevel' => 1, // Map "Heading 1" style to <h1> element.
             'imagehandling' => 'embedded' // Embed image data directly into the generated Moodle Question XML.
         );
+    /** @var array Lesson questions are stored here if importing a lesson Word file. */
+    private $lessonquestions = array();
 
     /**
      * Define required MIME-Type
@@ -96,8 +98,31 @@ class qformat_wordtable extends qformat_xml {
         if (property_exists('qformat_default', 'filename')) {
             $filename = $this->filename;
         } else {
-            global $mform;
-            $filename = "{$CFG->tempdir}/questionimport/{$realfilename}";
+            global $mform, $USER;
+
+            if (property_exists('qformat_default', 'importcontext')) {
+                // We have to check if this request is made from the lesson interface.
+                $cm = get_coursemodule_from_id('lesson', $this->importcontext->instanceid);
+                if ($cm) {
+                    $draftid = optional_param('questionfile', '', PARAM_FILE);
+                    $dir = make_temp_directory('forms');
+                    $tempfile = tempnam($dir, 'tempup_');
+
+                    $fs = get_file_storage();
+                    $context = context_user::instance($USER->id);
+                    if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $draftid, 'id DESC', false)) {
+                        throw new \moodle_exception(get_string('cannotwritetotempfile', 'qformat_wordtable', ''));
+                    }
+                    $file = reset($files);
+
+                    $filename = $file->copy_content_to($tempfile);
+                    $filename = $tempfile;
+                } else {
+                    $filename = "{$CFG->tempdir}/questionimport/{$realfilename}";
+                }
+            } else {
+                $filename = "{$CFG->tempdir}/questionimport/{$realfilename}";
+            }
         }
         $basefilename = basename($filename);
         $baserealfilename = basename($realfilename);
@@ -150,6 +175,20 @@ class qformat_wordtable extends qformat_xml {
             fclose($fp);
         }
 
+        // This part of the code is a copy of "readdata" function developed in format.php question/import.php
+        // and mod/lesson/import.php, to return the structure of the file.
+        // This patch is required because the lesson logic file uses its own file that it consumes in the form
+        // and does not do so like question import which shares a file at the class level.
+        if (is_readable($filename) && isset($cm)) {
+            $filearray = file($filename);
+            // Check for Macintosh OS line returns (ie file on one line), and fix.
+            if (preg_match("/\r/", $filearray[0]) AND !preg_match("/\n/", $filearray[0])) {
+                $this->lessonquestions = explode("\r", $filearray[0]);
+            } else {
+                $this->lessonquestions = $filearray;
+            }
+        }
+
         return true;
     }   // End importpreprocess function.
 
@@ -185,4 +224,31 @@ class qformat_wordtable extends qformat_xml {
         $xhtmldata = $mqxml2xhtml->export($content, $this->xsltparameters['pluginname'], $this->xsltparameters['imagehandling']);
         return $xhtmldata;
     }   // End presave_process function.
+
+    /**
+     * Return content of all files containing questions as an array with one element for each file found,
+     * For each file, the corresponding element is an array of lines.
+     *
+     * @param string $filename name of file
+     * @return mixed array of content if successful, false on failure
+     */
+    public function readdata($filename) {
+
+        if (property_exists('qformat_default', 'importcontext')) {
+            // We have to check if this request is made from the lesson interface.
+            $cm = get_coursemodule_from_id('lesson', $this->importcontext->instanceid);
+            if ($cm) {
+                // Since we have already developed the logic of this file above, we only need to return the result.
+                return $this->lessonquestions;
+            } else {
+                // In case it is not a lesson request then we must return the core solution.
+                return parent::readdata($filename);
+            }
+        } else {
+            // In case it is not a lesson request then we must return the core solution.
+            return parent::readdata($filename);
+        }
+
+        return false;
+    }
 }
