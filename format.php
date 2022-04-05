@@ -73,6 +73,21 @@ class qformat_wordtable extends qformat_xml {
         return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
 
+    /**
+     * Validate the given file.
+     *
+     * Check that the file has a .docx suffix, should also check it's in Zip file format.
+     *
+     * @param stored_file $file the file to check
+     * @return string the error message that occurred while validating the given file
+     */
+    public function validate_file(stored_file $file): string {
+        if (!preg_match('#\.docx$#i', $file->get_filename())) {
+            return get_string('errorfilenamemustbedocx', 'qformat_wordtable');
+        }
+        return '';
+    }
+
     // IMPORT FUNCTIONS START HERE.
 
     /**
