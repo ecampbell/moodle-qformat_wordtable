@@ -24,8 +24,6 @@
 
 namespace qformat_wordtable;
 
-defined('MOODLE_INTERNAL') || die();
-
 use \booktool_wordimport\wordconverter;
 use moodle_exception;
 
