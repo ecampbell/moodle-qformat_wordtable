@@ -242,7 +242,7 @@ class mqxmlconverter {
         foreach ($textstrings as $typegroup => $grouparray) {
             foreach ($grouparray as $stringid) {
                 // Use 'grade' instead of 'gradenoun' in Moodle versions prior to 3.11.6.
-                if ($CFG->release < 2021051706 && $stringid === 'gradenoun') {
+                if ($CFG->version < 2021051706 && $stringid === 'gradenoun') {
                     $labeltext = get_string('grade', 'moodle');
                 } else {
                     $labeltext = get_string($stringid, $typegroup);
