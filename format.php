@@ -197,7 +197,7 @@ class qformat_wordtable extends qformat_xml {
         if (is_readable($filename) && isset($cm)) {
             $filearray = file($filename);
             // Check for Macintosh OS line returns (ie file on one line), and fix.
-            if (preg_match("/\r/", $filearray[0]) AND !preg_match("/\n/", $filearray[0])) {
+            if (preg_match("/\r/", $filearray[0]) && !preg_match("/\n/", $filearray[0])) {
                 $this->lessonquestions = explode("\r", $filearray[0]);
             } else {
                 $this->lessonquestions = $filearray;

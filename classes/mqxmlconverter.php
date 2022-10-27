@@ -315,7 +315,7 @@ class mqxmlconverter {
         $foundquestions = preg_match_all('~(.*?)<question type="([^"]*)"[^>]*>(.*?)</question>~s', $questionxmlstring,
                             $questionmatches, PREG_SET_ORDER);
         $numquestions = count($questionmatches);
-        if ($foundquestions === false or $foundquestions == 0) {
+        if ($foundquestions === false || $foundquestions == 0) {
             return $questionxmlstring;
         }
 

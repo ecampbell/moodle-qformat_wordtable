@@ -24,8 +24,6 @@
 
 namespace qformat_wordtable\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for qformat_wordtable implementing null_provider.
  *
