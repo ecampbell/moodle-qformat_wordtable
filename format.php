@@ -36,6 +36,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/xmlize.php");
+require_once($CFG->dirroot.'/lib/uploadlib.php');
 
 // Development: turn on all debug messages and strict warnings.
 // The wordtable plugin just extends XML import/export.
