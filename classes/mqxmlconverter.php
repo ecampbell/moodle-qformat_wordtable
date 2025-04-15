@@ -24,7 +24,7 @@
 
 namespace qformat_wordtable;
 
-use \booktool_wordimport\wordconverter;
+use booktool_wordimport\wordconverter;
 use moodle_exception;
 
 /**
@@ -48,7 +48,7 @@ class mqxmlconverter {
         global $CFG, $USER, $COURSE;
 
         // Set common parameters for all XSLT transformations.
-        $this->xsltparameters = array(
+        $this->xsltparameters = [
             'course_id' => $COURSE->id,
             'course_name' => $COURSE->fullname,
             'author_name' => $USER->firstname . ' ' . $USER->lastname,
@@ -62,8 +62,8 @@ class mqxmlconverter {
             'imagehandling' => 'embedded', // Question banks are embedded, Lessons are referenced.
             'heading1stylelevel' => 1, // Question banks are 1, Lessons should be overridden to 3.
             'pluginname' => $plugin,
-            'debug_flag' => (debugging(null, DEBUG_DEVELOPER)) ? '1' : '0'
-            );
+            'debug_flag' => (debugging(null, DEBUG_DEVELOPER)) ? '1' : '0',
+            ];
     }
 
     /**
@@ -74,7 +74,7 @@ class mqxmlconverter {
      * @param array $parameters Extra XSLT parameters, if any
      * @return string Processed XML content
      */
-    public function import(string $xhtmldata, string $imagedata, array $parameters = array()) {
+    public function import(string $xhtmldata, string $imagedata, array $parameters = []) {
         global $CFG;
 
         // Set common parameters for all XSLT transformations. Note that the XSLT processor doesn't support $arguments.
@@ -200,40 +200,40 @@ class mqxmlconverter {
         global $CFG;
 
         // Release-independent list of all strings required in the XSLT stylesheets for labels etc.
-        $textstrings = array(
-            'grades' => array('item'),
-            'moodle' => array('categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown',
-                            'formatplain', 'formattext', 'gradenoun', 'question', 'tags'),
-            'qformat_wordtable' => array('cloze_instructions', 'cloze_distractor_column_label', 'cloze_feedback_column_label',
+        $textstrings = [
+            'grades' => ['item'],
+            'moodle' => ['categoryname', 'no', 'yes', 'feedback', 'format', 'formathtml', 'formatmarkdown',
+                            'formatplain', 'formattext', 'gradenoun', 'question', 'tags'],
+            'qformat_wordtable' => ['cloze_instructions', 'cloze_distractor_column_label', 'cloze_feedback_column_label',
                             'cloze_mcformat_label', 'description_instructions', 'essay_instructions',
                             'interface_language_mismatch', 'multichoice_instructions', 'truefalse_instructions',
-                            'transformationfailed', 'unsupported_instructions'),
-            'qtype_description' => array('pluginnamesummary'),
-            'qtype_ddimageortext' => array('pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
-                    'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop'),
-            'qtype_ddmarker' => array('pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
+                            'transformationfailed', 'unsupported_instructions'],
+            'qtype_description' => ['pluginnamesummary'],
+            'qtype_ddimageortext' => ['pluginnamesummary', 'bgimage', 'dropbackground', 'dropzoneheader',
+                    'draggableitem', 'infinite', 'label', 'shuffleimages', 'xleft', 'ytop'],
+            'qtype_ddmarker' => ['pluginnamesummary', 'bgimage', 'clearwrongparts', 'coords',
                 'dropbackground', 'dropzoneheader', 'infinite', 'marker', 'noofdrags', 'shape_circle',
-                'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced'),
-            'qtype_ddwtos' => array('pluginnamesummary', 'infinite'),
-            'qtype_essay' => array('acceptedfiletypes', 'allowattachments', 'attachmentsrequired', 'formatnoinline',
+                'shape_polygon', 'shape_rectangle', 'shape', 'showmisplaced', 'stateincorrectlyplaced'],
+            'qtype_ddwtos' => ['pluginnamesummary', 'infinite'],
+            'qtype_essay' => ['acceptedfiletypes', 'allowattachments', 'attachmentsrequired', 'formatnoinline',
                             'graderinfo', 'formateditor', 'formateditorfilepicker',
                             'formatmonospaced', 'formatplain', 'pluginnamesummary', 'responsefieldlines', 'responseformat',
                             'responseisrequired', 'responsenotrequired',
-                            'responserequired', 'responsetemplate', 'responsetemplate_help'),
-            'qtype_gapselect' => array('pluginnamesummary', 'errornoslots', 'group', 'shuffle'),
-            'qtype_match' => array('blanksforxmorequestions', 'filloutthreeqsandtwoas'),
-            'qtype_multichoice' => array('answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback',
-                            'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'),
-            'qtype_shortanswer' => array('casesensitive', 'filloutoneanswer'),
-            'qtype_truefalse' => array('false', 'true'),
-            'question' => array('addmorechoiceblanks', 'category', 'clearwrongparts', 'correctfeedbackdefault',
+                            'responserequired', 'responsetemplate', 'responsetemplate_help'],
+            'qtype_gapselect' => ['pluginnamesummary', 'errornoslots', 'group', 'shuffle'],
+            'qtype_match' => ['blanksforxmorequestions', 'filloutthreeqsandtwoas'],
+            'qtype_multichoice' => ['answernumbering', 'choiceno', 'correctfeedback', 'incorrectfeedback',
+                            'partiallycorrectfeedback', 'pluginnamesummary', 'shuffleanswers'],
+            'qtype_shortanswer' => ['casesensitive', 'filloutoneanswer'],
+            'qtype_truefalse' => ['false', 'true'],
+            'question' => ['addmorechoiceblanks', 'category', 'clearwrongparts', 'correctfeedbackdefault',
                             'defaultmark', 'generalfeedback', 'hintn', 'hintnoptions', 'idnumber',
                             'incorrectfeedbackdefault', 'partiallycorrectfeedbackdefault',
                             'penaltyforeachincorrecttry', 'questioncategory', 'shownumpartscorrect',
-                            'shownumpartscorrectwhenfinished'),
-            'quiz' => array('answer', 'answers', 'casesensitive', 'correct', 'correctanswers',
-                            'defaultgrade', 'incorrect', 'shuffle')
-            );
+                            'shownumpartscorrectwhenfinished'],
+            'quiz' => ['answer', 'answers', 'casesensitive', 'correct', 'correctanswers',
+                            'defaultgrade', 'incorrect', 'shuffle'],
+            ];
 
         // Get the question type field labels, to populate table cell labels on export, recognise cell labels on import.
         $questionlabels = "<moodlelabels>\n";
@@ -278,7 +278,7 @@ class mqxmlconverter {
             // Strip out the closing element first so that we can insert the extra labels.
             $questionlabels = str_replace("</moodlelabels>", "", $questionlabels);
 
-            $textstrings['qtype_multichoiceset'] = array('pluginnamesummary', 'showeachanswerfeedback');
+            $textstrings['qtype_multichoiceset'] = ['pluginnamesummary', 'showeachanswerfeedback'];
             foreach ($textstrings as $typegroup => $grouparray) {
                 foreach ($grouparray as $stringid) {
                     $namestring = $typegroup . '_' . $stringid;

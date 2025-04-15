@@ -33,6 +33,8 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/format/xml/tests/xmlformat_test.php');
 require_once($CFG->dirroot . '/tag/lib.php');
 
+namespace qformat_wordtable
+
 /**
  * Unit tests for exporting questions into Word (via XML).
  *
@@ -42,16 +44,15 @@ require_once($CFG->dirroot . '/tag/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @group qformat_wordtable
  */
-class qformat_wordtable_export_test extends question_testcase {
+final class qformat_wordtable_export_test extends question_testcase {
 
     /**
      * Test if the exported HTML output is the same as the expected HTML (ignoring newlines).
      *
      * @param string $expectedhtml as defined.
      * @param string $html as returned by presave_process.
-     * @return mixed Boolean true/false, or some error indicator.
      */
-    public function assert_same_html($expectedhtml, $html) {
+    public function assert_same_html($expectedhtml, $html): void {
         // Only test the question content, assuming a single question.
         $html = substr($html, strpos($html, '<h2 '));
         // Remove any non-breaking spaces, which are often used in empty cells.
@@ -65,7 +66,7 @@ class qformat_wordtable_export_test extends question_testcase {
     /**
      * Test if the exported HTML for a Description question matches the expected output.
      */
-    public function test_export_description() {
+    public function test_export_description(): void {
         $descriptionxml = '<question type="description">
     <name>
       <text>A description</text>
@@ -127,7 +128,7 @@ class qformat_wordtable_export_test extends question_testcase {
     /**
      * Test if the exported HTML for an Essay question matches the expected output.
      */
-    public function test_export_essay29() {
+    public function test_export_essay29(): void {
         $descriptionxml = '<question type="essay">
     <name><text>Moodle 2.9 Essay Question</text></name>
     <questiontext format="moodle_auto_format">
