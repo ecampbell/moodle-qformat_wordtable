@@ -28,9 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025041500;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->maturity  = MATURITY_STABLE;  // Maturity level.
+$plugin->version   = 2025042300;            // The current plugin version (Date: YYYYMMDDXX).
+$plugin->maturity  = MATURITY_STABLE;       // Maturity level.
 $plugin->component  = 'qformat_wordtable';  // Plugin name.
-$plugin->release  = '3.9.7 (Build: 2025041500)';  // The current module release in human-readable form (x.y).
-$plugin->requires = 2025041400;  // Requires Moodle 5.0 or later.
-$plugin->dependencies = ['booktool_wordimport' => 2021083100];
+$plugin->release  = '3.9.7 (Build: 2025042300)';  // The current module release in human-readable form (x.y).
+$plugin->requires = 2020060900;             // Requires Moodle 3.9 or higher.
+$plugin->dependencies = ['booktool_wordimport' => 2020061500];

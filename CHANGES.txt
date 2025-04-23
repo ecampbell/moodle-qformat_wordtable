@@ -1,7 +1,8 @@
 # Change log
 
 Date          Version   Comment
-2025/04/04    3.9.6     Remove dependency on upload library.
+2025/04/23    3.9.7     Relax Moodle version requirement back to 3.9, not 5.0, as uploadlib was obsolete then anyway.
+2025/04/04    3.9.6     Remove dependency on uploadlib library.
 2022/10/26    3.9.5     Fix bug in checking for versions before 3.11.6.
 2022/04/05    3.9.4     Support file validation on import for Moodle 3.11.6 and higher.
 2022/04/04    3.9.3     Support "Import questions" command in Lesson activity (thanks to drobayo for the code).
